@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Personalized real estate guidance for clients and mentorship for growing agents.">
+    <title>Stephanie J Mendoza | Realtor &amp; Mentor</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&amp;family=DM+Sans:wght@400;500;600&amp;display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="site-config.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="container navbar">
+            <a class="brand" href="#home">
+                <img class="brand__logo" data-logo-image src="assets/logos/stephanie-mendoza-logo.png"
+                    alt="Stephanie J Mendoza Real Estate Agent">
+            </a>
+
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-navigation"
+                aria-label="Open navigation menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <nav class="main-nav" id="main-navigation" aria-label="Main navigation">
+                <ul class="main-nav__list">
+                    <li><a class="main-nav__link" href="#home">Home</a></li>
+                    <li><a class="main-nav__link" href="#clients">Clients</a></li>
+                    <li><a class="main-nav__link" href="#agents">Agents</a></li>
+                    <li><a class="main-nav__link" href="#blog">Blog</a></li>
+                    <li><a class="main-nav__link" href="#reviews">Reviews</a></li>
+                    <li><a class="button button--small" href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero" id="home" aria-labelledby="hero-heading">
+            <div class="container hero__layout">
+                <div class="hero__content">
+                    <p class="eyebrow">Real estate guidance &amp; mentorship</p>
+
+                    <h1 class="hero__brand-name" id="hero-heading" data-realtor-name>
+                        Stephanie J Mendoza
+                    </h1>
+                </div>
+
+                <div class="hero__showcase">
+                    <div class="hero__message">
+                        <h2 class="hero__title">
+                            Helping clients move forward.
+                            <span>Helping agents grow.</span>
+                        </h2>
+
+                        <p class="hero__intro" data-hero-intro>
+                            Thoughtful support for buyers and sellers, plus practical mentorship for agents building businesses they love.
+                        </p>
+                    </div>
+
+                    <div class="hero-cards" aria-label="Ways Stephanie can support you">
+                    <a class="hero-card hero-card--clients" href="#clients" aria-label="Explore services for clients">
+                        <header class="hero-card__header">
+                            <p>For Clients</p>
+                        </header>
+                        <div class="hero-card__canvas">
+                            <div class="photo-frame">
+                                <img class="hero-card__image" data-client-image
+                                    src="https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&amp;fit=crop&amp;w=900&amp;q=85"
+                                    alt="A couple settling into their new home">
+                                <p class="photo-frame__caption">Find a place that feels like you.</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a class="hero-card hero-card--portrait" href="#contact" aria-label="Contact Stephanie Mendoza">
+                        <header class="hero-card__header">
+                            <p>Meet <span data-realtor-first-name>Stephanie</span></p>
+                        </header>
+                        <div class="hero-card__canvas">
+                            <div class="photo-frame">
+                                <img class="hero-card__image" data-portrait-image
+                                    src="assets/images/StephMendozaPortrait.webp" alt="Portrait of Stephanie J Mendoza">
+                                <p class="photo-frame__caption">Your realtor. Your mentor. Your advocate.</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a class="hero-card hero-card--agents" href="#agents" aria-label="Explore mentorship for agents">
+                        <header class="hero-card__header">
+                            <p>For Agents</p>
+                        </header>
+                        <div class="hero-card__canvas">
+                            <div class="photo-frame">
+                                <img class="hero-card__image" data-agent-image
+                                    src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&amp;fit=crop&amp;w=900&amp;q=85"
+                                    alt="Real estate professionals collaborating at a table">
+                                <p class="photo-frame__caption">Grow with guidance and community.</p>
+                            </div>
+                        </div>
+                    </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="audience-section" aria-label="Real estate services for clients and agents">
+            <article class="audience-panel audience-panel--clients" id="clients">
+                <div class="audience-panel__inner">
+                    <p class="audience-panel__label">Clients</p>
+                    <h2>Buying or selling?<br>I'm here for you.</h2>
+                    <p class="audience-panel__intro">
+                        From first-time buyers to seasoned sellers, I make the process clear, smooth, and focused on your goals.
+                    </p>
+
+                    <div class="audience-services">
+                        <div class="audience-service">
+                            <span class="audience-service__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5M5.5 10v10h13V10M9.5 20v-6h5v6"/></svg>
+                            </span>
+                            <h3>Buying a Home</h3>
+                            <p>Find the right home with confidence.</p>
+                            <a href="#contact">Learn More <span aria-hidden="true">→</span></a>
+                        </div>
+
+                        <div class="audience-service">
+                            <span class="audience-service__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><path d="M4 4h8l8 8-8 8-8-8V4Z"/><circle cx="9" cy="9" r="1.5"/></svg>
+                            </span>
+                            <h3>Selling a Home</h3>
+                            <p>Maximize your value and minimize stress.</p>
+                            <a href="#contact">Learn More <span aria-hidden="true">→</span></a>
+                        </div>
+
+                        <div class="audience-service">
+                            <span class="audience-service__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="5"/><path d="m14 14 6 6M8 10h4M10 8v4"/></svg>
+                            </span>
+                            <h3>Resources</h3>
+                            <p>Helpful guides for every step of the journey.</p>
+                            <a href="#contact">Learn More <span aria-hidden="true">→</span></a>
+                        </div>
+                    </div>
+
+                    <a class="button audience-panel__button" href="#contact">Explore Client Services</a>
+                </div>
+            </article>
+
+            <article class="audience-panel audience-panel--agents" id="agents">
+                <div class="audience-panel__inner">
+                    <p class="audience-panel__label">Agents</p>
+                    <h2>Grow your business<br>with the right support.</h2>
+                    <p class="audience-panel__intro">
+                        Coaching, training, and a collaborative community designed to help you level up.
+                    </p>
+
+                    <div class="audience-services">
+                        <div class="audience-service">
+                            <span class="audience-service__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><path d="M7 20v-7M17 20v-7M4 12l4-4 4 4 4-4 4 4M9 6.5 12 4l3 2.5"/></svg>
+                            </span>
+                            <h3>Mentorship</h3>
+                            <p>One-on-one guidance from experience.</p>
+                            <a href="#contact">Learn More <span aria-hidden="true">→</span></a>
+                        </div>
+
+                        <div class="audience-service">
+                            <span class="audience-service__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>
+                            </span>
+                            <h3>Training</h3>
+                            <p>Practical tools to help you succeed.</p>
+                            <a href="#contact">Learn More <span aria-hidden="true">→</span></a>
+                        </div>
+
+                        <div class="audience-service">
+                            <span class="audience-service__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><path d="M12 20S4 15.5 4 9.5A4.5 4.5 0 0 1 12 6.7a4.5 4.5 0 0 1 8 2.8C20 15.5 12 20 12 20Z"/></svg>
+                            </span>
+                            <h3>Community</h3>
+                            <p>A team that supports your growth.</p>
+                            <a href="#contact">Learn More <span aria-hidden="true">→</span></a>
+                        </div>
+                    </div>
+
+                    <a class="button audience-panel__button" href="#contact">Explore Agent Programs</a>
+                </div>
+            </article>
+        </section>
+
+        <section class="reviews-section" id="reviews" aria-labelledby="reviews-heading">
+            <div class="container">
+                <div class="section-heading">
+                    <p class="eyebrow">Kind Words</p>
+                    <h2 id="reviews-heading">What clients &amp; agents are saying</h2>
+                </div>
+
+                <div class="reviews-carousel">
+                    <button class="reviews-carousel__button reviews-carousel__button--previous" type="button" data-review-direction="-1" aria-label="Show previous review">←</button>
+                    <div class="reviews-carousel__track" data-reviews-track></div>
+                    <button class="reviews-carousel__button reviews-carousel__button--next" type="button" data-review-direction="1" aria-label="Show next review">→</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="blog-section" id="blog" aria-labelledby="blog-heading">
+            <div class="container">
+                <div class="section-heading">
+                    <p class="eyebrow">From the Blog</p>
+                    <h2 id="blog-heading">Tips, insights &amp; real talk</h2>
+                </div>
+
+                <div class="blog-grid" data-blog-grid></div>
+                <a class="button blog-section__button" href="#contact">View All Articles</a>
+            </div>
+        </section>
+
+        <section class="contact-cta" id="contact" aria-labelledby="contact-heading">
+            <div class="container contact-cta__inner">
+                <svg class="contact-cta__botanical" viewBox="0 0 180 130" aria-hidden="true">
+                    <path d="M80 130C78 96 79 59 104 10M82 101C63 88 50 70 43 48M83 82c18-8 34-22 43-39M65 82C48 78 34 68 24 55M94 55c17-5 31-15 41-29M55 67C43 55 39 42 39 28M110 38c2-12 8-22 17-30"/>
+                    <path d="M43 48c-10-1-19 2-25 9 10 3 19 1 25-9ZM126 43c10-2 19 0 26 6-9 4-18 2-26-6ZM39 28c-7-5-11-13-10-22 9 5 13 12 10 22ZM127 8c-1 9-7 16-16 20-1-9 5-17 16-20Z"/>
+                </svg>
+
+                <div class="contact-cta__copy">
+                    <p class="eyebrow">Ready When You Are</p>
+                    <h2 id="contact-heading">Let's create your next chapter.</h2>
+                    <p>Whether you're buying, selling, or ready to grow your business—I'd love to help.</p>
+                </div>
+
+                <a class="button contact-cta__button" data-email-link href="mailto:RealtorStephanieAV@gmail.com">Let's Connect</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container site-footer__grid">
+            <a class="site-footer__brand" href="#home">
+                <img data-logo-image src="assets/logos/stephanie-mendoza-logo.png" alt="Stephanie J Mendoza Real Estate Agent">
+            </a>
+
+            <div class="site-footer__contact">
+                <a data-phone-link href="tel:16614351239" data-realtor-phone>(661) 435-1239</a>
+                <a data-email-link href="mailto:RealtorStephanieAV@gmail.com" data-realtor-email>RealtorStephanieAV@gmail.com</a>
+                <div class="site-footer__socials" aria-label="Social media links">
+                    <a data-facebook-link href="https://www.facebook.com/stephaniej.mendoza.75/" aria-label="Facebook">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4.5A15 15 0 0 0 14.4 4C11.8 4 10 5.6 10 8.6V11H7v4h3v7h4v-7h3.2l.5-4H14V8.6c0-.4.2-.6.6-.6Z"/></svg>
+                    </a>
+                    <a data-instagram-link href="https://www.instagram.com/stephaniejmendoza/" aria-label="Instagram">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" class="social-icon-dot"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="site-footer__legal">
+                <nav aria-label="Legal links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Use</a>
+                </nav>
+                <p>© <span data-footer-year>2026</span> <span data-realtor-name>Stephanie J Mendoza</span>. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
