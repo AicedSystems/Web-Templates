@@ -8,14 +8,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <script src="site-config.js" defer></script>
-    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/styles.css') }}">
+    <script src="{{ url_for('static', filename='site/js/site-config.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='site/js/script.js') }}" defer></script>
 </head>
 <body>
     <header class="site-header">
         <a class="wordmark" href="#home" aria-label="Stephanie J Mendoza home">
-            <img data-logo-image src="assets/images/realtor-logo.png"
+            <img data-logo-image src="{{ url_for('static', filename='site/images/realtor-logo.png') }}"
                 alt="Stephanie J Mendoza Real Estate Agent">
         </a>
         <nav class="main-nav" aria-label="Main navigation">
@@ -95,7 +95,7 @@
             </div>
 
             <div class="hero__visual" aria-label="Portrait of Stephanie J Mendoza">
-                <img data-hero-image src="assets/images/hero-portrait.png"
+                <img data-hero-image src="{{ url_for('static', filename='site/images/hero-portrait.png') }}"
                     alt="Stephanie J Mendoza wearing a black suit">
             </div>
 
@@ -159,7 +159,7 @@
 
         <section class="about-section" id="about" aria-labelledby="about-heading">
             <div class="about-section__image">
-                <img data-about-image src="assets/images/about-portrait.webp"
+                <img data-about-image src="{{ url_for('static', filename='site/images/about-portrait.webp') }}"
                     alt="Portrait of Stephanie J Mendoza">
             </div>
             <div class="about-section__content">
@@ -212,7 +212,7 @@
             </div>
 
             <div class="agents-section__media">
-                <img data-agents-image src="assets/images/agents-feature.jpg"
+                <img data-agents-image src="{{ url_for('static', filename='site/images/agents-feature.jpg') }}"
                     alt="A diverse group of professionals collaborating around a table">
             </div>
         </section>
@@ -269,7 +269,7 @@
     <footer class="site-footer">
         <div class="site-footer__inner">
             <a class="site-footer__logo" href="#home">
-                <img data-logo-image src="assets/images/realtor-logo.png"
+                <img data-logo-image src="{{ url_for('static', filename='site/images/realtor-logo.png') }}"
                     alt="Stephanie J Mendoza Real Estate Agent">
             </a>
 

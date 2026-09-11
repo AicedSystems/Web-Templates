@@ -15,10 +15,10 @@ const realtorData = {
     },
 
     images: {
-        logo: "assets/images/realtor-logo.png",
-        hero: "assets/images/hero-portrait.png",
+        logo: "/static/site/images/realtor-logo.png",
+        hero: "/static/site/images/hero-portrait.png",
         clients: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1400&q=88",
-        agents: "assets/images/agents-feature.jpg",
-        about: "assets/images/about-portrait.webp"
+        agents: "/static/site/images/agents-feature.jpg",
+        about: "/static/site/images/about-portrait.webp"
     }
 };
