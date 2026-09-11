@@ -13,7 +13,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body, h1, h2, p, ul { margin: 0; }
-body { min-width: 320px; color: var(--color-text); background: var(--color-cream); font-family: var(--font-body); }
+body { min-width: 320px; overflow-x: hidden; color: var(--color-text); background: var(--color-cream); font-family: var(--font-body); }
 img { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; }
 ul { padding: 0; list-style: none; }
@@ -475,6 +475,150 @@ main > section:not(.hero) { min-height: 1px; scroll-margin-top: 20px; }
     color: rgba(255, 255, 255, .62);
 }
 
+/* Mobile navigation */
+.mobile-menu-button,
+.mobile-nav {
+    display: none;
+}
+
+.mobile-nav[hidden] {
+    display: none;
+}
+
+/* About section */
+.about-section {
+    display: grid;
+    grid-template-columns: minmax(300px, .8fr) minmax(380px, 1.2fr);
+    align-items: center;
+    gap: clamp(48px, 8vw, 120px);
+    padding: 84px max(40px, calc((100vw - 1280px) / 2));
+    background: var(--color-paper);
+}
+
+.about-section__image {
+    max-width: 430px;
+    justify-self: end;
+    overflow: hidden;
+}
+
+.about-section__image img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: center top;
+}
+
+.about-section__content {
+    max-width: 580px;
+}
+
+.about-section h2,
+.reviews-section h2,
+.blog-section h2 {
+    margin-top: 16px;
+    font-family: var(--font-heading);
+    font-size: clamp(2.6rem, 4vw, 4.35rem);
+    font-weight: 500;
+    letter-spacing: -.04em;
+    line-height: .98;
+}
+
+.about-section__content > p:last-child {
+    max-width: 520px;
+    margin-top: 24px;
+    color: #65615E;
+    font-size: .84rem;
+    line-height: 1.75;
+}
+
+/* Reviews section */
+.reviews-section {
+    padding: 88px 0;
+    background: var(--color-cream);
+}
+
+.section-shell {
+    width: min(100% - 80px, 1280px);
+    margin-inline: auto;
+}
+
+.reviews-section .section-number,
+.reviews-section > .section-shell > h2,
+.blog-section .section-number,
+.blog-section > .section-shell > h2 {
+    text-align: center;
+}
+
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+    margin-top: 44px;
+}
+
+.review-card {
+    margin: 0;
+    padding: 32px;
+    border: 1px solid rgba(117, 104, 95, .2);
+    background: var(--color-paper);
+}
+
+.review-card blockquote {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 1.12rem;
+    line-height: 1.5;
+}
+
+.review-card figcaption {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 26px;
+    font-size: .7rem;
+}
+
+.review-card figcaption strong {
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.review-card figcaption span {
+    color: var(--color-taupe);
+}
+
+/* Future dynamic blog container */
+.blog-section {
+    padding: 76px 0;
+    background: var(--color-paper);
+}
+
+.blog-post-list {
+    min-height: 110px;
+    margin-top: 36px;
+    padding: 38px;
+    border: 1px dashed rgba(117, 104, 95, .32);
+    color: var(--color-line);
+    font-size: .8rem;
+    text-align: center;
+}
+
+.site-footer__identity {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-bottom: 14px;
+    color: rgba(255, 255, 255, .72);
+    font-family: var(--font-body);
+    font-size: .67rem;
+    line-height: 1.45;
+}
+
+.site-footer__identity strong {
+    color: var(--color-white);
+    font-size: .76rem;
+}
+
 @media (max-width: 1050px) {
     .site-header { padding-inline: 34px; }
     .main-nav ul { gap: 18px; }
@@ -514,12 +658,65 @@ main > section:not(.hero) { min-height: 1px; scroll-margin-top: 20px; }
         padding: 30px 0 0;
         border-top: 1px solid rgba(244, 239, 232, .22);
     }
+
+    .about-section {
+        gap: 54px;
+        padding-inline: 40px;
+    }
+
+    .reviews-grid {
+        gap: 16px;
+    }
 }
 
 @media (max-width: 780px) {
     .site-header { position: relative; padding: 24px 20px; background: var(--color-cream); }
     .wordmark img { width: min(78vw, 330px); }
     .main-nav { display: none; }
+
+    .mobile-menu-button {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 5px;
+        width: 44px;
+        height: 44px;
+        padding: 9px;
+        border: 1px solid rgba(117, 104, 95, .3);
+        background: transparent;
+        cursor: pointer;
+    }
+
+    .mobile-menu-button span {
+        display: block;
+        width: 100%;
+        height: 2px;
+        background: var(--color-black);
+    }
+
+    .mobile-nav {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        left: 0;
+        z-index: 20;
+        display: block;
+        padding: 12px 20px 22px;
+        border-top: 1px solid rgba(117, 104, 95, .2);
+        background: var(--color-cream);
+        box-shadow: 0 16px 28px rgba(29, 29, 29, .12);
+    }
+
+    .mobile-nav a {
+        display: block;
+        padding: 12px 4px;
+        border-bottom: 1px solid rgba(117, 104, 95, .18);
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .13em;
+        text-align: center;
+        text-transform: uppercase;
+    }
     .hero { display: flex; flex-direction: column; overflow: visible; }
     .hero__copy { width: 100%; min-height: auto; padding: 64px 24px 54px; text-align: center; }
     .hero h1 { font-size: clamp(3.1rem, 14vw, 4.6rem); }
@@ -571,6 +768,43 @@ main > section:not(.hero) { min-height: 1px; scroll-margin-top: 20px; }
 
     .agents-section__media {
         min-height: 58vh;
+    }
+
+    .about-section {
+        grid-template-columns: 1fr;
+        gap: 38px;
+        padding: 68px 24px;
+    }
+
+    .about-section__image {
+        width: min(100%, 390px);
+        justify-self: center;
+    }
+
+    .about-section__content {
+        text-align: center;
+    }
+
+    .about-section__content > p:last-child {
+        margin-inline: auto;
+    }
+
+    .reviews-section,
+    .blog-section {
+        padding: 64px 0;
+    }
+
+    .section-shell {
+        width: calc(100% - 48px);
+    }
+
+    .reviews-grid {
+        grid-template-columns: 1fr;
+        margin-top: 34px;
+    }
+
+    .blog-post-list {
+        padding: 30px 20px;
     }
 
     .contact-cta__inner {

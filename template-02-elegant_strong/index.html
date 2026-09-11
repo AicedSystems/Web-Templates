@@ -15,7 +15,7 @@
 <body>
     <header class="site-header">
         <a class="wordmark" href="#home" aria-label="Stephanie J Mendoza home">
-            <img data-logo-image src="assets/images/stephlogo/stephanie-mendoza-logo copy.png"
+            <img data-logo-image src="assets/images/realtor-logo.png"
                 alt="Stephanie J Mendoza Real Estate Agent">
         </a>
         <nav class="main-nav" aria-label="Main navigation">
@@ -26,6 +26,24 @@
                 <li><a class="main-nav__link" href="#blog">Blog</a></li>
                 <li><a class="main-nav__link" href="#reviews">Reviews</a></li>
                 <li><a class="button button--light" href="#contact">Contact Me</a></li>
+            </ul>
+        </nav>
+
+        <button class="mobile-menu-button" type="button" data-menu-button aria-expanded="false"
+            aria-controls="mobile-navigation" aria-label="Open navigation menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav class="mobile-nav" id="mobile-navigation" data-mobile-nav aria-label="Mobile navigation" hidden>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#clients">Clients</a></li>
+                <li><a href="#agents">Agents</a></li>
+                <li><a href="#blog">Blog</a></li>
+                <li><a href="#reviews">Reviews</a></li>
+                <li><a href="#contact">Contact</a></li>
             </ul>
         </nav>
     </header>
@@ -43,38 +61,41 @@
                 </div>
                 <div class="hero-blog">
                     <p class="hero-blog__label">From the Blog</p>
-                    <a class="hero-blog__card" href="#blog">
-                        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&amp;fit=crop&amp;w=500&amp;q=85"
-                            alt="Modern home exterior">
-                        <div class="hero-blog__content">
-                            <p>Buying Insights</p>
-                            <h2>3 questions to ask before buying your next home</h2>
-                            <span>Read Article →</span>
-                        </div>
-                    </a>
-                    <a class="hero-blog__card" href="#blog">
-                        <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&amp;fit=crop&amp;w=500&amp;q=85"
-                            alt="Professionals collaborating around a table">
-                        <div class="hero-blog__content">
-                            <p>Agent Growth</p>
-                            <h2>Building a real estate business that lasts</h2>
-                            <span>Read Article →</span>
-                        </div>
-                    </a>
-                    <a class="hero-blog__card" href="#blog">
-                        <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&amp;fit=crop&amp;w=500&amp;q=85"
-                            alt="House keys resting beside a model home">
-                        <div class="hero-blog__content">
-                            <p>Selling Strategy</p>
-                            <h2>Simple ways to prepare your home for market</h2>
-                            <span>Read Article →</span>
-                        </div>
-                    </a>
+                    <!-- Temporary static demo cards. Replace with API-loaded published posts during future CMS integration. -->
+                    <div class="hero-blog__list" data-blog-preview>
+                        <a class="hero-blog__card" href="#blog">
+                            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&amp;fit=crop&amp;w=500&amp;q=85"
+                                alt="Modern home exterior">
+                            <div class="hero-blog__content">
+                                <p>Buying Insights</p>
+                                <h2>3 questions to ask before buying your next home</h2>
+                                <span>Read Article →</span>
+                            </div>
+                        </a>
+                        <a class="hero-blog__card" href="#blog">
+                            <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&amp;fit=crop&amp;w=500&amp;q=85"
+                                alt="Professionals collaborating around a table">
+                            <div class="hero-blog__content">
+                                <p>Agent Growth</p>
+                                <h2>Building a real estate business that lasts</h2>
+                                <span>Read Article →</span>
+                            </div>
+                        </a>
+                        <a class="hero-blog__card" href="#blog">
+                            <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&amp;fit=crop&amp;w=500&amp;q=85"
+                                alt="House keys resting beside a model home">
+                            <div class="hero-blog__content">
+                                <p>Selling Strategy</p>
+                                <h2>Simple ways to prepare your home for market</h2>
+                                <span>Read Article →</span>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
 
             <div class="hero__visual" aria-label="Portrait of Stephanie J Mendoza">
-                <img data-hero-image src="assets/images/stephlogo/ChatGPT Image Aug 27, 2026, 09_33_13 AM.png"
+                <img data-hero-image src="assets/images/hero-portrait.png"
                     alt="Stephanie J Mendoza wearing a black suit">
             </div>
 
@@ -83,7 +104,7 @@
                     <span class="directory-item__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M15 14a5 5 0 0 1 6 5v1"/></svg></span>
                     <h2>For Clients</h2><p>Buying, selling, and everything in between. I'm here for you.</p>
                 </a>
-                <a class="directory-item" href="#contact">
+                <a class="directory-item" href="#about">
                     <span class="directory-item__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5M5.5 10v10h13V10M9.5 20v-6h5v6"/></svg></span>
                     <h2>About Stephanie</h2><p>Your realtor. Your mentor. Your advocate.</p>
                 </a>
@@ -136,6 +157,20 @@
             </div>
         </section>
 
+        <section class="about-section" id="about" aria-labelledby="about-heading">
+            <div class="about-section__image">
+                <img data-about-image src="assets/images/about-portrait.webp"
+                    alt="Portrait of Stephanie J Mendoza">
+            </div>
+            <div class="about-section__content">
+                <p class="section-number">About / Stephanie</p>
+                <h2 id="about-heading">Guidance grounded in real connection.</h2>
+                <p>
+                    Stephanie helps clients move forward with clarity while supporting agents as they build confident, sustainable businesses. Replace this short biography with the realtor's approved story before launch.
+                </p>
+            </div>
+        </section>
+
         <section class="agents-section" id="agents" aria-labelledby="agents-heading">
             <div class="agents-section__content">
                 <div class="agents-section__intro">
@@ -177,13 +212,42 @@
             </div>
 
             <div class="agents-section__media">
-                <img data-agents-image src="assets/images/stephlogo/iStock-1329013293.jpg"
+                <img data-agents-image src="assets/images/agents-feature.jpg"
                     alt="A diverse group of professionals collaborating around a table">
             </div>
         </section>
 
-        <section id="reviews" aria-label="Reviews"></section>
-        <section id="blog" aria-label="Blog"></section>
+        <section class="reviews-section" id="reviews" aria-labelledby="reviews-heading">
+            <div class="section-shell">
+                <p class="section-number">03 / Kind Words</p>
+                <h2 id="reviews-heading">What clients are saying</h2>
+                <div class="reviews-grid">
+                    <figure class="review-card">
+                        <blockquote>“Stephanie made the entire process feel clear and manageable. We always knew what came next.”</blockquote>
+                        <figcaption><strong>Client Name</strong><span>First-Time Buyer</span></figcaption>
+                    </figure>
+                    <figure class="review-card">
+                        <blockquote>“Her communication and attention to detail gave us confidence from our first meeting through closing.”</blockquote>
+                        <figcaption><strong>Client Name</strong><span>Home Seller</span></figcaption>
+                    </figure>
+                    <figure class="review-card">
+                        <blockquote>“Stephanie leads with honesty, experience, and genuine care for the people she works with.”</blockquote>
+                        <figcaption><strong>Client Name</strong><span>Real Estate Agent</span></figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <section class="blog-section" id="blog" aria-labelledby="blog-heading">
+            <div class="section-shell">
+                <p class="section-number">04 / From the Blog</p>
+                <h2 id="blog-heading">Latest insights</h2>
+                <!-- Future Flask/API-rendered published posts will be inserted into this container. -->
+                <div class="blog-post-list" id="blog-post-list" data-blog-list>
+                    <p>Published articles will appear here.</p>
+                </div>
+            </div>
+        </section>
         <section class="contact-cta" id="contact" aria-labelledby="contact-heading">
             <div class="contact-cta__inner">
                 <svg class="contact-cta__branch" viewBox="0 0 190 150" aria-hidden="true">
@@ -205,11 +269,17 @@
     <footer class="site-footer">
         <div class="site-footer__inner">
             <a class="site-footer__logo" href="#home">
-                <img data-logo-image src="assets/images/stephlogo/stephanie-mendoza-logo copy.png"
+                <img data-logo-image src="assets/images/realtor-logo.png"
                     alt="Stephanie J Mendoza Real Estate Agent">
             </a>
 
             <div class="site-footer__contact">
+                <div class="site-footer__identity">
+                    <strong data-realtor-name>Stephanie J Mendoza</strong>
+                    <span>Real Estate Agent</span>
+                    <span>DRE #<span data-realtor-license>02006601</span></span>
+                    <span data-realtor-brokerage>Real Broker</span>
+                </div>
                 <a data-phone-link data-realtor-phone href="tel:16614351239">(661) 435-1239</a>
                 <a data-email-link data-realtor-email href="mailto:RealtorStephanieAV@gmail.com">RealtorStephanieAV@gmail.com</a>
 
