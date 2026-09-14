@@ -36,6 +36,15 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 
 db.init_app(app)
 
+ADMIN_SITE_DATA = {
+    "name": "Stephanie J Mendoza",
+    "admin_title": "Content Studio",
+    "logo_filename": "site/images/realtor-logo.png",
+    "avatar_filename": "site/images/about-portrait.webp",
+    "live_site_url": "/",
+    "blog_url": "/blog",
+}
+
 SUPPORTED_BLOCK_TYPES = {"heading", "paragraph", "image", "youtube", "quote", "cta"}
 AI_SUPPORTED_BLOCK_TYPES = {"heading", "paragraph", "quote"}
 SUPPORTED_POST_CATEGORIES = {
@@ -378,6 +387,12 @@ def serialize_post_summary(post):
     }
 
 
+def serialize_admin_post_summary(post):
+    summary = serialize_post_summary(post)
+    summary["status"] = post.status
+    return summary
+
+
 @app.get("/")
 def home():
     return render_template("site/index.html")
@@ -391,6 +406,24 @@ def blog():
 @app.get("/blog/<int:post_id>")
 def article(post_id):
     return render_template("blog/article.html", post_id=post_id)
+
+
+@app.get("/admin/blog")
+@require_editor_auth
+def admin_blog_dashboard():
+    return render_template(
+        "admin/blog/dashboard.html",
+        admin_site=ADMIN_SITE_DATA,
+    )
+
+
+@app.get("/admin/blog/archived")
+@require_editor_auth
+def admin_blog_archived():
+    return render_template(
+        "admin/blog/archived.html",
+        admin_site=ADMIN_SITE_DATA,
+    )
 
 
 @app.post("/api/posts/enhance")
@@ -525,6 +558,88 @@ def list_posts():
     posts = db.session.execute(statement).all()
 
     return jsonify([serialize_post_summary(post) for post in posts])
+
+
+@app.get("/api/admin/posts")
+@require_editor_auth
+def list_admin_posts():
+    statement = (
+        db.select(
+            Post.id,
+            Post.title,
+            Post.category,
+            Post.excerpt,
+            Post.published_at,
+            Post.status,
+        )
+        .where(Post.status.in_({"published", "archived"}))
+        .order_by(Post.published_at.desc(), Post.id.desc())
+    )
+    posts = db.session.execute(statement).all()
+
+    response = jsonify([serialize_admin_post_summary(post) for post in posts])
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+@app.patch("/api/posts/<int:post_id>/archive")
+@require_editor_auth
+def archive_post(post_id):
+    post = db.session.get(Post, post_id)
+
+    if post is None:
+        return jsonify({"message": "Post not found."}), 404
+    if post.status != "published":
+        return jsonify({"message": "Only published posts can be archived."}), 409
+
+    post.status = "archived"
+
+    try:
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return jsonify({"message": "Unable to archive post."}), 500
+
+    return jsonify(serialize_post(post))
+
+
+@app.patch("/api/posts/<int:post_id>/restore")
+@require_editor_auth
+def restore_post(post_id):
+    post = db.session.get(Post, post_id)
+
+    if post is None:
+        return jsonify({"message": "Post not found."}), 404
+    if post.status != "archived":
+        return jsonify({"message": "Only archived posts can be restored."}), 409
+
+    post.status = "published"
+
+    try:
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return jsonify({"message": "Unable to restore post."}), 500
+
+    return jsonify(serialize_post(post))
+
+
+@app.delete("/api/posts/<int:post_id>")
+@require_editor_auth
+def delete_post(post_id):
+    post = db.session.get(Post, post_id)
+
+    if post is None:
+        return jsonify({"message": "Post not found."}), 404
+
+    try:
+        db.session.delete(post)
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return jsonify({"message": "Unable to permanently delete post."}), 500
+
+    return "", 204
 
 
 @app.get("/api/posts/<int:post_id>")

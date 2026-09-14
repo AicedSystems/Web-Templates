@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Archived Articles | {{ admin_site.name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/dashboard.css') }}">
+    <script src="{{ url_for('static', filename='admin/blog/js/archived.js', v='3') }}" defer></script>
+</head>
+<body>
+    <div class="admin-shell">
+        <aside class="admin-sidebar">
+            <a class="admin-brand" href="{{ url_for('admin_blog_dashboard') }}">
+                <img src="{{ url_for('static', filename=admin_site.logo_filename) }}" alt="{{ admin_site.name }}">
+                <span>{{ admin_site.admin_title }}</span>
+            </a>
+
+            <nav class="admin-nav" aria-label="Content Studio navigation">
+                <a class="admin-nav__link" href="{{ url_for('admin_blog_dashboard') }}">
+                    <span aria-hidden="true">⌂</span> Dashboard
+                </a>
+                <button class="admin-nav__link" type="button" disabled title="Create Article is coming in the next phase">
+                    <span aria-hidden="true">＋</span> Create Article
+                </button>
+                <button class="admin-nav__link" type="button" disabled title="Paste Article is coming in the next phase">
+                    <span aria-hidden="true">▤</span> Paste Article
+                </button>
+                <a class="admin-nav__link admin-nav__link--active" href="{{ url_for('admin_blog_archived') }}" aria-current="page">
+                    <span aria-hidden="true">□</span> Archived Articles
+                </a>
+                <a class="admin-nav__link" href="{{ admin_site.blog_url }}">
+                    <span aria-hidden="true">↗</span> Public Blog
+                </a>
+            </nav>
+
+            <div class="admin-sidebar__footer">
+                <span>Private workspace</span>
+                <a href="{{ admin_site.live_site_url }}">View Live Site <span aria-hidden="true">↗</span></a>
+            </div>
+        </aside>
+
+        <div class="admin-workspace">
+            <header class="admin-header">
+                <div><p class="admin-kicker">{{ admin_site.name }}</p><strong>{{ admin_site.admin_title }}</strong></div>
+                <div class="admin-header__actions">
+                    <a href="{{ admin_site.live_site_url }}">View Live Site</a>
+                    <div class="admin-profile">
+                        <img src="{{ url_for('static', filename=admin_site.avatar_filename) }}" alt="">
+                        <span>{{ admin_site.name }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="admin-main" id="main-content">
+                <section class="archive-heading" aria-labelledby="archive-heading-title">
+                    <div>
+                        <p class="admin-kicker">Content library</p>
+                        <h1 id="archive-heading-title">Archived articles</h1>
+                        <p>Restore an article to the public blog or permanently remove it. Permanent deletion cannot be undone.</p>
+                    </div>
+                    <strong id="archived-count">—</strong>
+                </section>
+
+                <section class="recent-posts archived-posts" aria-labelledby="archived-posts-heading">
+                    <div class="section-heading section-heading--posts">
+                        <div><p class="admin-kicker">Archive</p><h2 id="archived-posts-heading">Stored articles</h2></div>
+                        <a href="{{ url_for('admin_blog_dashboard') }}">Back to Dashboard</a>
+                    </div>
+
+                    <p class="recent-posts__status" id="archived-status" aria-live="polite">Loading archived articles…</p>
+                    <div class="recent-posts__table" id="archived-table" hidden>
+                        <div class="bulk-actions" id="archived-bulk-actions">
+                            <label class="bulk-actions__select-all">
+                                <input type="checkbox" id="archived-select-all">
+                                <span>Select all</span>
+                            </label>
+                            <span class="bulk-actions__count" id="archived-selected-count">0 selected</span>
+                            <div class="bulk-actions__buttons">
+                                <button type="button" id="bulk-restore" disabled>Restore selected</button>
+                                <button class="bulk-actions__danger" type="button" id="bulk-delete" disabled>
+                                    <span aria-hidden="true">⌫</span> Delete selected
+                                </button>
+                            </div>
+                        </div>
+                        <div class="recent-posts__header" aria-hidden="true">
+                            <span>Select</span><span>Article</span><span>Category</span><span>Published</span><span>Status</span><span>Actions</span>
+                        </div>
+                        <div id="archived-list"></div>
+                    </div>
+
+                    <template id="archived-row-template">
+                        <article class="post-row">
+                            <label class="post-row__select">
+                                <input type="checkbox" class="post-row__checkbox">
+                                <span class="sr-only">Select article</span>
+                            </label>
+                            <h3 class="post-row__title"></h3>
+                            <span class="post-row__category"></span>
+                            <time class="post-row__date"></time>
+                            <span class="post-row__status post-row__status--archived">Archived</span>
+                            <div class="post-row__actions">
+                                <button class="post-row__action" type="button" data-post-action="restore">Restore</button>
+                                <button class="post-row__action post-row__action--danger" type="button" data-post-action="delete">Delete</button>
+                            </div>
+                        </article>
+                    </template>
+                </section>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
