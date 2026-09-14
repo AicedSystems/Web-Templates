@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Real estate guidance, market insights, and practical advice from Stephanie J Mendoza.">
+    <title>Blog | Stephanie J Mendoza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='blog/css/public-blog.css') }}">
+    <script src="{{ url_for('static', filename='blog/js/blog.js') }}" defer></script>
+</head>
+<body>
+    <header class="blog-header">
+        <a class="blog-wordmark" href="/#home" aria-label="Stephanie J Mendoza home">
+            <img src="{{ url_for('static', filename='site/images/realtor-logo.png') }}" alt="Stephanie J Mendoza Real Estate Agent">
+        </a>
+        <nav class="blog-nav" aria-label="Main navigation">
+            <a href="/#home">Home</a>
+            <a href="/#clients">Clients</a>
+            <a href="/#agents">Agents</a>
+            <a href="/#about">About</a>
+            <a class="blog-nav__active" href="/blog" aria-current="page">Blog</a>
+            <a href="/#reviews">Reviews</a>
+            <a class="blog-nav__contact" href="/#contact">Contact Me</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="blog-hero" aria-labelledby="blog-heading">
+            <p class="blog-eyebrow">Insights / Guidance / Real Estate</p>
+            <h1 id="blog-heading">Thoughtful guidance<br>for your next move.</h1>
+            <p>Practical real estate advice, local perspective, and ideas for building a business with intention.</p>
+        </section>
+
+        <section class="post-feed" aria-labelledby="latest-posts-heading">
+            <div class="post-feed__heading">
+                <p class="blog-eyebrow">From the Blog</p>
+                <h2 id="latest-posts-heading">Latest insights</h2>
+            </div>
+
+            <p class="post-feed__status" id="post-feed-status" aria-live="polite">Loading published articles…</p>
+            <div class="post-grid" id="post-grid" hidden></div>
+
+            <template id="post-card-template">
+                <article class="post-card">
+                    <a class="post-card__link" href="/blog">
+                        <div class="post-card__media">
+                            <img class="post-card__image" alt="">
+                            <span class="post-card__image-placeholder" aria-hidden="true">SJ</span>
+                        </div>
+                        <div class="post-card__content">
+                            <div class="post-card__meta">
+                                <span class="post-card__category"></span>
+                                <time class="post-card__date"></time>
+                            </div>
+                            <h3 class="post-card__title"></h3>
+                            <p class="post-card__excerpt"></p>
+                            <span class="post-card__action">Read Article <span aria-hidden="true">→</span></span>
+                        </div>
+                    </a>
+                </article>
+            </template>
+        </section>
+    </main>
+
+    <footer class="blog-footer">
+        <a href="/#home">Stephanie J Mendoza</a>
+        <p>Real estate guidance rooted in genuine connection.</p>
+        <a href="/#contact">Let's Connect <span aria-hidden="true">→</span></a>
+    </footer>
+</body>
+</html>

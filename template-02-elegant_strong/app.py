@@ -26,6 +26,13 @@ if not editor_username or not editor_password:
     raise RuntimeError("EDITOR_USERNAME and EDITOR_PASSWORD must be set.")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    # Check pooled connections before using them so a connection closed by
+    # Supabase is replaced instead of causing the next request to fail.
+    "pool_pre_ping": True,
+    # Periodically replace long-lived connections before they become stale.
+    "pool_recycle": 300,
+}
 
 db.init_app(app)
 
@@ -359,9 +366,31 @@ def serialize_post(post):
     }
 
 
+def serialize_post_summary(post):
+    return {
+        "id": post.id,
+        "title": post.title,
+        "category": post.category,
+        "excerpt": post.excerpt,
+        "publishedDate": (
+            f"{post.published_at.isoformat()}Z" if post.published_at else None
+        ),
+    }
+
+
 @app.get("/")
 def home():
     return render_template("site/index.html")
+
+
+@app.get("/blog", strict_slashes=False)
+def blog():
+    return render_template("blog/index.html")
+
+
+@app.get("/blog/<int:post_id>")
+def article(post_id):
+    return render_template("blog/article.html", post_id=post_id)
 
 
 @app.post("/api/posts/enhance")
@@ -480,16 +509,22 @@ def create_post():
     return jsonify(serialize_post(post)), 201
 
 
-@app.get("/api/posts")
+@app.get("/api/posts", strict_slashes=False)
 def list_posts():
     statement = (
-        db.select(Post)
+        db.select(
+            Post.id,
+            Post.title,
+            Post.category,
+            Post.excerpt,
+            Post.published_at,
+        )
         .where(Post.status == "published")
         .order_by(Post.published_at.desc(), Post.id.desc())
     )
-    posts = db.session.execute(statement).scalars().all()
+    posts = db.session.execute(statement).all()
 
-    return jsonify([serialize_post(post) for post in posts])
+    return jsonify([serialize_post_summary(post) for post in posts])
 
 
 @app.get("/api/posts/<int:post_id>")

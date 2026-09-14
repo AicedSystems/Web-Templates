@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Real estate insights from Stephanie J Mendoza.">
+    <title>Article | Stephanie J Mendoza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='blog/css/public-blog.css') }}">
+    <script src="{{ url_for('static', filename='blog/js/article.js') }}" defer></script>
+</head>
+<body>
+    <header class="blog-header">
+        <a class="blog-wordmark" href="/#home" aria-label="Stephanie J Mendoza home">
+            <img src="{{ url_for('static', filename='site/images/realtor-logo.png') }}" alt="Stephanie J Mendoza Real Estate Agent">
+        </a>
+        <nav class="blog-nav" aria-label="Main navigation">
+            <a href="/#home">Home</a>
+            <a href="/#clients">Clients</a>
+            <a href="/#agents">Agents</a>
+            <a href="/#about">About</a>
+            <a class="blog-nav__active" href="/blog">Blog</a>
+            <a href="/#reviews">Reviews</a>
+            <a class="blog-nav__contact" href="/#contact">Contact Me</a>
+        </nav>
+    </header>
+
+    <main class="article-page" data-post-id="{{ post_id }}" id="main-content">
+        <a class="article-page__back" href="/blog"><span aria-hidden="true">←</span> All Articles</a>
+        <p class="article-page__status" id="article-status" aria-live="polite">Loading article…</p>
+
+        <article class="article" id="article-detail" hidden>
+            <header class="article__header">
+                <p class="blog-eyebrow" id="article-category"></p>
+                <h1 id="article-title"></h1>
+                <p class="article__excerpt" id="article-excerpt"></p>
+                <time class="article__date" id="article-date"></time>
+            </header>
+
+            <figure class="article__featured-media" id="article-media" hidden>
+                <img id="article-image" alt="">
+            </figure>
+
+            <div class="article__content" id="article-content"></div>
+            <ul class="article__tags" id="article-tags" aria-label="Article tags"></ul>
+        </article>
+    </main>
+
+    <footer class="blog-footer">
+        <a href="/#home">Stephanie J Mendoza</a>
+        <p>Real estate guidance rooted in genuine connection.</p>
+        <a href="/#contact">Let's Connect <span aria-hidden="true">→</span></a>
+    </footer>
+</body>
+</html>
