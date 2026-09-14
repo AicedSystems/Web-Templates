@@ -29,23 +29,67 @@
 
     <main>
         <section class="blog-hero" aria-labelledby="blog-heading">
-            <p class="blog-eyebrow">Insights / Guidance / Real Estate</p>
-            <h1 id="blog-heading">Thoughtful guidance<br>for your next move.</h1>
-            <p>Practical real estate advice, local perspective, and ideas for building a business with intention.</p>
+            <div class="blog-hero__copy">
+                <p class="blog-eyebrow">Insights / Guidance / Real Estate</p>
+                <h1 id="blog-heading">Thoughtful guidance<br>for your next move.</h1>
+                <p>Practical real estate advice, local perspective, and ideas for building a business with intention.</p>
+                <a class="blog-hero__button" href="#latest-posts-heading">Explore All Articles <span aria-hidden="true">→</span></a>
+            </div>
+
+            <aside class="featured-post" aria-labelledby="featured-post-heading">
+                <div class="featured-post__heading">
+                    <p class="blog-eyebrow" id="featured-post-heading">Featured Article</p>
+                    <p class="featured-post__counter" id="featured-post-counter" aria-label="Featured article position">01 / 01</p>
+                </div>
+                <p class="featured-post__status" id="featured-post-status" aria-live="polite">Loading featured article…</p>
+                <article class="featured-article" id="featured-post" hidden>
+                    <a class="featured-article__link" id="featured-post-link" href="/blog">
+                        <div class="featured-article__media">
+                            <img id="featured-post-image" alt="">
+                            <span class="featured-article__category" id="featured-post-category"></span>
+                        </div>
+                        <div class="featured-article__body">
+                            <time class="featured-article__date" id="featured-post-date"></time>
+                            <div class="featured-article__copy">
+                                <h2 id="featured-post-title"></h2>
+                                <p id="featured-post-excerpt"></p>
+                                <span>Read Article <span aria-hidden="true">→</span></span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
+            </aside>
         </section>
 
         <section class="post-feed" aria-labelledby="latest-posts-heading">
             <div class="post-feed__heading">
-                <p class="blog-eyebrow">From the Blog</p>
-                <h2 id="latest-posts-heading">Latest insights</h2>
+                <div class="post-feed__title">
+                    <p class="blog-eyebrow">From the Blog</p>
+                    <h2 id="latest-posts-heading">Latest insights</h2>
+                </div>
+
+                <div class="post-filter" data-post-filter>
+                    <button class="post-filter__button" type="button" aria-expanded="false" aria-controls="post-filter-menu">
+                        <span>Filter</span>
+                        <span aria-hidden="true">↓</span>
+                    </button>
+                    <div class="post-filter__menu" id="post-filter-menu" hidden>
+                        <button type="button" data-category="all" aria-pressed="true">All Articles</button>
+                        <button type="button" data-category="market-updates" aria-pressed="false">Market Updates</button>
+                        <button type="button" data-category="recruiting" aria-pressed="false">Recruiting</button>
+                        <button type="button" data-category="success-stories" aria-pressed="false">Success Stories</button>
+                        <button type="button" data-category="training" aria-pressed="false">Training</button>
+                    </div>
+                </div>
             </div>
 
-            <p class="post-feed__status" id="post-feed-status" aria-live="polite">Loading published articles…</p>
+            <p class="post-feed__status" id="post-feed-status" aria-live="polite">Loading latest articles…</p>
             <div class="post-grid" id="post-grid" hidden></div>
 
             <template id="post-card-template">
                 <article class="post-card">
                     <a class="post-card__link" href="/blog">
+                        <span class="post-card__number" aria-hidden="true"></span>
                         <div class="post-card__media">
                             <img class="post-card__image" alt="">
                             <span class="post-card__image-placeholder" aria-hidden="true">SJ</span>
