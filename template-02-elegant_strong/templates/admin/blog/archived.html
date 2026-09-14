@@ -23,12 +23,12 @@
                 <a class="admin-nav__link" href="{{ url_for('admin_blog_dashboard') }}">
                     <span aria-hidden="true">⌂</span> Dashboard
                 </a>
-                <button class="admin-nav__link" type="button" disabled title="Create Article is coming in the next phase">
+                <a class="admin-nav__link" href="{{ url_for('admin_blog_new') }}">
                     <span aria-hidden="true">＋</span> Create Article
-                </button>
-                <button class="admin-nav__link" type="button" disabled title="Paste Article is coming in the next phase">
+                </a>
+                <a class="admin-nav__link" href="{{ url_for('admin_blog_new_paste') }}">
                     <span aria-hidden="true">▤</span> Paste Article
-                </button>
+                </a>
                 <a class="admin-nav__link admin-nav__link--active" href="{{ url_for('admin_blog_archived') }}" aria-current="page">
                     <span aria-hidden="true">□</span> Archived Articles
                 </a>

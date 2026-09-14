@@ -426,6 +426,33 @@ def admin_blog_archived():
     )
 
 
+@app.get("/admin/blog/new")
+@require_editor_auth
+def admin_blog_new():
+    return render_template(
+        "admin/blog/start_post.html",
+        admin_site=ADMIN_SITE_DATA,
+    )
+
+
+@app.get("/admin/blog/new/paste")
+@require_editor_auth
+def admin_blog_new_paste():
+    return render_template(
+        "admin/blog/paste_post.html",
+        admin_site=ADMIN_SITE_DATA,
+    )
+
+
+@app.get("/admin/blog/new/build")
+@require_editor_auth
+def admin_blog_new_build():
+    return render_template(
+        "admin/blog/create_post.html",
+        admin_site=ADMIN_SITE_DATA,
+    )
+
+
 @app.post("/api/posts/enhance")
 @require_editor_auth
 def enhance_post():

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Article Editor | {{ admin_site.name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/create_post.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/aiced-bot.css') }}">
+    <script src="{{ url_for('static', filename='admin/blog/js/article_blocks.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='admin/blog/js/post_storage.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='admin/blog/js/create_post.js') }}" defer></script>
+</head>
+<body>
+    <div class="editor-shell">
+        <header class="editor-header">
+            <a class="editor-brand" href="{{ url_for('admin_blog_dashboard') }}">
+                <img src="{{ url_for('static', filename=admin_site.logo_filename) }}" alt="{{ admin_site.name }}">
+                <span>{{ admin_site.admin_title }}</span>
+            </a>
+            <nav aria-label="Editor navigation">
+                <a href="{{ url_for('admin_blog_dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('admin_blog_new') }}">New Article</a>
+                <a href="{{ url_for('admin_blog_new_paste') }}">Paste Article</a>
+                <a href="{{ admin_site.blog_url }}">Public Blog</a>
+                <a href="{{ admin_site.live_site_url }}">Live Site</a>
+            </nav>
+        </header>
+
+        <main class="editor-page" id="main-content">
+            <form class="editor-layout" id="post-form" data-post-form novalidate>
+                <section class="editor-main" aria-labelledby="editor-title">
+                    <div class="editor-intro">
+                        <p class="admin-kicker">Article editor</p>
+                        <h1 id="editor-title">Create your article</h1>
+                        <p>Build and arrange the article one content block at a time.</p>
+                    </div>
+
+                    <section class="editor-panel editor-details" aria-labelledby="details-title">
+                        <div class="editor-section-heading"><div><p class="admin-kicker">Metadata</p><h2 id="details-title">Article details</h2></div></div>
+                        <label class="editor-field"><span>Title <small id="title-character-count">0/100</small></span><input id="post-title" maxlength="100" required placeholder="Enter a clear article title"></label>
+                        <label class="editor-field"><span>SEO summary <small id="excerpt-character-count">0/160</small></span><textarea id="post-excerpt" maxlength="160" rows="4" required placeholder="Summarize what readers will learn…"></textarea></label>
+                    </section>
+
+                    <section class="editor-panel block-builder" aria-labelledby="content-title">
+                        <div class="editor-section-heading"><div><p class="admin-kicker">Article body</p><h2 id="content-title">Content blocks</h2></div></div>
+                        <div class="block-builder__list" id="content-block-list"></div>
+                        <div class="block-builder__add" aria-label="Add article content">
+                            <span>Add:</span>
+                            <button type="button" data-add-block="heading">Heading</button>
+                            <button type="button" data-add-block="paragraph">Paragraph</button>
+                            <button type="button" data-add-block="quote">Quote</button>
+                            <button type="button" data-add-block="image">Image</button>
+                            <button type="button" data-add-block="youtube">YouTube</button>
+                            <button type="button" data-add-block="cta">CTA</button>
+                        </div>
+                    </section>
+                </section>
+
+                <aside class="editor-sidebar" aria-label="Publishing controls">
+                    <section class="editor-panel">
+                        <p class="admin-kicker">Publishing</p><h2>Post setup</h2>
+                        <label class="editor-field"><span>Category</span><select id="post-category" required><option value="">Select a category</option><option value="market-updates">Market Updates</option><option value="recruiting">Recruiting</option><option value="success-stories">Success Stories</option><option value="training">Training</option></select></label>
+                        <label class="editor-field"><span>Tags <small>Optional, comma-separated</small></span><input id="post-tags" placeholder="Buyers, Antelope Valley"></label>
+                    </section>
+
+                    <section class="editor-panel">
+                        <p class="admin-kicker">Featured image</p><h2>Cover photo</h2>
+                        <label class="featured-image" id="featured-image-drop-zone">
+                            <input id="post-featured-image" type="file" accept="image/jpeg,image/png,image/webp">
+                            <img id="preview-image" alt="Selected featured image" hidden>
+                            <span id="preview-no-image"><strong>Choose an image</strong><small>JPEG, PNG, or WebP up to 5 MB</small></span>
+                        </label>
+                        <button class="editor-link-button" id="remove-thumbnail-button" type="button" hidden>Remove image</button>
+                    </section>
+
+                    <section class="editor-panel editor-preview" aria-labelledby="preview-title-heading">
+                        <p class="admin-kicker">Preview</p><h2 id="preview-title-heading">Article card</h2>
+                        <p class="editor-preview__category" id="preview-category">Select a category</p>
+                        <h3 id="preview-title">Your article title</h3>
+                        <p id="preview-excerpt">Your article summary will appear here.</p>
+                    </section>
+
+                    <section class="editor-panel editor-actions">
+                        <p class="publishing-status" id="publishing-status" aria-live="polite"></p>
+                        <button class="editor-button editor-button--secondary" id="save-draft-button" type="button">Save Draft</button>
+                        <button class="editor-button editor-button--primary" id="publish-post-button" type="button">Publish Article</button>
+                    </section>
+                </aside>
+            </form>
+        </main>
+    </div>
+
+    <button class="aiced-launcher" id="aiced-launcher" type="button" aria-label="Open Aiced Bot" aria-expanded="false" aria-controls="aiced-panel">
+        <img src="{{ url_for('static', filename='admin/blog/images/aiced-bot/aicedbotprototype.png') }}" alt="">
+        <span>Aiced Bot</span>
+    </button>
+
+    <div class="aiced-backdrop" id="aiced-backdrop" hidden>
+        <aside class="aiced-panel" id="aiced-panel" role="dialog" aria-modal="true" aria-labelledby="aiced-title" tabindex="-1">
+            <header class="aiced-panel__header">
+                <div><img src="{{ url_for('static', filename='admin/blog/images/aiced-bot/aicedbotprototype.png') }}" alt=""><span>Aiced Bot</span></div>
+                <button id="aiced-close" type="button" aria-label="Close Aiced Bot">×</button>
+            </header>
+            <div class="aiced-panel__body">
+                <div id="aiced-idle">
+                    <p class="admin-kicker">Writing assistant</p>
+                    <h2 id="aiced-title">How can I help?</h2>
+                    <p>Improve search clarity while keeping your article’s facts and meaning intact.</p>
+                    <button class="aiced-seo-action" id="aiced-improve-seo" type="button">
+                        <img src="{{ url_for('static', filename='admin/blog/images/aiced-bot/aicedbot-seo-bars.png') }}" alt="">
+                        <span><strong>Improve SEO</strong><small>Review title, summary, headings, and keyword clarity</small></span>
+                        <span aria-hidden="true">→</span>
+                    </button>
+                </div>
+                <div class="aiced-workflow" id="aiced-workflow" aria-live="polite" hidden></div>
+            </div>
+        </aside>
+    </div>
+</body>
+</html>

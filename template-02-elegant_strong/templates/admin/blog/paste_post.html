@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Paste Article | {{ admin_site.name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/entry-flow.css') }}">
+    <script src="{{ url_for('static', filename='admin/blog/js/article_blocks.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='admin/blog/js/paste_post.js') }}" defer></script>
+</head>
+<body>
+    <div class="admin-shell">
+        <aside class="admin-sidebar">
+            <a class="admin-brand" href="{{ url_for('admin_blog_dashboard') }}"><img src="{{ url_for('static', filename=admin_site.logo_filename) }}" alt="{{ admin_site.name }}"><span>{{ admin_site.admin_title }}</span></a>
+            <nav class="admin-nav" aria-label="Content Studio navigation">
+                <a class="admin-nav__link" href="{{ url_for('admin_blog_dashboard') }}"><span aria-hidden="true">⌂</span> Dashboard</a>
+                <a class="admin-nav__link" href="{{ url_for('admin_blog_new') }}"><span aria-hidden="true">＋</span> Create Article</a>
+                <a class="admin-nav__link admin-nav__link--active" href="{{ url_for('admin_blog_new_paste') }}" aria-current="page"><span aria-hidden="true">▤</span> Paste Article</a>
+                <a class="admin-nav__link" href="{{ url_for('admin_blog_archived') }}"><span aria-hidden="true">□</span> Archived Articles</a>
+                <a class="admin-nav__link" href="{{ admin_site.blog_url }}"><span aria-hidden="true">↗</span> Public Blog</a>
+            </nav>
+            <div class="admin-sidebar__footer"><span>Private workspace</span><a href="{{ admin_site.live_site_url }}">View Live Site <span aria-hidden="true">↗</span></a></div>
+        </aside>
+
+        <div class="admin-workspace">
+            <header class="admin-header">
+                <div><p class="admin-kicker">{{ admin_site.name }}</p><strong>{{ admin_site.admin_title }}</strong></div>
+                <div class="admin-header__actions"><a href="{{ url_for('admin_blog_new') }}">Back to Article Options</a><a href="{{ admin_site.live_site_url }}">View Live Site</a></div>
+            </header>
+            <main class="admin-main entry-page" id="main-content">
+                <section class="entry-card paste-card" aria-labelledby="paste-article-title">
+                    <p class="admin-kicker">Import content</p>
+                    <h1 id="paste-article-title">Paste your article</h1>
+                    <p class="entry-card__intro">Paste finished writing below. You can keep it unchanged or prepare an AI-enhanced version for the editor.</p>
+                    <label class="sr-only" for="pasted-article">Article text</label>
+                    <textarea class="paste-card__textarea" id="pasted-article" placeholder="Paste your article here…" spellcheck="true"></textarea>
+                    <p class="paste-card__word-count" id="paste-word-count" aria-live="polite">0 words</p>
+                    <div class="paste-card__actions">
+                        <button class="entry-button entry-button--secondary" id="continue-as-is" type="button" disabled>Continue As Is →</button>
+                        <button class="entry-button entry-button--primary" id="enhance-with-ai" type="button" disabled>✦ Enhance With AI</button>
+                    </div>
+                    <p class="paste-card__status" id="paste-enhancement-status" aria-live="polite">Continue As Is keeps your article text unchanged.</p>
+                </section>
+                <aside class="entry-notes" aria-label="Import information">
+                    <section><p class="admin-kicker">What happens next</p><h2>Prepare your draft</h2><p>The editor will let you choose a category, add tags, select a featured image, and review every content block.</p></section>
+                    <section><h2>AI enhancement</h2><p>Enhancement improves readability and organization while preserving the article’s original facts and meaning.</p></section>
+                </aside>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

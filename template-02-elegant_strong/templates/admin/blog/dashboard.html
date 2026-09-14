@@ -23,12 +23,12 @@
                 <a class="admin-nav__link admin-nav__link--active" href="{{ url_for('admin_blog_dashboard') }}" aria-current="page">
                     <span aria-hidden="true">⌂</span> Dashboard
                 </a>
-                <button class="admin-nav__link" type="button" disabled title="Create Article is coming in the next phase">
+                <a class="admin-nav__link" href="{{ url_for('admin_blog_new') }}">
                     <span aria-hidden="true">＋</span> Create Article
-                </button>
-                <button class="admin-nav__link" type="button" disabled title="Paste Article is coming in the next phase">
+                </a>
+                <a class="admin-nav__link" href="{{ url_for('admin_blog_new_paste') }}">
                     <span aria-hidden="true">▤</span> Paste Article
-                </button>
+                </a>
                 <a class="admin-nav__link" href="{{ url_for('admin_blog_archived') }}">
                     <span aria-hidden="true">□</span> Archived Articles
                 </a>
@@ -62,27 +62,27 @@
                 <section class="admin-welcome" aria-labelledby="dashboard-heading">
                     <div>
                         <p class="admin-kicker">Content overview</p>
-                        <h1 id="dashboard-heading">Welcome back, Stephanie.</h1>
-                        <p>Manage published insights and prepare for your next article from one focused workspace.</p>
+                        <h1 id="dashboard-heading">Welcome back, Steph!</h1>
+                        <p>Manage all your content from one place.</p>
                     </div>
                     <div class="admin-welcome__mark" aria-hidden="true">SJ</div>
                 </section>
 
                 <section class="quick-actions" aria-labelledby="quick-actions-heading">
                     <div class="section-heading">
-                        <div><p class="admin-kicker">Start here</p><h2 id="quick-actions-heading">Primary actions</h2></div>
+                        <div><p class="admin-kicker">Start here</p><h2 id="quick-actions-heading">Create, Post or View Site</h2></div>
                     </div>
                     <div class="quick-actions__grid">
-                        <button class="action-card" type="button" disabled>
+                        <a class="action-card action-card--live" href="{{ url_for('admin_blog_new') }}">
                             <span class="action-card__icon" aria-hidden="true">＋</span>
                             <strong>Create Article</strong>
-                            <small>Coming in Phase 5B</small>
-                        </button>
-                        <button class="action-card" type="button" disabled>
+                            <small>Choose how to begin</small>
+                        </a>
+                        <a class="action-card action-card--live" href="{{ url_for('admin_blog_new_paste') }}">
                             <span class="action-card__icon" aria-hidden="true">▤</span>
                             <strong>Paste Article</strong>
-                            <small>Coming in Phase 5B</small>
-                        </button>
+                            <small>Import an existing article</small>
+                        </a>
                         <a class="action-card action-card--live" href="{{ admin_site.live_site_url }}">
                             <span class="action-card__icon" aria-hidden="true">↗</span>
                             <strong>View Live Site</strong>
@@ -106,7 +106,7 @@
 
                 <section class="recent-posts" aria-labelledby="recent-posts-heading">
                     <div class="section-heading section-heading--posts">
-                        <div><p class="admin-kicker">Published Posts</p><h2 id="recent-posts-heading">Recent articles</h2></div>
+                        <div><p class="admin-kicker">Published Posts</p><h2 id="recent-posts-heading">All articles</h2></div>
                         <a href="{{ admin_site.blog_url }}">View Public Blog <span aria-hidden="true">↗</span></a>
                     </div>
 
