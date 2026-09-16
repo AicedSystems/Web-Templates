@@ -9,11 +9,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/dashboard.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/create_post.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/aiced-bot.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/create_post.css', v='22') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/aiced-bot.css', v='2') }}">
     <script src="{{ url_for('static', filename='admin/blog/js/article_blocks.js') }}" defer></script>
     <script src="{{ url_for('static', filename='admin/blog/js/post_storage.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='admin/blog/js/create_post.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='admin/blog/js/create_post.js', v='12') }}" defer></script>
 </head>
 <body>
     <div class="editor-shell">
@@ -62,10 +62,44 @@
                 </section>
 
                 <aside class="editor-sidebar" aria-label="Publishing controls">
+                    <div class="editor-sidebar__scroll">
                     <section class="editor-panel">
                         <p class="admin-kicker">Publishing</p><h2>Post setup</h2>
                         <label class="editor-field"><span>Category</span><select id="post-category" required><option value="">Select a category</option><option value="market-updates">Market Updates</option><option value="recruiting">Recruiting</option><option value="success-stories">Success Stories</option><option value="training">Training</option></select></label>
                         <label class="editor-field"><span>Tags <small>Optional, comma-separated</small></span><input id="post-tags" placeholder="Buyers, Antelope Valley"></label>
+                    </section>
+
+                    <section class="editor-panel ai-assistant-card" id="ai-assistant-card" aria-labelledby="ai-assistant-card-title">
+                        <header class="ai-assistant-card__header">
+                            <div class="ai-assistant-card__identity">
+                                <img src="{{ url_for('static', filename='admin/blog/images/aiced-bot/aicedbotprototype.png') }}" alt="">
+                                <div><h2 id="ai-assistant-card-title">Aiced Bot</h2><p>Your AI writing assistant</p></div>
+                            </div>
+                            <div class="ai-assistant-card__header-actions">
+                                <button id="ai-assistant-tips" type="button">Tips</button>
+                                <button id="ai-assistant-card-toggle" type="button" aria-label="Collapse Aiced Bot card" aria-expanded="true" aria-controls="ai-assistant-card-content">⌃</button>
+                            </div>
+                        </header>
+                        <div class="ai-assistant-card__content" id="ai-assistant-card-content">
+                            <h3>Improve your article</h3>
+                            <p>Get quick help with writing, SEO, tone, and more.</p>
+                            <div class="ai-assistant-card__quick-actions">
+                                <button type="button" data-aiced-card-action="seo"><span>▥</span><strong>Improve SEO</strong><small>Better visibility and keywords</small></button>
+                                <button type="button" data-aiced-card-action="readability"><span>▤</span><strong>Improve readability</strong><small>Clearer, simpler writing</small></button>
+                                <button type="button" data-aiced-card-action="shorter"><span>✂</span><strong>Make it shorter</strong><small>Keep the key points</small></button>
+                                <button type="button" data-aiced-card-action="tone"><span>☺</span><strong>Warmer tone</strong><small>Professional and friendly</small></button>
+                            </div>
+                            <p class="ai-assistant-card__status" id="ai-assistant-card-status" aria-live="polite" hidden></p>
+                            <button class="ai-assistant-card__enhance" type="button" data-aiced-card-action="seo">
+                                <img src="{{ url_for('static', filename='admin/blog/images/aiced-bot/aicedbotrunning.png') }}" alt="">
+                                <span><strong>Enhance entire article</strong><small>Improve SEO, structure, and clarity</small></span><b aria-hidden="true">›</b>
+                            </button>
+                            <div class="ai-assistant-card__ask">
+                                <span>or</span>
+                                <div><textarea id="ai-assistant-request" rows="2" placeholder="Tell Aiced Bot what to change…" aria-label="Tell Aiced Bot what to change"></textarea><button id="ai-assistant-send" type="button" aria-label="Send request">➤</button></div>
+                                <p>Examples: <button type="button" data-aiced-example="Make the intro shorter">Make the intro shorter</button></p>
+                            </div>
+                        </div>
                     </section>
 
                     <section class="editor-panel">
@@ -79,21 +113,42 @@
                     </section>
 
                     <section class="editor-panel editor-preview" aria-labelledby="preview-title-heading">
-                        <p class="admin-kicker">Preview</p><h2 id="preview-title-heading">Article card</h2>
+                        <div class="editor-preview__heading">
+                            <div><p class="admin-kicker">Preview</p><h2 id="preview-title-heading">Article card</h2></div>
+                            <button class="editor-preview__full-button" id="view-full-article-button" type="button" aria-label="Preview full article" data-tooltip="Preview full article">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M14 4h6v6M20 4l-7 7M10 20H4v-6M4 20l7-7" />
+                                </svg>
+                            </button>
+                        </div>
                         <p class="editor-preview__category" id="preview-category">Select a category</p>
                         <h3 id="preview-title">Your article title</h3>
                         <p id="preview-excerpt">Your article summary will appear here.</p>
                     </section>
-
                     <section class="editor-panel editor-actions">
                         <p class="publishing-status" id="publishing-status" aria-live="polite"></p>
                         <button class="editor-button editor-button--secondary" id="save-draft-button" type="button">Save Draft</button>
                         <button class="editor-button editor-button--primary" id="publish-post-button" type="button">Publish Article</button>
                     </section>
+                    </div>
                 </aside>
             </form>
         </main>
     </div>
+
+    <dialog class="full-preview-dialog" id="full-preview-dialog" aria-labelledby="full-preview-dialog-title">
+        <header class="full-preview-dialog__header">
+            <div><p class="admin-kicker">Article preview</p><h2 id="full-preview-dialog-title">Full article</h2></div>
+            <button id="close-full-preview-button" type="button" aria-label="Close full article preview">×</button>
+        </header>
+        <article class="full-preview-article">
+            <p class="full-preview-article__category" id="full-preview-category"></p>
+            <h1 id="full-preview-title"></h1>
+            <p class="full-preview-article__excerpt" id="full-preview-excerpt"></p>
+            <img class="full-preview-article__featured" id="full-preview-featured-image" alt="Article featured image" hidden>
+            <div class="full-preview-article__content" id="full-preview-content"></div>
+        </article>
+    </dialog>
 
     <button class="aiced-launcher" id="aiced-launcher" type="button" aria-label="Open Aiced Bot" aria-expanded="false" aria-controls="aiced-panel">
         <img src="{{ url_for('static', filename='admin/blog/images/aiced-bot/aicedbotprototype.png') }}" alt="">
