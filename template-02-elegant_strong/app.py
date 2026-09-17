@@ -12,7 +12,7 @@ from flask import Flask, jsonify, render_template, request
 from sqlalchemy.exc import SQLAlchemyError
 
 from extensions import db
-from models import Post
+from models import Post, Review
 
 app = Flask(__name__)
 database_url = os.environ.get("DATABASE_URL")
@@ -114,6 +114,11 @@ EMBEDDED_IMAGE_PATTERN = re.compile(
     re.IGNORECASE,
 )
 MAXIMUM_EMBEDDED_IMAGE_BYTES = 5 * 1024 * 1024
+MAXIMUM_REVIEW_NAME_LENGTH = 120
+MAXIMUM_REVIEW_QUOTE_LENGTH = 2_000
+MAXIMUM_REVIEW_CLIENT_TYPE_LENGTH = 80
+MAXIMUM_REVIEW_IMAGE_URL_LENGTH = 2_048
+MAXIMUM_REVIEW_DISPLAY_ORDER = 2_147_483_647
 
 
 def require_editor_auth(view):
@@ -391,6 +396,120 @@ def serialize_admin_post_summary(post):
     summary = serialize_post_summary(post)
     summary["status"] = post.status
     return summary
+
+
+def serialize_review_summary(review):
+    return {
+        "id": review.id,
+        "clientName": review.client_name,
+        "quote": review.quote,
+        "clientImageUrl": review.client_image_url,
+        "rating": review.rating,
+        "clientType": review.client_type,
+        "displayOrder": review.display_order,
+    }
+
+
+def serialize_admin_review(review):
+    summary = serialize_review_summary(review)
+    summary.update({
+        "isPublished": review.is_published,
+        "archivedAt": f"{review.archived_at.isoformat()}Z" if review.archived_at else None,
+        "createdAt": f"{review.created_at.isoformat()}Z",
+        "updatedAt": f"{review.updated_at.isoformat()}Z",
+    })
+    return summary
+
+
+def validate_review_payload(data, partial=False):
+    if not isinstance(data, dict):
+        return None, "Request body must be valid JSON."
+
+    allowed_fields = {
+        "clientName", "quote", "clientImageUrl", "rating",
+        "clientType", "displayOrder", "isPublished",
+    }
+    unknown_fields = sorted(set(data) - allowed_fields)
+    if unknown_fields:
+        return None, f"Unsupported field(s): {', '.join(unknown_fields)}."
+    if partial and not data:
+        return None, "At least one review field is required."
+
+    if not partial:
+        missing_fields = [field for field in ("clientName", "quote") if field not in data]
+        if missing_fields:
+            return None, f"Missing required field(s): {', '.join(missing_fields)}."
+
+    validated = {}
+
+    if "clientName" in data:
+        client_name = data["clientName"]
+        if not isinstance(client_name, str) or not client_name.strip():
+            return None, "clientName must be a non-empty string."
+        client_name = client_name.strip()
+        if len(client_name) > MAXIMUM_REVIEW_NAME_LENGTH:
+            return None, f"clientName must be {MAXIMUM_REVIEW_NAME_LENGTH} characters or fewer."
+        validated["client_name"] = client_name
+
+    if "quote" in data:
+        quote = data["quote"]
+        if not isinstance(quote, str) or not quote.strip():
+            return None, "quote must be a non-empty string."
+        quote = quote.strip()
+        if len(quote) > MAXIMUM_REVIEW_QUOTE_LENGTH:
+            return None, f"quote must be {MAXIMUM_REVIEW_QUOTE_LENGTH} characters or fewer."
+        validated["quote"] = quote
+
+    if "clientImageUrl" in data:
+        image_url = data["clientImageUrl"]
+        if image_url in {None, ""}:
+            validated["client_image_url"] = None
+        elif not isinstance(image_url, str):
+            return None, "clientImageUrl must be null or an HTTP(S) URL."
+        else:
+            image_url = image_url.strip()
+            if len(image_url) > MAXIMUM_REVIEW_IMAGE_URL_LENGTH or not is_web_url(image_url):
+                return None, "clientImageUrl must be an HTTP(S) URL of 2048 characters or fewer."
+            validated["client_image_url"] = image_url
+
+    if "rating" in data:
+        rating = data["rating"]
+        if rating is not None and (type(rating) is not int or not 1 <= rating <= 5):
+            return None, "rating must be null or an integer from 1 through 5."
+        validated["rating"] = rating
+
+    if "clientType" in data:
+        client_type = data["clientType"]
+        if client_type in {None, ""}:
+            validated["client_type"] = None
+        elif not isinstance(client_type, str):
+            return None, "clientType must be null or a string."
+        else:
+            client_type = client_type.strip()
+            if len(client_type) > MAXIMUM_REVIEW_CLIENT_TYPE_LENGTH:
+                return None, f"clientType must be {MAXIMUM_REVIEW_CLIENT_TYPE_LENGTH} characters or fewer."
+            validated["client_type"] = client_type
+
+    if "displayOrder" in data:
+        display_order = data["displayOrder"]
+        if type(display_order) is not int or not 0 <= display_order <= MAXIMUM_REVIEW_DISPLAY_ORDER:
+            return None, "displayOrder must be a non-negative integer."
+        validated["display_order"] = display_order
+
+    if "isPublished" in data:
+        is_published = data["isPublished"]
+        if not isinstance(is_published, bool):
+            return None, "isPublished must be a boolean."
+        validated["is_published"] = is_published
+
+    if not partial:
+        validated.setdefault("client_image_url", None)
+        validated.setdefault("rating", None)
+        validated.setdefault("client_type", None)
+        validated.setdefault("display_order", 0)
+        validated.setdefault("is_published", False)
+
+    return validated, None
 
 
 @app.get("/")
@@ -677,6 +796,106 @@ def get_post(post_id):
         return jsonify({"message": "Post not found."}), 404
 
     return jsonify(serialize_post(post))
+
+
+@app.get("/api/reviews", strict_slashes=False)
+def list_reviews():
+    statement = (
+        db.select(
+            Review.id,
+            Review.client_name,
+            Review.quote,
+            Review.client_image_url,
+            Review.rating,
+            Review.client_type,
+            Review.display_order,
+        )
+        .where(Review.is_published.is_(True), Review.archived_at.is_(None))
+        .order_by(Review.display_order.asc(), Review.id.asc())
+    )
+    reviews = db.session.execute(statement).all()
+    return jsonify([serialize_review_summary(review) for review in reviews])
+
+
+@app.get("/api/reviews/<int:review_id>")
+def get_review(review_id):
+    statement = (
+        db.select(
+            Review.id,
+            Review.client_name,
+            Review.quote,
+            Review.client_image_url,
+            Review.rating,
+            Review.client_type,
+            Review.display_order,
+        )
+        .where(
+            Review.id == review_id,
+            Review.is_published.is_(True),
+            Review.archived_at.is_(None),
+        )
+    )
+    review = db.session.execute(statement).one_or_none()
+    if review is None:
+        return jsonify({"message": "Review not found."}), 404
+    return jsonify(serialize_review_summary(review))
+
+
+@app.post("/api/reviews")
+@require_editor_auth
+def create_review():
+    validated, validation_error = validate_review_payload(request.get_json(silent=True))
+    if validation_error:
+        return jsonify({"message": validation_error}), 400
+
+    review = Review(**validated)
+    try:
+        db.session.add(review)
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return jsonify({"message": "Unable to save review."}), 500
+    return jsonify(serialize_admin_review(review)), 201
+
+
+@app.patch("/api/reviews/<int:review_id>")
+@require_editor_auth
+def update_review(review_id):
+    review = db.session.get(Review, review_id)
+    if review is None:
+        return jsonify({"message": "Review not found."}), 404
+
+    validated, validation_error = validate_review_payload(
+        request.get_json(silent=True),
+        partial=True,
+    )
+    if validation_error:
+        return jsonify({"message": validation_error}), 400
+
+    for field, value in validated.items():
+        setattr(review, field, value)
+    try:
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return jsonify({"message": "Unable to update review."}), 500
+    return jsonify(serialize_admin_review(review))
+
+
+@app.delete("/api/reviews/<int:review_id>")
+@require_editor_auth
+def delete_review(review_id):
+    review = db.session.get(Review, review_id)
+    if review is None:
+        return jsonify({"message": "Review not found."}), 404
+
+    try:
+        db.session.delete(review)
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return jsonify({"message": "Unable to permanently delete review."}), 500
+    return "", 204
 
 
 if __name__ == "__main__":
