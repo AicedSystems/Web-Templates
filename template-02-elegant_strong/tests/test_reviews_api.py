@@ -35,11 +35,28 @@ class ReviewsApiTestCase(unittest.TestCase):
 
     def test_public_list_is_empty_and_mutations_require_authentication(self):
         self.assertEqual(self.client.get("/api/reviews").status_code, 200)
+        self.assertEqual(self.client.get("/api/admin/reviews").status_code, 401)
+        self.assertEqual(self.client.get("/admin/reviews").status_code, 401)
         response = self.client.post(
             "/api/reviews",
             json={"clientName": "Client", "quote": "A thoughtful review."},
         )
         self.assertEqual(response.status_code, 401)
+
+    def test_admin_list_and_manager_require_auth_and_include_every_state(self):
+        records = (
+            Review(client_name="Published", quote="Public", is_published=True),
+            Review(client_name="Hidden", quote="Private", is_published=False),
+            Review(client_name="Archived", quote="Stored", is_published=True, archived_at=datetime.utcnow()),
+        )
+        db.session.add_all(records)
+        db.session.commit()
+
+        response = self.client.get("/api/admin/reviews", headers=self.auth_headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual({review["clientName"] for review in response.get_json()}, {"Published", "Hidden", "Archived"})
+        self.assertEqual(response.headers.get("Cache-Control"), "no-store")
+        self.assertEqual(self.client.get("/admin/reviews", headers=self.auth_headers).status_code, 200)
 
     def test_unpublished_review_is_never_public(self):
         response = self.client.post(
@@ -105,6 +122,30 @@ class ReviewsApiTestCase(unittest.TestCase):
         self.assertEqual(updated.status_code, 200)
         self.assertEqual(updated.get_json()["quote"], "Updated.")
         self.assertEqual(self.client.delete(f"/api/reviews/{review_id}", headers=self.auth_headers).status_code, 204)
+
+    def test_archive_and_restore_are_authenticated_and_preserve_publication(self):
+        response = self.client.post(
+            "/api/reviews",
+            headers=self.auth_headers,
+            json={"clientName": "Client", "quote": "Review", "isPublished": True},
+        )
+        review_id = response.get_json()["id"]
+
+        self.assertEqual(self.client.patch(f"/api/reviews/{review_id}/archive").status_code, 401)
+        archived = self.client.patch(f"/api/reviews/{review_id}/archive", headers=self.auth_headers)
+        self.assertEqual(archived.status_code, 200)
+        self.assertTrue(archived.get_json()["isPublished"])
+        self.assertIsNotNone(archived.get_json()["archivedAt"])
+        self.assertEqual(self.client.get("/api/reviews").get_json(), [])
+        self.assertEqual(self.client.patch(f"/api/reviews/{review_id}/archive", headers=self.auth_headers).status_code, 409)
+
+        self.assertEqual(self.client.patch(f"/api/reviews/{review_id}/restore").status_code, 401)
+        restored = self.client.patch(f"/api/reviews/{review_id}/restore", headers=self.auth_headers)
+        self.assertEqual(restored.status_code, 200)
+        self.assertTrue(restored.get_json()["isPublished"])
+        self.assertIsNone(restored.get_json()["archivedAt"])
+        self.assertEqual(len(self.client.get("/api/reviews").get_json()), 1)
+        self.assertEqual(self.client.patch(f"/api/reviews/{review_id}/restore", headers=self.auth_headers).status_code, 409)
 
     def test_validation_rejects_malformed_payloads(self):
         invalid_payloads = (

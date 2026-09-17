@@ -572,6 +572,15 @@ def admin_blog_new_build():
     )
 
 
+@app.get("/admin/reviews")
+@require_editor_auth
+def admin_reviews_manager():
+    return render_template(
+        "admin/reviews/index.html",
+        admin_site=ADMIN_SITE_DATA,
+    )
+
+
 @app.post("/api/posts/enhance")
 @require_editor_auth
 def enhance_post():
@@ -817,6 +826,35 @@ def list_reviews():
     return jsonify([serialize_review_summary(review) for review in reviews])
 
 
+@app.get("/api/admin/reviews")
+@require_editor_auth
+def list_admin_reviews():
+    statement = (
+        db.select(
+            Review.id,
+            Review.client_name,
+            Review.quote,
+            Review.client_image_url,
+            Review.rating,
+            Review.client_type,
+            Review.display_order,
+            Review.is_published,
+            Review.archived_at,
+            Review.created_at,
+            Review.updated_at,
+        )
+        .order_by(
+            Review.archived_at.is_not(None).asc(),
+            Review.display_order.asc(),
+            Review.id.asc(),
+        )
+    )
+    reviews = db.session.execute(statement).all()
+    response = jsonify([serialize_admin_review(review) for review in reviews])
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
 @app.get("/api/reviews/<int:review_id>")
 def get_review(review_id):
     statement = (
@@ -879,6 +917,42 @@ def update_review(review_id):
     except SQLAlchemyError:
         db.session.rollback()
         return jsonify({"message": "Unable to update review."}), 500
+    return jsonify(serialize_admin_review(review))
+
+
+@app.patch("/api/reviews/<int:review_id>/archive")
+@require_editor_auth
+def archive_review(review_id):
+    review = db.session.get(Review, review_id)
+    if review is None:
+        return jsonify({"message": "Review not found."}), 404
+    if review.archived_at is not None:
+        return jsonify({"message": "Review is already archived."}), 409
+
+    review.archived_at = datetime.utcnow()
+    try:
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return jsonify({"message": "Unable to archive review."}), 500
+    return jsonify(serialize_admin_review(review))
+
+
+@app.patch("/api/reviews/<int:review_id>/restore")
+@require_editor_auth
+def restore_review(review_id):
+    review = db.session.get(Review, review_id)
+    if review is None:
+        return jsonify({"message": "Review not found."}), 404
+    if review.archived_at is None:
+        return jsonify({"message": "Review is not archived."}), 409
+
+    review.archived_at = None
+    try:
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return jsonify({"message": "Unable to restore review."}), 500
     return jsonify(serialize_admin_review(review))
 
 

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Reviews | {{ admin_site.admin_title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/reviews/css/reviews.css', v='1') }}">
+    <script src="{{ url_for('static', filename='admin/reviews/js/reviews.js', v='1') }}" defer></script>
+</head>
+<body>
+    <div class="admin-shell">
+        <aside class="admin-sidebar">
+            <a class="admin-brand" href="{{ url_for('admin_blog_dashboard') }}">
+                <img src="{{ url_for('static', filename=admin_site.logo_filename) }}" alt="{{ admin_site.name }}">
+                <span>{{ admin_site.admin_title }}</span>
+            </a>
+            <nav class="admin-nav" aria-label="Content Studio navigation">
+                <a class="admin-nav__link" href="{{ url_for('admin_blog_dashboard') }}"><span aria-hidden="true">⌂</span> Dashboard</a>
+                <a class="admin-nav__link" href="{{ url_for('admin_blog_new') }}"><span aria-hidden="true">＋</span> Create Article</a>
+                <a class="admin-nav__link" href="{{ url_for('admin_blog_new_paste') }}"><span aria-hidden="true">▤</span> Paste Article</a>
+                <a class="admin-nav__link" href="{{ url_for('admin_blog_archived') }}"><span aria-hidden="true">□</span> Archived Articles</a>
+                <a class="admin-nav__link admin-nav__link--active" href="{{ url_for('admin_reviews_manager') }}" aria-current="page"><span aria-hidden="true">★</span> Reviews</a>
+                <a class="admin-nav__link" href="{{ admin_site.blog_url }}"><span aria-hidden="true">↗</span> Public Blog</a>
+            </nav>
+            <div class="admin-sidebar__footer"><span>Private workspace</span><a href="{{ admin_site.live_site_url }}">View Live Site <span aria-hidden="true">↗</span></a></div>
+        </aside>
+
+        <div class="admin-workspace">
+            <header class="admin-header">
+                <div><p class="admin-kicker">{{ admin_site.name }}</p><strong>{{ admin_site.admin_title }}</strong></div>
+                <div class="admin-header__actions"><a href="{{ url_for('admin_blog_dashboard') }}">Dashboard</a><a href="{{ admin_site.live_site_url }}">View Live Site</a></div>
+            </header>
+
+            <main class="admin-main reviews-page" id="main-content">
+                <section class="reviews-heading" aria-labelledby="reviews-heading-title">
+                    <div><p class="admin-kicker">Website content</p><h1 id="reviews-heading-title">Reviews Manager</h1><p>Create, publish, order, hide, and archive client reviews.</p></div>
+                    <button class="reviews-add-button" id="add-review-button" type="button">+ Add Review</button>
+                </section>
+
+                <section class="reviews-manager" aria-labelledby="reviews-list-title">
+                    <div class="reviews-toolbar">
+                        <div><p class="admin-kicker">Client feedback</p><h2 id="reviews-list-title">All reviews</h2></div>
+                        <div class="reviews-filters" aria-label="Filter reviews">
+                            <button class="is-active" type="button" data-review-filter="all">All</button>
+                            <button type="button" data-review-filter="published">Published</button>
+                            <button type="button" data-review-filter="hidden">Hidden</button>
+                            <button type="button" data-review-filter="archived">Archived</button>
+                        </div>
+                    </div>
+                    <p class="reviews-status" id="reviews-status" aria-live="polite">Loading reviews…</p>
+                    <div class="reviews-list" id="reviews-list" hidden></div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <dialog class="review-dialog" id="review-dialog" aria-labelledby="review-dialog-title">
+        <form class="review-form" id="review-form" novalidate>
+            <header class="review-dialog__header">
+                <div><p class="admin-kicker">Review details</p><h2 id="review-dialog-title">Add Review</h2></div>
+                <button id="close-review-dialog" type="button" aria-label="Close review form">×</button>
+            </header>
+            <div class="review-form__body">
+                <input id="review-id" type="hidden">
+                <label class="review-field"><span>Client Name</span><input id="review-client-name" maxlength="120" required></label>
+                <label class="review-field review-field--wide"><span>Quote</span><textarea id="review-quote" maxlength="2000" rows="6" required></textarea></label>
+                <label class="review-field"><span>Client Type <small>Optional</small></span><input id="review-client-type" maxlength="80" placeholder="Buyer, Seller, Agent…"></label>
+                <label class="review-field"><span>Rating <small>Optional</small></span><select id="review-rating"><option value="">No rating</option><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option></select></label>
+                <label class="review-field review-field--wide"><span>Client Image URL <small>Optional, HTTP(S) only</small></span><input id="review-image-url" type="url" placeholder="https://…"></label>
+                <label class="review-field"><span>Display Order</span><input id="review-display-order" type="number" min="0" step="1" value="0" required></label>
+                <label class="review-published"><input id="review-is-published" type="checkbox"><span><strong>Published</strong><small>Show this active review through the public API.</small></span></label>
+                <p class="review-form__status" id="review-form-status" aria-live="polite"></p>
+            </div>
+            <footer class="review-form__actions"><button id="cancel-review" type="button">Cancel</button><button class="review-form__save" id="save-review" type="submit">Save Review</button></footer>
+        </form>
+    </dialog>
+</body>
+</html>

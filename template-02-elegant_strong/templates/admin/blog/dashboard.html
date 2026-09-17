@@ -32,6 +32,9 @@
                 <a class="admin-nav__link" href="{{ url_for('admin_blog_archived') }}">
                     <span aria-hidden="true">□</span> Archived Articles
                 </a>
+                <a class="admin-nav__link" href="{{ url_for('admin_reviews_manager') }}">
+                    <span aria-hidden="true">★</span> Reviews
+                </a>
                 <a class="admin-nav__link" href="{{ admin_site.blog_url }}">
                     <span aria-hidden="true">↗</span> Public Blog
                 </a>
@@ -87,6 +90,11 @@
                             <span class="action-card__icon" aria-hidden="true">↗</span>
                             <strong>View Live Site</strong>
                             <small>Open the realtor homepage</small>
+                        </a>
+                        <a class="action-card action-card--live" href="{{ url_for('admin_reviews_manager') }}">
+                            <span class="action-card__icon" aria-hidden="true">★</span>
+                            <strong>Manage Reviews</strong>
+                            <small>Add and publish client feedback</small>
                         </a>
                     </div>
                 </section>
