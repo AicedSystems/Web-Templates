@@ -11,8 +11,9 @@ from urllib.parse import urlparse
 from flask import Flask, jsonify, render_template, request
 from sqlalchemy.exc import SQLAlchemyError
 
+import media_storage
 from extensions import db
-from models import Post, Review
+from models import Post, Review, ReviewPageContent
 
 app = Flask(__name__)
 database_url = os.environ.get("DATABASE_URL")
@@ -119,6 +120,14 @@ MAXIMUM_REVIEW_QUOTE_LENGTH = 2_000
 MAXIMUM_REVIEW_CLIENT_TYPE_LENGTH = 80
 MAXIMUM_REVIEW_IMAGE_URL_LENGTH = 2_048
 MAXIMUM_REVIEW_DISPLAY_ORDER = 2_147_483_647
+MAXIMUM_PAGE_SHORT_TEXT_LENGTH = 160
+MAXIMUM_PAGE_BODY_LENGTH = 2_000
+PAGE_IMAGE_SCOPES = {
+    "about": "reviews-page/about",
+    "featuredStory": "reviews-page/featured-story",
+    "finalCta": "reviews-page/final-cta",
+}
+HTML_TAG_PATTERN = re.compile(r"<\s*/?\s*[a-z][^>]*>", re.IGNORECASE)
 
 
 def require_editor_auth(view):
@@ -399,11 +408,19 @@ def serialize_admin_post_summary(post):
 
 
 def serialize_review_summary(review):
+    client_image_path = getattr(review, "client_image_path", None)
+    client_image_url = (
+        media_storage.derive_public_url(client_image_path)
+        if client_image_path
+        else review.client_image_url
+    )
     return {
         "id": review.id,
         "clientName": review.client_name,
         "quote": review.quote,
-        "clientImageUrl": review.client_image_url,
+        "clientImageUrl": client_image_url,
+        "clientImageFocalX": getattr(review, "client_image_focal_x", 50),
+        "clientImageFocalY": getattr(review, "client_image_focal_y", 50),
         "rating": review.rating,
         "clientType": review.client_type,
         "displayOrder": review.display_order,
@@ -413,6 +430,7 @@ def serialize_review_summary(review):
 def serialize_admin_review(review):
     summary = serialize_review_summary(review)
     summary.update({
+        "clientImagePath": getattr(review, "client_image_path", None),
         "isPublished": review.is_published,
         "archivedAt": f"{review.archived_at.isoformat()}Z" if review.archived_at else None,
         "createdAt": f"{review.created_at.isoformat()}Z",
@@ -421,12 +439,236 @@ def serialize_admin_review(review):
     return summary
 
 
+def serialize_page_image(image):
+    if image is None:
+        return None
+    storage_path = image.get("storagePath") if isinstance(image, dict) else None
+    if not media_storage.is_managed_storage_path(storage_path):
+        return None
+    return {
+        "storagePath": storage_path,
+        "publicUrl": media_storage.derive_public_url(storage_path),
+        "focalX": image.get("focalX", 50),
+        "focalY": image.get("focalY", 50),
+    }
+
+
+def serialize_review_page_content(content, eligible_reviews=None, featured_review=None):
+    payload = {
+        "hero": content.hero,
+        "about": {**content.about, "image": serialize_page_image(content.about.get("image"))},
+        "featuredStory": {
+            **content.featured_story,
+            "image": serialize_page_image(content.featured_story.get("image")),
+        },
+        "featuredReviewId": content.featured_review_id,
+        "finalCta": {
+            **content.final_cta,
+            "image": serialize_page_image(content.final_cta.get("image")),
+        },
+        "updatedAt": f"{content.updated_at.isoformat()}Z",
+    }
+    if featured_review is not None:
+        payload["featuredReview"] = serialize_review_summary(featured_review)
+    else:
+        payload["featuredReview"] = None
+    if eligible_reviews is not None:
+        payload["eligibleReviews"] = [serialize_review_summary(review) for review in eligible_reviews]
+    return payload
+
+
+def validate_page_text(value, label, maximum=MAXIMUM_PAGE_SHORT_TEXT_LENGTH):
+    if not isinstance(value, str) or not value.strip():
+        return None, f"{label} is required."
+    value = value.strip()
+    if len(value) > maximum:
+        return None, f"{label} must be {maximum} characters or fewer."
+    if HTML_TAG_PATTERN.search(value):
+        return None, f"{label} cannot contain HTML."
+    return value, None
+
+
+def validate_page_link(value, label):
+    value, error = validate_page_text(value, label, 2_048)
+    if error:
+        return None, error
+    if value.startswith("/") and not value.startswith("//"):
+        return value, None
+    if is_web_url(value):
+        return value, None
+    return None, f"{label} must be a website link or a link beginning with /."
+
+
+def validate_page_cta(value, label):
+    if not isinstance(value, dict) or set(value) != {"label", "href"}:
+        return None, f"{label} is incomplete."
+    cta_label, error = validate_page_text(value["label"], f"{label} label", 80)
+    if error:
+        return None, error
+    href, error = validate_page_link(value["href"], f"{label} link")
+    if error:
+        return None, error
+    return {"label": cta_label, "href": href}, None
+
+
+def validate_page_values(value, label, expected_count):
+    if not isinstance(value, list) or len(value) != expected_count:
+        return None, f"{label} must contain exactly {expected_count} items."
+    validated = []
+    for index, item in enumerate(value, start=1):
+        if not isinstance(item, dict) or set(item) != {"title", "subtitle"}:
+            return None, f"{label} item {index} is incomplete."
+        title, error = validate_page_text(item["title"], f"{label} item {index} title", 40)
+        if error:
+            return None, error
+        subtitle, error = validate_page_text(item["subtitle"], f"{label} item {index} subtitle", 40)
+        if error:
+            return None, error
+        validated.append({"title": title, "subtitle": subtitle})
+    return validated, None
+
+
+def validate_page_image(value, placement):
+    if value is None:
+        return None, None
+    if not isinstance(value, dict) or set(value) != {"storagePath", "focalX", "focalY"}:
+        return None, f"{placement} image information is incomplete."
+    storage_path = value["storagePath"]
+    expected_prefix = f"{PAGE_IMAGE_SCOPES[placement]}/"
+    if not media_storage.is_managed_storage_path(storage_path) or not storage_path.startswith(expected_prefix):
+        return None, f"Choose an image uploaded for the {placement} section."
+    focal_x = value["focalX"]
+    focal_y = value["focalY"]
+    if type(focal_x) is not int or not 0 <= focal_x <= 100:
+        return None, "Horizontal image position must be from 0 through 100."
+    if type(focal_y) is not int or not 0 <= focal_y <= 100:
+        return None, "Vertical image position must be from 0 through 100."
+    return {"storagePath": storage_path, "focalX": focal_x, "focalY": focal_y}, None
+
+
+def validate_review_page_payload(data):
+    required_sections = {"hero", "about", "featuredStory", "featuredReviewId", "finalCta"}
+    if not isinstance(data, dict) or set(data) != required_sections:
+        return None, "The Reviews Page content is incomplete. Refresh and try again."
+
+    hero = data["hero"]
+    hero_keys = {"eyebrow", "titleLine1", "titleEmphasis", "description", "cta", "values", "reelUrl"}
+    if not isinstance(hero, dict) or set(hero) != hero_keys:
+        return None, "Hero content is incomplete."
+    validated_hero = {}
+    for key, label, maximum in (
+        ("eyebrow", "Hero eyebrow", 80),
+        ("titleLine1", "Hero heading", 120),
+        ("titleEmphasis", "Hero emphasized heading", 120),
+        ("description", "Hero description", MAXIMUM_PAGE_BODY_LENGTH),
+    ):
+        validated_hero[key], error = validate_page_text(hero[key], label, maximum)
+        if error:
+            return None, error
+    validated_hero["cta"], error = validate_page_cta(hero["cta"], "Hero button")
+    if error:
+        return None, error
+    validated_hero["values"], error = validate_page_values(hero["values"], "Hero values", 3)
+    if error:
+        return None, error
+    reel_url, error = validate_page_link(hero["reelUrl"], "Instagram Reel URL")
+    reel_host = urlparse(reel_url).netloc.lower().removeprefix("www.") if not error else ""
+    if error or (reel_host != "instagram.com" and not reel_host.endswith(".instagram.com")):
+        return None, "Instagram Reel URL must be a valid Instagram link."
+    validated_hero["reelUrl"] = reel_url
+
+    about = data["about"]
+    about_keys = {"eyebrow", "titleLine1", "titleLine2", "body", "cta", "values", "image"}
+    if not isinstance(about, dict) or set(about) != about_keys:
+        return None, "About Stephanie content is incomplete."
+    validated_about = {}
+    for key, label, maximum in (
+        ("eyebrow", "About eyebrow", 80),
+        ("titleLine1", "About heading first line", 120),
+        ("titleLine2", "About heading second line", 120),
+        ("body", "About description", MAXIMUM_PAGE_BODY_LENGTH),
+    ):
+        validated_about[key], error = validate_page_text(about[key], label, maximum)
+        if error:
+            return None, error
+    validated_about["cta"], error = validate_page_cta(about["cta"], "About button")
+    if error:
+        return None, error
+    validated_about["values"], error = validate_page_values(about["values"], "About values", 4)
+    if error:
+        return None, error
+    validated_about["image"], error = validate_page_image(about["image"], "about")
+    if error:
+        return None, error
+
+    featured = data["featuredStory"]
+    featured_keys = {"eyebrow", "titleLine1", "titleLine2", "image"}
+    if not isinstance(featured, dict) or set(featured) != featured_keys:
+        return None, "Featured Story content is incomplete."
+    validated_featured = {}
+    for key, label in (
+        ("eyebrow", "Featured Story eyebrow"),
+        ("titleLine1", "Featured Story heading first line"),
+        ("titleLine2", "Featured Story heading second line"),
+    ):
+        validated_featured[key], error = validate_page_text(featured[key], label, 120)
+        if error:
+            return None, error
+    validated_featured["image"], error = validate_page_image(featured["image"], "featuredStory")
+    if error:
+        return None, error
+
+    featured_review_id = data["featuredReviewId"]
+    if featured_review_id is not None and type(featured_review_id) is not int:
+        return None, "Choose a valid Featured Story review."
+    if featured_review_id is not None:
+        selected_review = db.session.get(Review, featured_review_id)
+        if selected_review is None or not selected_review.is_published or selected_review.archived_at is not None:
+            return None, "Featured Story must use a published, active review."
+
+    final_cta = data["finalCta"]
+    final_keys = {"eyebrow", "title", "cta", "image"}
+    if not isinstance(final_cta, dict) or set(final_cta) != final_keys:
+        return None, "Final CTA content is incomplete."
+    validated_final = {}
+    validated_final["eyebrow"], error = validate_page_text(final_cta["eyebrow"], "Final CTA eyebrow", 80)
+    if error:
+        return None, error
+    validated_final["title"], error = validate_page_text(final_cta["title"], "Final CTA heading", 160)
+    if error:
+        return None, error
+    validated_final["cta"], error = validate_page_cta(final_cta["cta"], "Final CTA button")
+    if error:
+        return None, error
+    validated_final["image"], error = validate_page_image(final_cta["image"], "finalCta")
+    if error:
+        return None, error
+
+    return {
+        "hero": validated_hero,
+        "about": validated_about,
+        "featured_story": validated_featured,
+        "featured_review_id": featured_review_id,
+        "final_cta": validated_final,
+    }, None
+
+
+def get_eligible_featured_reviews():
+    statement = (
+        db.select(Review)
+        .where(Review.is_published.is_(True), Review.archived_at.is_(None))
+        .order_by(Review.display_order.asc(), Review.id.asc())
+    )
+    return db.session.scalars(statement).all()
+
+
 def validate_review_payload(data, partial=False):
     if not isinstance(data, dict):
         return None, "Request body must be valid JSON."
 
     allowed_fields = {
-        "clientName", "quote", "clientImageUrl", "rating",
+        "clientName", "quote", "clientImageUrl", "clientImagePath",
+        "clientImageFocalX", "clientImageFocalY", "rating",
         "clientType", "displayOrder", "isPublished",
     }
     unknown_fields = sorted(set(data) - allowed_fields)
@@ -472,6 +714,25 @@ def validate_review_payload(data, partial=False):
                 return None, "clientImageUrl must be an HTTP(S) URL of 2048 characters or fewer."
             validated["client_image_url"] = image_url
 
+    if "clientImagePath" in data:
+        image_path = data["clientImagePath"]
+        if image_path in {None, ""}:
+            validated["client_image_path"] = None
+        elif not media_storage.is_managed_storage_path(image_path):
+            return None, "clientImagePath must be a managed Storage image path."
+        else:
+            validated["client_image_path"] = image_path
+
+    for api_field, model_field in (
+        ("clientImageFocalX", "client_image_focal_x"),
+        ("clientImageFocalY", "client_image_focal_y"),
+    ):
+        if api_field in data:
+            focal_value = data[api_field]
+            if type(focal_value) is not int or not 0 <= focal_value <= 100:
+                return None, f"{api_field} must be an integer from 0 through 100."
+            validated[model_field] = focal_value
+
     if "rating" in data:
         rating = data["rating"]
         if rating is not None and (type(rating) is not int or not 1 <= rating <= 5):
@@ -504,6 +765,9 @@ def validate_review_payload(data, partial=False):
 
     if not partial:
         validated.setdefault("client_image_url", None)
+        validated.setdefault("client_image_path", None)
+        validated.setdefault("client_image_focal_x", 50)
+        validated.setdefault("client_image_focal_y", 50)
         validated.setdefault("rating", None)
         validated.setdefault("client_type", None)
         validated.setdefault("display_order", 0)
@@ -525,6 +789,39 @@ def blog():
 @app.get("/blog/<int:post_id>")
 def article(post_id):
     return render_template("blog/article.html", post_id=post_id)
+
+
+def render_reviews_page(editor_preview=False):
+    try:
+        content = db.session.get(ReviewPageContent, 1)
+    except SQLAlchemyError:
+        db.session.rollback()
+        content = None
+    if content is None:
+        return render_template(
+            "site/reviews.html",
+            reviews_page=None,
+            editor_preview=editor_preview,
+        )
+
+    featured_review = None
+    if content.featured_review_id is not None:
+        try:
+            candidate = db.session.get(Review, content.featured_review_id)
+            if candidate is not None and candidate.is_published and candidate.archived_at is None:
+                featured_review = candidate
+        except SQLAlchemyError:
+            db.session.rollback()
+    return render_template(
+        "site/reviews.html",
+        reviews_page=serialize_review_page_content(content, featured_review=featured_review),
+        editor_preview=editor_preview,
+    )
+
+
+@app.get("/reviews", strict_slashes=False)
+def reviews():
+    return render_reviews_page()
 
 
 @app.get("/admin/blog")
@@ -579,6 +876,113 @@ def admin_reviews_manager():
         "admin/reviews/index.html",
         admin_site=ADMIN_SITE_DATA,
     )
+
+
+@app.get("/admin/reviews/page")
+@require_editor_auth
+def admin_reviews_page_editor():
+    return render_template(
+        "admin/reviews/page_editor.html",
+        admin_site=ADMIN_SITE_DATA,
+    )
+
+
+@app.get("/admin/reviews/page/preview")
+@require_editor_auth
+def admin_reviews_page_preview():
+    return render_reviews_page(editor_preview=True)
+
+
+@app.get("/api/admin/reviews-page")
+@require_editor_auth
+def get_admin_reviews_page():
+    content = db.session.get(ReviewPageContent, 1)
+    if content is None:
+        return jsonify({"message": "Reviews Page content has not been configured."}), 404
+    eligible_reviews = get_eligible_featured_reviews()
+    featured_review = next(
+        (review for review in eligible_reviews if review.id == content.featured_review_id),
+        None,
+    )
+    response = jsonify(
+        serialize_review_page_content(
+            content,
+            eligible_reviews=eligible_reviews,
+            featured_review=featured_review,
+        )
+    )
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+@app.put("/api/admin/reviews-page")
+@require_editor_auth
+def update_admin_reviews_page():
+    content = db.session.get(ReviewPageContent, 1)
+    if content is None:
+        return jsonify({"message": "Reviews Page content has not been configured."}), 404
+
+    validated, validation_error = validate_review_page_payload(request.get_json(silent=True))
+    if validation_error:
+        return jsonify({"message": validation_error}), 400
+
+    content.hero = validated["hero"]
+    content.about = validated["about"]
+    content.featured_story = validated["featured_story"]
+    content.featured_review_id = validated["featured_review_id"]
+    content.final_cta = validated["final_cta"]
+    content.updated_at = datetime.utcnow()
+    try:
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return jsonify({"message": "Unable to save the Reviews Page right now."}), 500
+
+    eligible_reviews = get_eligible_featured_reviews()
+    featured_review = next(
+        (review for review in eligible_reviews if review.id == content.featured_review_id),
+        None,
+    )
+    response = jsonify(
+        serialize_review_page_content(
+            content,
+            eligible_reviews=eligible_reviews,
+            featured_review=featured_review,
+        )
+    )
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+@app.post("/api/admin/media/images")
+@require_editor_auth
+def upload_admin_image():
+    try:
+        uploaded_image = media_storage.upload_image(
+            request.files.get("file"),
+            request.form.get("scope", ""),
+        )
+    except media_storage.MediaStorageError as error:
+        return jsonify({"message": str(error)}), error.status_code
+
+    response = jsonify(uploaded_image)
+    response.status_code = 201
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+@app.delete("/api/admin/media/images")
+@require_editor_auth
+def delete_admin_image():
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict) or set(data) != {"storagePath"}:
+        return jsonify({"message": "storagePath is required."}), 400
+
+    try:
+        media_storage.delete_image(data["storagePath"])
+    except media_storage.MediaStorageError as error:
+        return jsonify({"message": str(error)}), error.status_code
+    return "", 204
 
 
 @app.post("/api/posts/enhance")
@@ -815,6 +1219,9 @@ def list_reviews():
             Review.client_name,
             Review.quote,
             Review.client_image_url,
+            Review.client_image_path,
+            Review.client_image_focal_x,
+            Review.client_image_focal_y,
             Review.rating,
             Review.client_type,
             Review.display_order,
@@ -835,6 +1242,9 @@ def list_admin_reviews():
             Review.client_name,
             Review.quote,
             Review.client_image_url,
+            Review.client_image_path,
+            Review.client_image_focal_x,
+            Review.client_image_focal_y,
             Review.rating,
             Review.client_type,
             Review.display_order,
@@ -863,6 +1273,9 @@ def get_review(review_id):
             Review.client_name,
             Review.quote,
             Review.client_image_url,
+            Review.client_image_path,
+            Review.client_image_focal_x,
+            Review.client_image_focal_y,
             Review.rating,
             Review.client_type,
             Review.display_order,

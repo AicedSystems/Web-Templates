@@ -7,7 +7,10 @@ from datetime import datetime
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 os.environ["EDITOR_USERNAME"] = "review-test-editor"
 os.environ["EDITOR_PASSWORD"] = "review-test-password"
+os.environ["SUPABASE_URL"] = "https://example.supabase.co"
+os.environ["SUPABASE_STORAGE_BUCKET"] = "site-media"
 
+import app as app_module  # noqa: E402
 from app import app  # noqa: E402
 from extensions import db  # noqa: E402
 from models import Review  # noqa: E402
@@ -30,7 +33,8 @@ class ReviewsApiTestCase(unittest.TestCase):
         db.session.query(Review).delete()
         db.session.commit()
         self.client = app.test_client()
-        token = base64.b64encode(b"review-test-editor:review-test-password").decode("ascii")
+        credentials = f"{app_module.editor_username}:{app_module.editor_password}".encode("utf-8")
+        token = base64.b64encode(credentials).decode("ascii")
         self.auth_headers = {"Authorization": f"Basic {token}"}
 
     def test_public_list_is_empty_and_mutations_require_authentication(self):
@@ -156,12 +160,43 @@ class ReviewsApiTestCase(unittest.TestCase):
             {"clientName": "Client", "quote": "Review", "displayOrder": -1},
             {"clientName": "Client", "quote": "Review", "isPublished": "yes"},
             {"clientName": "Client", "quote": "Review", "clientImageUrl": "data:image/png;base64,AAAA"},
+            {"clientName": "Client", "quote": "Review", "clientImagePath": "other/unmanaged.webp"},
+            {"clientName": "Client", "quote": "Review", "clientImageFocalX": -1},
+            {"clientName": "Client", "quote": "Review", "clientImageFocalY": 101},
         )
         for payload in invalid_payloads:
             with self.subTest(payload=payload):
                 response = self.client.post("/api/reviews", headers=self.auth_headers, json=payload)
                 self.assertEqual(response.status_code, 400)
                 self.assertIn("message", response.get_json())
+
+    def test_managed_review_image_path_derives_public_url(self):
+        storage_path = f"review-cards/{'a' * 32}.webp"
+        response = self.client.post(
+            "/api/reviews",
+            headers=self.auth_headers,
+            json={
+                "clientName": "Storage Client",
+                "quote": "Stored outside PostgreSQL.",
+                "clientImagePath": storage_path,
+                "clientImageFocalX": 64,
+                "clientImageFocalY": 27,
+                "isPublished": True,
+            },
+        )
+        self.assertEqual(response.status_code, 201)
+        payload = response.get_json()
+        self.assertEqual(payload["clientImagePath"], storage_path)
+        self.assertEqual(
+            payload["clientImageUrl"],
+            f"https://example.supabase.co/storage/v1/object/public/site-media/{storage_path}",
+        )
+        self.assertEqual(payload["clientImageFocalX"], 64)
+        self.assertEqual(payload["clientImageFocalY"], 27)
+        public_payload = self.client.get("/api/reviews").get_json()[0]
+        self.assertEqual(public_payload["clientImageUrl"], payload["clientImageUrl"])
+        self.assertEqual(public_payload["clientImageFocalX"], 64)
+        self.assertEqual(public_payload["clientImageFocalY"], 27)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Reviews Page | {{ admin_site.admin_title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/reviews/css/page-editor.css', v='1') }}">
+    <script src="{{ url_for('static', filename='admin/reviews/js/page-editor.js', v='1') }}" defer></script>
+</head>
+<body>
+    <div class="admin-shell">
+        <aside class="admin-sidebar">
+            <a class="admin-brand" href="{{ url_for('admin_blog_dashboard') }}">
+                <img src="{{ url_for('static', filename=admin_site.logo_filename) }}" alt="{{ admin_site.name }}">
+                <span>{{ admin_site.admin_title }}</span>
+            </a>
+            <nav class="admin-nav" aria-label="Content Studio navigation">
+                <a class="admin-nav__link" href="{{ url_for('admin_blog_dashboard') }}"><span aria-hidden="true">⌂</span> Dashboard</a>
+                <a class="admin-nav__link" href="{{ url_for('admin_blog_new') }}"><span aria-hidden="true">＋</span> Create Article</a>
+                <a class="admin-nav__link" href="{{ url_for('admin_blog_new_paste') }}"><span aria-hidden="true">▤</span> Paste Article</a>
+                <a class="admin-nav__link" href="{{ url_for('admin_blog_archived') }}"><span aria-hidden="true">□</span> Archived Articles</a>
+                <a class="admin-nav__link" href="{{ url_for('admin_reviews_manager') }}"><span aria-hidden="true">★</span> Reviews</a>
+                <a class="admin-nav__link admin-nav__link--active" href="{{ url_for('admin_reviews_page_editor') }}" aria-current="page"><span aria-hidden="true">▱</span> Reviews Page</a>
+                <a class="admin-nav__link" href="{{ admin_site.blog_url }}"><span aria-hidden="true">↗</span> Public Blog</a>
+            </nav>
+            <div class="admin-sidebar__footer"><span>Private workspace</span><a href="{{ admin_site.live_site_url }}">View Live Site <span aria-hidden="true">↗</span></a></div>
+        </aside>
+
+        <div class="admin-workspace">
+            <header class="admin-header">
+                <div><p class="admin-kicker">{{ admin_site.name }}</p><strong>{{ admin_site.admin_title }}</strong></div>
+                <div class="admin-header__actions"><a href="{{ url_for('admin_reviews_manager') }}">Manage Reviews</a><a href="{{ url_for('reviews') }}" target="_blank" rel="noopener">View Live Page ↗</a></div>
+            </header>
+
+            <main class="admin-main page-editor" id="main-content">
+                <section class="page-editor__heading" aria-labelledby="page-editor-title">
+                    <div><p class="admin-kicker">Website content</p><h1 id="page-editor-title">Reviews Page</h1><p>Edit what visitors see while the page design stays safely locked.</p></div>
+                    <a href="{{ url_for('reviews') }}" target="_blank" rel="noopener">View Live Page <span aria-hidden="true">↗</span></a>
+                </section>
+
+                <p class="page-editor__status" id="page-editor-status" aria-live="polite">Loading your Reviews Page…</p>
+
+                <div class="page-editor__workspace" id="page-editor-workspace" hidden>
+                    <aside class="edit-panel" aria-label="Reviews Page controls">
+                        <div class="edit-panel__heading"><div><p class="admin-kicker">Edit panel</p><h2 id="edit-panel-title">Choose something to edit</h2></div><button id="close-edit-panel" type="button" aria-label="Close editing controls" hidden>×</button></div>
+                        <div class="edit-panel__empty" id="edit-panel-empty"><span aria-hidden="true">↗</span><strong>Click an outlined area in the preview</strong><p>The controls for that part of the page will appear here.</p></div>
+                    <form class="page-controls" id="reviews-page-form" novalidate hidden>
+                        <section class="editor-section is-active" data-editor-section="hero">
+                            <button class="editor-section__toggle" type="button" aria-expanded="true"><span><small>01</small> Hero</span><span aria-hidden="true">⌄</span></button>
+                            <div class="editor-section__body">
+                                <label><span>Small heading</span><input name="hero.eyebrow" maxlength="80" required></label>
+                                <label><span>Main heading</span><input name="hero.titleLine1" maxlength="120" required></label>
+                                <label><span>Emphasized heading</span><input name="hero.titleEmphasis" maxlength="120" required></label>
+                                <label><span>Description</span><textarea name="hero.description" maxlength="2000" rows="4" required></textarea></label>
+                                <div class="field-pair"><label><span>Button text</span><input name="hero.cta.label" maxlength="80" required></label><label><span>Button link</span><input name="hero.cta.href" maxlength="2048" required></label></div>
+                                <fieldset><legend>What clients can expect</legend><div class="value-grid" data-values="hero"></div></fieldset>
+                                <label><span>Instagram Reel URL</span><input name="hero.reelUrl" type="url" maxlength="2048" required><small>The Hero currently displays an Instagram Reel.</small></label>
+                            </div>
+                        </section>
+
+                        <section class="editor-section" data-editor-section="carousel">
+                            <button class="editor-section__toggle" type="button" aria-expanded="false"><span><small>02</small> Client Stories</span><span aria-hidden="true">⌄</span></button>
+                            <div class="editor-section__body">
+                                <div class="carousel-note"><div aria-hidden="true"><span></span><span></span><span></span></div><p>Published, active reviews automatically fill this section.</p><a href="{{ url_for('admin_reviews_manager') }}">Manage Reviews →</a></div>
+                            </div>
+                        </section>
+
+                        <section class="editor-section" data-editor-section="about">
+                            <button class="editor-section__toggle" type="button" aria-expanded="false"><span><small>03</small> About Stephanie</span><span aria-hidden="true">⌄</span></button>
+                            <div class="editor-section__body">
+                                <label><span>Small heading</span><input name="about.eyebrow" maxlength="80" required></label>
+                                <div class="field-pair"><label><span>Heading first line</span><input name="about.titleLine1" maxlength="120" required></label><label><span>Heading second line</span><input name="about.titleLine2" maxlength="120" required></label></div>
+                                <label><span>Description</span><textarea name="about.body" maxlength="2000" rows="6" required></textarea></label>
+                                <fieldset><legend>Core values</legend><div class="value-grid" data-values="about"></div></fieldset>
+                                <div class="field-pair"><label><span>Button text</span><input name="about.cta.label" maxlength="80" required></label><label><span>Button link</span><input name="about.cta.href" maxlength="2048" required></label></div>
+                                <div class="image-control" data-image-control="about" data-upload-scope="reviews-page/about"><span class="image-control__label">Portrait</span><div class="image-control__preview"><img alt="Current About Stephanie image"><span>No uploaded image — using the website default</span></div><div class="image-control__actions"><label class="image-upload-button"><span>Upload image</span><input type="file" accept="image/jpeg,image/png,image/webp"></label><button type="button" data-remove-image>Remove image</button></div><div class="focal-control" hidden><label><span>Left / right focus</span><input data-focal-x type="range" min="0" max="100" step="1"></label><label><span>Up / down focus</span><input data-focal-y type="range" min="0" max="100" step="1"></label></div><p class="image-control__status" aria-live="polite"></p></div>
+                            </div>
+                        </section>
+
+                        <section class="editor-section" data-editor-section="featuredStory">
+                            <button class="editor-section__toggle" type="button" aria-expanded="false"><span><small>04</small> Featured Story</span><span aria-hidden="true">⌄</span></button>
+                            <div class="editor-section__body">
+                                <label><span>Small heading</span><input name="featuredStory.eyebrow" maxlength="120" required></label>
+                                <div class="field-pair"><label><span>Heading first line</span><input name="featuredStory.titleLine1" maxlength="120" required></label><label><span>Heading second line</span><input name="featuredStory.titleLine2" maxlength="120" required></label></div>
+                                <fieldset class="review-picker"><legend>Choose the client story to feature</legend><p>Only published, active reviews are available.</p><div class="review-picker__options" id="featured-review-options"></div></fieldset>
+                                <div class="image-control" data-image-control="featuredStory" data-upload-scope="reviews-page/featured-story"><span class="image-control__label">Section image</span><div class="image-control__preview"><img alt="Current Featured Story image"><span>No uploaded image — using the website default</span></div><div class="image-control__actions"><label class="image-upload-button"><span>Upload image</span><input type="file" accept="image/jpeg,image/png,image/webp"></label><button type="button" data-remove-image>Remove image</button></div><div class="focal-control" hidden><label><span>Left / right focus</span><input data-focal-x type="range" min="0" max="100" step="1"></label><label><span>Up / down focus</span><input data-focal-y type="range" min="0" max="100" step="1"></label></div><p class="image-control__status" aria-live="polite"></p></div>
+                            </div>
+                        </section>
+
+                        <section class="editor-section" data-editor-section="finalCta">
+                            <button class="editor-section__toggle" type="button" aria-expanded="false"><span><small>05</small> Final CTA</span><span aria-hidden="true">⌄</span></button>
+                            <div class="editor-section__body">
+                                <label><span>Small heading</span><input name="finalCta.eyebrow" maxlength="80" required></label>
+                                <label><span>Heading</span><input name="finalCta.title" maxlength="160" required></label>
+                                <div class="field-pair"><label><span>Button text</span><input name="finalCta.cta.label" maxlength="80" required></label><label><span>Button link</span><input name="finalCta.cta.href" maxlength="2048" required></label></div>
+                                <div class="image-control" data-image-control="finalCta" data-upload-scope="reviews-page/final-cta"><span class="image-control__label">Background image</span><div class="image-control__preview"><img alt="Current Final CTA background"><span>No uploaded image — using the website default</span></div><div class="image-control__actions"><label class="image-upload-button"><span>Upload image</span><input type="file" accept="image/jpeg,image/png,image/webp"></label><button type="button" data-remove-image>Remove image</button></div><div class="focal-control" hidden><label><span>Left / right focus</span><input data-focal-x type="range" min="0" max="100" step="1"></label><label><span>Up / down focus</span><input data-focal-y type="range" min="0" max="100" step="1"></label></div><p class="image-control__status" aria-live="polite"></p></div>
+                            </div>
+                        </section>
+                    </form>
+                    </aside>
+
+                    <section class="live-preview" aria-labelledby="live-preview-title">
+                        <header><div><p class="admin-kicker">Live page preview</p><h2 id="live-preview-title">Reviews Page</h2></div><span>Click an area to edit</span></header>
+                        <div class="live-preview__viewport">
+                            <iframe id="reviews-page-preview" src="{{ url_for('admin_reviews_page_preview') }}" title="Editable preview of the Reviews Page"></iframe>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="page-editor__savebar" id="page-editor-savebar" hidden><div><strong id="save-state">No unsaved changes</strong><span id="save-message" aria-live="polite"></span></div><a href="{{ url_for('reviews') }}" target="_blank" rel="noopener">View Live Page</a><button id="save-page" type="submit" form="reviews-page-form" disabled>Save Changes</button></div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

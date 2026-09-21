@@ -35,6 +35,9 @@
                 <a class="admin-nav__link" href="{{ url_for('admin_reviews_manager') }}">
                     <span aria-hidden="true">★</span> Reviews
                 </a>
+                <a class="admin-nav__link" href="{{ url_for('admin_reviews_page_editor') }}">
+                    <span aria-hidden="true">▱</span> Reviews Page
+                </a>
                 <a class="admin-nav__link" href="{{ admin_site.blog_url }}">
                     <span aria-hidden="true">↗</span> Public Blog
                 </a>
@@ -95,6 +98,11 @@
                             <span class="action-card__icon" aria-hidden="true">★</span>
                             <strong>Manage Reviews</strong>
                             <small>Add and publish client feedback</small>
+                        </a>
+                        <a class="action-card action-card--live" href="{{ url_for('admin_reviews_page_editor') }}">
+                            <span class="action-card__icon" aria-hidden="true">▱</span>
+                            <strong>Edit Reviews Page</strong>
+                            <small>Update the page content and images</small>
                         </a>
                     </div>
                 </section>

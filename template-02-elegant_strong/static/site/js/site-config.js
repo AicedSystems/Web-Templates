@@ -20,5 +20,20 @@ const realtorData = {
         clients: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1400&q=88",
         agents: "/static/site/images/agents-feature.jpg",
         about: "/static/site/images/about-portrait.webp"
+    },
+
+    reviewsPage: {
+        aboutImage: {
+            src: "/static/site/images/steph-about-portrait.webp",
+            fit: "contain",
+            focalX: 50,
+            focalY: 100
+        },
+        featuredStoryImage: {
+            src: "/static/site/images/steph-testimonial-reviews.webp",
+            fit: "cover",
+            focalX: 50,
+            focalY: 24
+        }
     }
 };

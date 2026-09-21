@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Client stories and real estate reviews for Stephanie J Mendoza.">
+    <title>Client Stories | Stephanie J Mendoza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/reviews.css') }}">
+    <script src="{{ url_for('static', filename='site/js/site-config.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='site/js/script.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='site/js/reviews.js') }}" defer></script>
+    {% if editor_preview %}<script src="{{ url_for('static', filename='admin/reviews/js/page-preview.js', v='1') }}" defer></script>{% endif %}
+</head>
+<body class="reviews-page{% if editor_preview %} reviews-page--editor-preview{% endif %}">
+    {% set page = reviews_page if reviews_page else none %}
+    <header class="site-header">
+        <a class="wordmark" href="/" aria-label="Stephanie J Mendoza home">
+            <img data-logo-image src="{{ url_for('static', filename='site/images/realtor-logo.png') }}" alt="Stephanie J Mendoza Real Estate Agent">
+        </a>
+        <nav class="main-nav" aria-label="Main navigation">
+            <ul>
+                <li><a class="main-nav__link" href="/">Home</a></li>
+                <li><a class="main-nav__link" href="/#clients">Clients</a></li>
+                <li><a class="main-nav__link" href="/#agents">Agents</a></li>
+                <li><a class="main-nav__link" href="/blog">Blog</a></li>
+                <li><a class="main-nav__link main-nav__link--active" href="/reviews">Reviews</a></li>
+                <li><a class="button button--light" href="/#contact">Contact Me</a></li>
+            </ul>
+        </nav>
+        <button class="mobile-menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="mobile-navigation" aria-label="Open navigation menu">
+            <span></span><span></span><span></span>
+        </button>
+        <nav class="mobile-nav" id="mobile-navigation" data-mobile-nav aria-label="Mobile navigation" hidden>
+            <ul>
+                <li><a href="/">Home</a></li><li><a href="/#clients">Clients</a></li><li><a href="/#agents">Agents</a></li>
+                <li><a href="/blog">Blog</a></li><li><a href="/reviews">Reviews</a></li><li><a href="/#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="reviews-hero" aria-labelledby="reviews-title">
+            <div class="reviews-hero__copy">
+                <p class="eyebrow">{{ page.hero.eyebrow if page else 'Client stories' }}</p>
+                <h1 id="reviews-title">{{ page.hero.titleLine1 if page else 'A partner in' }}<br><em>{{ page.hero.titleEmphasis if page else 'your next chapter.' }}</em></h1>
+                <span class="reviews-hero__rule" aria-hidden="true"></span>
+                <p>{{ page.hero.description if page else 'Buying, selling, or investing—every move deserves clear guidance, genuine care, and a trusted advocate by your side.' }}</p>
+                <a class="button" href="{{ page.hero.cta.href if page else '/#contact' }}">{{ page.hero.cta.label if page else "Let's Connect" }} <span aria-hidden="true">&rarr;</span></a>
+                <dl class="reviews-hero__values" aria-label="Stephanie's approach">
+                    {% set hero_values = page.hero['values'] if page else [{'title':'Local','subtitle':'Expertise'},{'title':'Client-first','subtitle':'Approach'},{'title':'Lasting','subtitle':'Relationships'}] %}
+                    {% for value in hero_values %}<div><dt>{{ value.title }}</dt><dd>{{ value.subtitle }}</dd></div>{% endfor %}
+                </dl>
+            </div>
+            <div class="reviews-hero__visual" aria-label="Instagram Reel from Stephanie J Mendoza">
+                <div class="reviews-hero__instagram">
+                    <blockquote class="instagram-media"
+                        data-instgrm-permalink="{{ page.hero.reelUrl if page else 'https://www.instagram.com/reel/DZoKC98JdbR/' }}"
+                        data-instgrm-version="14">
+                        <a href="{{ page.hero.reelUrl if page else 'https://www.instagram.com/reel/DZoKC98JdbR/' }}" target="_blank" rel="noopener noreferrer">
+                            Watch Stephanie's story on Instagram
+                        </a>
+                    </blockquote>
+                </div>
+            </div>
+        </section>
+
+        <section class="reviews-showcase" aria-labelledby="stories-title">
+            <div class="reviews-showcase__heading">
+                <p class="eyebrow">Client stories</p>
+                <h2 id="stories-title">Real People. Real Results.</h2>
+                <p>Words from the people Stephanie has had the privilege to serve.</p>
+            </div>
+            <div class="reviews-feed" data-reviews-feed aria-live="polite">
+                <p class="reviews-feed__loading">Loading client stories&hellip;</p>
+            </div>
+        </section>
+
+        <section class="reviews-about" aria-labelledby="about-stephanie-title">
+            <div class="reviews-about__image" data-managed-image="about"{% if page and page.about.image %} data-managed-source="cms"{% endif %}>
+                <img src="{{ page.about.image.publicUrl if page and page.about.image else url_for('static', filename='site/images/steph-about-portrait.webp') }}" data-default-src="{{ url_for('static', filename='site/images/steph-about-portrait.webp') }}"{% if page and page.about.image %} style="--managed-image-position: {{ page.about.image.focalX }}% {{ page.about.image.focalY }}%"{% endif %} alt="Stephanie J Mendoza seated indoors">
+            </div>
+            <div class="reviews-about__copy">
+                <p class="eyebrow">{{ page.about.eyebrow if page else 'About Stephanie' }}</p>
+                <h2 id="about-stephanie-title">{{ page.about.titleLine1 if page else 'Helping You Find' }}<br>{{ page.about.titleLine2 if page else 'More Than a House' }} <span aria-hidden="true">&mdash;</span></h2>
+                <p>{{ page.about.body if page else "I'm Stephanie Mendoza, a local realtor that is warm but authorative with a passion for helping individuals and families find the right place to call home. Whether you're buying, selling, or just exploring your options, I'm here to make the process clear, simple, and even exciting." }}</p>
+                <ul class="reviews-about__list">
+                    {% set about_values = page.about['values'] if page else [{'title':'Local','subtitle':'Expertise'},{'title':'Client-first','subtitle':'Approach'},{'title':'Trusted','subtitle':'Guidance'},{'title':'Lasting','subtitle':'Relationships'}] %}
+                    {% for value in about_values %}<li>{{ value.title }} <span>{{ value.subtitle }}</span></li>{% endfor %}
+                </ul>
+                <a class="button" href="{{ page.about.cta.href if page else '/#about' }}">{{ page.about.cta.label if page else 'Get to Know Me' }} <span aria-hidden="true">&rarr;</span></a>
+            </div>
+        </section>
+
+        <section class="featured-story" aria-labelledby="featured-story-title">
+            <div class="featured-story__copy">
+                <p class="eyebrow">{{ page.featuredStory.eyebrow if page else 'Featured story' }}</p>
+                <h2 id="featured-story-title">{{ page.featuredStory.titleLine1 if page else 'A Client Who' }}<br>{{ page.featuredStory.titleLine2 if page else 'Became a Friend' }}</h2>
+                <span class="featured-story__rule" aria-hidden="true"></span>
+                {% if page and page.featuredReview %}
+                <blockquote>“{{ page.featuredReview.quote }}”</blockquote>
+                <p class="featured-story__client"><strong>&mdash; {{ page.featuredReview.clientName }}</strong><span>{{ page.featuredReview.clientType or 'Client' }}</span></p>
+                {% else %}
+                <blockquote>“Stephanie went above and beyond for us. She was always available to answer our questions, and her support made all the difference. We're so grateful for her!”</blockquote>
+                <p class="featured-story__client"><strong>&mdash; Jennifer S.</strong><span>Home Buyer</span></p>
+                {% endif %}
+            </div>
+            <div class="featured-story__image" data-managed-image="featuredStory"{% if page and page.featuredStory.image %} data-managed-source="cms"{% endif %}>
+                <img src="{{ page.featuredStory.image.publicUrl if page and page.featuredStory.image else url_for('static', filename='site/images/steph-testimonial-reviews.webp') }}" data-default-src="{{ url_for('static', filename='site/images/steph-testimonial-reviews.webp') }}"{% if page and page.featuredStory.image %} style="--managed-image-position: {{ page.featuredStory.image.focalX }}% {{ page.featuredStory.image.focalY }}%"{% endif %} alt="Stephanie J Mendoza">
+                
+            </div>
+        </section>
+
+        <section class="reviews-final-cta" aria-labelledby="reviews-cta-title"{% if page and page.finalCta.image %} style="--reviews-cta-image: url('{{ page.finalCta.image.publicUrl }}'); --reviews-cta-position: {{ page.finalCta.image.focalX }}% {{ page.finalCta.image.focalY }}%"{% endif %}>
+            <div>
+                <p class="eyebrow">{{ page.finalCta.eyebrow if page else "Ready for what's next?" }}</p>
+                <h2 id="reviews-cta-title">{{ page.finalCta.title if page else "Let's Make It Happen Together." }}</h2>
+                <a class="button" href="{{ page.finalCta.cta.href if page else '/#contact' }}">{{ page.finalCta.cta.label if page else 'Contact Me' }} <span aria-hidden="true">&rarr;</span></a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="site-footer__inner">
+            <a class="site-footer__logo" href="/" aria-label="Stephanie J Mendoza home">
+                <img data-logo-image src="{{ url_for('static', filename='site/images/realtor-logo.png') }}"
+                    alt="Stephanie J Mendoza Real Estate Agent">
+            </a>
+
+            <div class="site-footer__contact">
+                <div class="site-footer__identity">
+                    <strong data-realtor-name>Stephanie J Mendoza</strong>
+                    <span>Real Estate Agent</span>
+                    <span>DRE #<span data-realtor-license>02006601</span></span>
+                    <span data-realtor-brokerage>Real Broker</span>
+                </div>
+                <a data-phone-link data-realtor-phone href="tel:16614351239">(661) 435-1239</a>
+                <a data-email-link data-realtor-email href="mailto:RealtorStephanieAV@gmail.com">RealtorStephanieAV@gmail.com</a>
+
+                <div class="site-footer__socials" aria-label="Social media links">
+                    <a data-facebook-link href="#" aria-label="Facebook">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4.5A15 15 0 0 0 14.4 4C11.8 4 10 5.6 10 8.6V11H7v4h3v7h4v-7h3.2l.5-4H14V8.6c0-.4.2-.6.6-.6Z"/></svg>
+                    </a>
+                    <a data-instagram-link href="#" aria-label="Instagram">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" class="social-dot"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="site-footer__legal">
+                <nav aria-label="Legal links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Use</a>
+                </nav>
+                <p>&copy; <span data-footer-year>2026</span> <span data-realtor-name>Stephanie J Mendoza</span>. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <script async src="https://www.instagram.com/embed.js"></script>
+</body>
+</html>
