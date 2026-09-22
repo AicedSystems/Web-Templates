@@ -10,19 +10,21 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 
 
 MAXIMUM_IMAGE_UPLOAD_BYTES = 8 * 1024 * 1024
+MAXIMUM_VIDEO_UPLOAD_BYTES = 50 * 1024 * 1024
 MAXIMUM_IMAGE_DIMENSION = 2400
 MAXIMUM_IMAGE_PIXELS = 40_000_000
 OUTPUT_IMAGE_QUALITY = 85
 ALLOWED_SOURCE_FORMATS = {"JPEG", "PNG", "WEBP"}
 STORAGE_SCOPE_PREFIXES = {
+    "reviews-page/hero": "reviews-page/hero",
     "reviews-page/about": "reviews-page/about",
     "reviews-page/featured-story": "reviews-page/featured-story",
     "reviews-page/final-cta": "reviews-page/final-cta",
     "review-card": "review-cards",
 }
 MANAGED_STORAGE_PATH_PATTERN = re.compile(
-    r"^(?:reviews-page/(?:about|featured-story|final-cta)|review-cards)/"
-    r"[0-9a-f]{32}\.webp$"
+    r"^(?:(?:reviews-page/(?:about|featured-story|final-cta)|review-cards)/"
+    r"[0-9a-f]{32}\.webp|reviews-page/hero/[0-9a-f]{32}\.(?:webp|mp4|webm))$"
 )
 
 
@@ -122,14 +124,48 @@ def process_image_upload(file_storage):
         raise MediaValidationError("The uploaded file is not a valid supported image.")
 
 
+def process_video_upload(file_storage):
+    if file_storage is None or not getattr(file_storage, "filename", ""):
+        raise MediaValidationError("Choose a video to upload.")
+
+    raw_video = file_storage.stream.read(MAXIMUM_VIDEO_UPLOAD_BYTES + 1)
+    if not raw_video:
+        raise MediaValidationError("The uploaded video is empty.")
+    if len(raw_video) > MAXIMUM_VIDEO_UPLOAD_BYTES:
+        raise MediaValidationError("Videos must be 50 MB or smaller.")
+
+    declared_type = (getattr(file_storage, "content_type", "") or "").lower()
+    is_mp4 = len(raw_video) >= 12 and raw_video[4:8] == b"ftyp"
+    is_webm = raw_video.startswith(b"\x1a\x45\xdf\xa3") and b"webm" in raw_video[:4096].lower()
+
+    if is_mp4 and declared_type == "video/mp4":
+        return raw_video, "video/mp4", "mp4"
+    if is_webm and declared_type == "video/webm":
+        return raw_video, "video/webm", "webm"
+    raise MediaValidationError("Upload a valid MP4 or WebM video.")
+
+
 def upload_image(file_storage, scope):
     prefix = STORAGE_SCOPE_PREFIXES.get(scope)
     if prefix is None:
-        raise MediaValidationError("Unsupported image upload destination.")
+        raise MediaValidationError("Unsupported media upload destination.")
 
-    image_bytes, width, height = process_image_upload(file_storage)
+    declared_type = (getattr(file_storage, "content_type", "") or "").lower()
+    is_video = declared_type in {"video/mp4", "video/webm"}
+    if is_video:
+        if scope != "reviews-page/hero":
+            raise MediaValidationError("Videos can only be uploaded to the Hero section.")
+        media_bytes, content_type, extension = process_video_upload(file_storage)
+        width = height = None
+        media_type = "video"
+    else:
+        media_bytes, width, height = process_image_upload(file_storage)
+        content_type = "image/webp"
+        extension = "webp"
+        media_type = "image"
+
     settings = StorageSettings.from_environment()
-    storage_path = f"{prefix}/{uuid4().hex}.webp"
+    storage_path = f"{prefix}/{uuid4().hex}.{extension}"
     encoded_bucket = quote(settings.bucket, safe="")
     encoded_path = "/".join(quote(segment, safe="") for segment in storage_path.split("/"))
     upload_url = (
@@ -139,31 +175,34 @@ def upload_image(file_storage, scope):
     headers = {
         "apikey": settings.secret_key,
         "Authorization": f"Bearer {settings.secret_key}",
-        "Content-Type": "image/webp",
+        "Content-Type": content_type,
         "x-upsert": "false",
     }
 
     try:
-        response = httpx.post(upload_url, headers=headers, content=image_bytes, timeout=30.0)
+        response = httpx.post(upload_url, headers=headers, content=media_bytes, timeout=90.0)
         response.raise_for_status()
     except httpx.HTTPError as error:
-        raise MediaUpstreamError("The image could not be uploaded to Storage.") from error
+        raise MediaUpstreamError("The media could not be uploaded to Storage.") from error
 
-    return {
+    result = {
         "storagePath": storage_path,
         "publicUrl": derive_public_url(
             storage_path,
             project_url=settings.project_url,
             bucket=settings.bucket,
         ),
-        "width": width,
-        "height": height,
+        "mediaType": media_type,
+        "mimeType": content_type,
     }
+    if media_type == "image":
+        result.update({"width": width, "height": height})
+    return result
 
 
 def delete_image(storage_path):
     if not is_managed_storage_path(storage_path):
-        raise MediaValidationError("Unsupported managed image path.")
+        raise MediaValidationError("Unsupported managed media path.")
 
     settings = StorageSettings.from_environment()
     encoded_bucket = quote(settings.bucket, safe="")
@@ -184,4 +223,4 @@ def delete_image(storage_path):
         )
         response.raise_for_status()
     except httpx.HTTPError as error:
-        raise MediaUpstreamError("The image could not be removed from Storage.") from error
+        raise MediaUpstreamError("The media could not be removed from Storage.") from error

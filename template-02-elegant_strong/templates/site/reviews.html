@@ -9,11 +9,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='site/css/styles.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/reviews.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/reviews.css', v='12') }}">
     <script src="{{ url_for('static', filename='site/js/site-config.js') }}" defer></script>
     <script src="{{ url_for('static', filename='site/js/script.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='site/js/reviews.js') }}" defer></script>
-    {% if editor_preview %}<script src="{{ url_for('static', filename='admin/reviews/js/page-preview.js', v='1') }}" defer></script>{% endif %}
+    <script src="{{ url_for('static', filename='site/js/reviews.js', v='8') }}" defer></script>
+    {% if editor_preview %}<script src="{{ url_for('static', filename='admin/reviews/js/page-preview.js', v='6') }}" defer></script>{% endif %}
 </head>
 <body class="reviews-page{% if editor_preview %} reviews-page--editor-preview{% endif %}">
     {% set page = reviews_page if reviews_page else none %}
@@ -25,7 +25,7 @@
             <ul>
                 <li><a class="main-nav__link" href="/">Home</a></li>
                 <li><a class="main-nav__link" href="/#clients">Clients</a></li>
-                <li><a class="main-nav__link" href="/#agents">Agents</a></li>
+                <li><a class="main-nav__link" href="/agents">Agents</a></li>
                 <li><a class="main-nav__link" href="/blog">Blog</a></li>
                 <li><a class="main-nav__link main-nav__link--active" href="/reviews">Reviews</a></li>
                 <li><a class="button button--light" href="/#contact">Contact Me</a></li>
@@ -36,7 +36,7 @@
         </button>
         <nav class="mobile-nav" id="mobile-navigation" data-mobile-nav aria-label="Mobile navigation" hidden>
             <ul>
-                <li><a href="/">Home</a></li><li><a href="/#clients">Clients</a></li><li><a href="/#agents">Agents</a></li>
+                <li><a href="/">Home</a></li><li><a href="/#clients">Clients</a></li><li><a href="/agents">Agents</a></li>
                 <li><a href="/blog">Blog</a></li><li><a href="/reviews">Reviews</a></li><li><a href="/#contact">Contact</a></li>
             </ul>
         </nav>
@@ -55,7 +55,14 @@
                     {% for value in hero_values %}<div><dt>{{ value.title }}</dt><dd>{{ value.subtitle }}</dd></div>{% endfor %}
                 </dl>
             </div>
-            <div class="reviews-hero__visual" aria-label="Instagram Reel from Stephanie J Mendoza">
+            <div class="reviews-hero__visual" aria-label="Stephanie J Mendoza Hero media">
+                {% if page and page.hero.media and page.hero.media.mediaType == 'video' %}
+                <video class="reviews-hero__managed-media reviews-hero__managed-media--video" autoplay muted loop playsinline preload="metadata">
+                    <source src="{{ page.hero.media.publicUrl }}" type="{{ page.hero.media.mimeType }}">
+                </video>
+                {% elif page and page.hero.media and page.hero.media.mediaType == 'image' %}
+                <img class="reviews-hero__managed-media reviews-hero__managed-media--zoomable reviews-hero__managed-media--fit-{{ page.hero.media.desktopFit }}" src="{{ page.hero.media.publicUrl }}" style="--hero-media-position: {{ page.hero.media.focalX }}% {{ page.hero.media.focalY }}%; --hero-desktop-zoom: {{ page.hero.media.desktopZoom / 100 }}" alt="Stephanie J Mendoza">
+                {% elif not page or page.hero.reelUrl %}
                 <div class="reviews-hero__instagram">
                     <blockquote class="instagram-media"
                         data-instgrm-permalink="{{ page.hero.reelUrl if page else 'https://www.instagram.com/reel/DZoKC98JdbR/' }}"
@@ -65,6 +72,9 @@
                         </a>
                     </blockquote>
                 </div>
+                {% else %}
+                <img class="reviews-hero__managed-media" src="{{ url_for('static', filename='site/images/steph-about-portrait.webp') }}" alt="Stephanie J Mendoza">
+                {% endif %}
             </div>
         </section>
 
@@ -74,14 +84,20 @@
                 <h2 id="stories-title">Real People. Real Results.</h2>
                 <p>Words from the people Stephanie has had the privilege to serve.</p>
             </div>
-            <div class="reviews-feed" data-reviews-feed aria-live="polite">
-                <p class="reviews-feed__loading">Loading client stories&hellip;</p>
+            <div class="reviews-carousel" data-reviews-carousel>
+                <button class="reviews-carousel__button reviews-carousel__button--previous" type="button" data-reviews-previous aria-label="Previous client story" disabled>&larr;</button>
+                <div class="reviews-carousel__viewport">
+                    <div class="reviews-feed" data-reviews-feed aria-live="off">
+                        <p class="reviews-feed__loading">Loading client stories&hellip;</p>
+                    </div>
+                </div>
+                <button class="reviews-carousel__button reviews-carousel__button--next" type="button" data-reviews-next aria-label="Next client story" disabled>&rarr;</button>
             </div>
         </section>
 
         <section class="reviews-about" aria-labelledby="about-stephanie-title">
             <div class="reviews-about__image" data-managed-image="about"{% if page and page.about.image %} data-managed-source="cms"{% endif %}>
-                <img src="{{ page.about.image.publicUrl if page and page.about.image else url_for('static', filename='site/images/steph-about-portrait.webp') }}" data-default-src="{{ url_for('static', filename='site/images/steph-about-portrait.webp') }}"{% if page and page.about.image %} style="--managed-image-position: {{ page.about.image.focalX }}% {{ page.about.image.focalY }}%"{% endif %} alt="Stephanie J Mendoza seated indoors">
+                <img src="{{ page.about.image.publicUrl if page and page.about.image else url_for('static', filename='site/images/steph-about-portrait.webp') }}" data-default-src="{{ url_for('static', filename='site/images/steph-about-portrait.webp') }}"{% if page and page.about.image %} style="--managed-image-position: {{ page.about.image.focalX }}% {{ page.about.image.focalY }}%; --managed-image-fit: {{ page.about.image.fit }}; --managed-image-zoom: {{ page.about.image.zoom / 100 }}"{% endif %} alt="Stephanie J Mendoza seated indoors">
             </div>
             <div class="reviews-about__copy">
                 <p class="eyebrow">{{ page.about.eyebrow if page else 'About Stephanie' }}</p>
@@ -109,12 +125,12 @@
                 {% endif %}
             </div>
             <div class="featured-story__image" data-managed-image="featuredStory"{% if page and page.featuredStory.image %} data-managed-source="cms"{% endif %}>
-                <img src="{{ page.featuredStory.image.publicUrl if page and page.featuredStory.image else url_for('static', filename='site/images/steph-testimonial-reviews.webp') }}" data-default-src="{{ url_for('static', filename='site/images/steph-testimonial-reviews.webp') }}"{% if page and page.featuredStory.image %} style="--managed-image-position: {{ page.featuredStory.image.focalX }}% {{ page.featuredStory.image.focalY }}%"{% endif %} alt="Stephanie J Mendoza">
+                <img src="{{ page.featuredStory.image.publicUrl if page and page.featuredStory.image else url_for('static', filename='site/images/steph-testimonial-reviews.webp') }}" data-default-src="{{ url_for('static', filename='site/images/steph-testimonial-reviews.webp') }}"{% if page and page.featuredStory.image %} style="--managed-image-position: {{ page.featuredStory.image.focalX }}% {{ page.featuredStory.image.focalY }}%; --managed-image-fit: {{ page.featuredStory.image.fit }}; --managed-image-zoom: {{ page.featuredStory.image.zoom / 100 }}"{% endif %} alt="Stephanie J Mendoza">
                 
             </div>
         </section>
 
-        <section class="reviews-final-cta" aria-labelledby="reviews-cta-title"{% if page and page.finalCta.image %} style="--reviews-cta-image: url('{{ page.finalCta.image.publicUrl }}'); --reviews-cta-position: {{ page.finalCta.image.focalX }}% {{ page.finalCta.image.focalY }}%"{% endif %}>
+        <section class="reviews-final-cta" aria-labelledby="reviews-cta-title"{% if page and page.finalCta.image %} style="--reviews-cta-image: url('{{ page.finalCta.image.publicUrl }}'); --reviews-cta-position: {{ page.finalCta.image.focalX }}% {{ page.finalCta.image.focalY }}%; --reviews-cta-fit: {{ page.finalCta.image.fit }}; --reviews-cta-zoom: {{ page.finalCta.image.zoom / 100 }}"{% endif %}>
             <div>
                 <p class="eyebrow">{{ page.finalCta.eyebrow if page else "Ready for what's next?" }}</p>
                 <h2 id="reviews-cta-title">{{ page.finalCta.title if page else "Let's Make It Happen Together." }}</h2>

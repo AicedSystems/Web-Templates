@@ -1,6 +1,6 @@
 const editableRegions = [
     { selector: ".reviews-hero__copy", target: "hero", label: "Edit Hero text" },
-    { selector: ".reviews-hero__visual", target: "hero", label: "Edit Instagram Reel" },
+    { selector: ".reviews-hero__visual", target: "hero", label: "Edit Hero media" },
     { selector: ".reviews-showcase", target: "carousel", label: "Manage Reviews" },
     { selector: ".reviews-about__copy", target: "about", label: "Edit About content" },
     { selector: ".reviews-about__image", target: "about", label: "Edit About image" },
@@ -84,11 +84,59 @@ function updateManagedImage(selector, image) {
     if (!img.dataset.editorFallback) img.dataset.editorFallback = img.dataset.defaultSrc || img.src;
     img.src = image?.publicUrl || img.dataset.editorFallback;
     img.style.setProperty("--managed-image-position", `${image?.focalX ?? 50}% ${image?.focalY ?? 50}%`);
+    img.style.setProperty("--managed-image-fit", image?.fit === "contain" ? "contain" : "cover");
+    img.style.setProperty("--managed-image-zoom", String((image?.zoom ?? 100) / 100));
+}
+
+function updateHeroMedia(hero) {
+    const visual = document.querySelector(".reviews-hero__visual");
+    if (!visual) return;
+    const media = hero.media;
+    if (media?.publicUrl && media.mediaType === "image") {
+        const image = document.createElement("img");
+        const fit = media.desktopFit === "contain" ? "contain" : "cover";
+        image.className = `reviews-hero__managed-media reviews-hero__managed-media--zoomable reviews-hero__managed-media--fit-${fit}`;
+        image.src = media.publicUrl;
+        image.alt = "Stephanie J Mendoza";
+        image.style.setProperty("--hero-media-position", `${media.focalX ?? 50}% ${media.focalY ?? 50}%`);
+        image.style.setProperty("--hero-desktop-zoom", String((media.desktopZoom ?? 100) / 100));
+        visual.replaceChildren(image);
+        return;
+    }
+    if (media?.publicUrl && media.mediaType === "video") {
+        const video = document.createElement("video");
+        video.className = "reviews-hero__managed-media reviews-hero__managed-media--video";
+        video.src = media.publicUrl;
+        video.muted = true;
+        video.autoplay = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.preload = "metadata";
+        visual.replaceChildren(video);
+        video.play().catch(() => {});
+        return;
+    }
+    if (hero.reelUrl) {
+        const reel = document.createElement("div");
+        reel.className = "reviews-hero__instagram reviews-hero__instagram--editor-fallback";
+        const link = document.createElement("a");
+        link.href = hero.reelUrl;
+        link.textContent = "Instagram Reel\n▶";
+        reel.append(link);
+        visual.replaceChildren(reel);
+        return;
+    }
+    const fallback = document.createElement("img");
+    fallback.className = "reviews-hero__managed-media";
+    fallback.src = "/static/site/images/steph-about-portrait.webp";
+    fallback.alt = "Stephanie J Mendoza";
+    visual.replaceChildren(fallback);
 }
 
 function updatePreview(content) {
     if (!content) return;
     const hero = content.hero;
+    updateHeroMedia(hero);
     document.querySelector(".reviews-hero__copy .eyebrow").textContent = hero.eyebrow;
     replaceHeading(document.querySelector(".reviews-hero h1"), hero.titleLine1, hero.titleEmphasis, true);
     document.querySelector(".reviews-hero__copy > p:not(.eyebrow)").textContent = hero.description;
@@ -131,9 +179,13 @@ function updatePreview(content) {
     if (finalCta.image?.publicUrl) {
         finalSection.style.setProperty("--reviews-cta-image", `url("${finalCta.image.publicUrl}")`);
         finalSection.style.setProperty("--reviews-cta-position", `${finalCta.image.focalX}% ${finalCta.image.focalY}%`);
+        finalSection.style.setProperty("--reviews-cta-fit", finalCta.image.fit === "contain" ? "contain" : "cover");
+        finalSection.style.setProperty("--reviews-cta-zoom", String((finalCta.image.zoom ?? 100) / 100));
     } else {
         finalSection.style.removeProperty("--reviews-cta-image");
         finalSection.style.removeProperty("--reviews-cta-position");
+        finalSection.style.removeProperty("--reviews-cta-fit");
+        finalSection.style.removeProperty("--reviews-cta-zoom");
     }
 }
 

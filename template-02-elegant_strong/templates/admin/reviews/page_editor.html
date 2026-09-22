@@ -9,8 +9,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/dashboard.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='admin/reviews/css/page-editor.css', v='1') }}">
-    <script src="{{ url_for('static', filename='admin/reviews/js/page-editor.js', v='1') }}" defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/shared/css/image-position-control.css', v='1') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/reviews/css/page-editor.css', v='8') }}">
+    <script src="{{ url_for('static', filename='admin/shared/js/image-position-control.js', v='1') }}" defer></script>
+    <script src="{{ url_for('static', filename='admin/reviews/js/page-editor.js', v='10') }}" defer></script>
 </head>
 <body>
     <div class="admin-shell">
@@ -57,9 +59,43 @@
                                 <label><span>Main heading</span><input name="hero.titleLine1" maxlength="120" required></label>
                                 <label><span>Emphasized heading</span><input name="hero.titleEmphasis" maxlength="120" required></label>
                                 <label><span>Description</span><textarea name="hero.description" maxlength="2000" rows="4" required></textarea></label>
-                                <div class="field-pair"><label><span>Button text</span><input name="hero.cta.label" maxlength="80" required></label><label><span>Button link</span><input name="hero.cta.href" maxlength="2048" required></label></div>
                                 <fieldset><legend>What clients can expect</legend><div class="value-grid" data-values="hero"></div></fieldset>
-                                <label><span>Instagram Reel URL</span><input name="hero.reelUrl" type="url" maxlength="2048" required><small>The Hero currently displays an Instagram Reel.</small></label>
+                                <div class="image-control hero-media-control" id="hero-media-control" data-upload-scope="reviews-page/hero">
+                                    <span class="image-control__label">Hero Media</span>
+                                    <div class="hero-media-priority"><strong>What visitors will see</strong><ol><li>Uploaded image or video</li><li>Instagram Reel</li><li>Website fallback image</li></ol><p id="hero-media-active">Checking active media…</p></div>
+                                    <div class="hero-media-dropzone" id="hero-media-dropzone" tabindex="0" role="button" aria-label="Upload a Hero image or video">
+                                        <span aria-hidden="true">＋</span><strong>Drag an image or video here</strong><small>or click to browse · Images up to 8 MB · Videos up to 50 MB</small>
+                                        <input id="hero-media-file" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm">
+                                    </div>
+                                    <div class="image-control__preview hero-media-preview" id="hero-media-preview">
+                                        <img alt="Current Hero media">
+                                        <video muted loop playsinline autoplay preload="metadata"></video>
+                                        <span>No uploaded Hero media</span>
+                                    </div>
+                                    <p class="image-position-help" id="hero-position-help" hidden>Drag the image to reposition it inside the frame.</p>
+                                    <div class="image-control__actions"><button type="button" id="replace-hero-media">Replace media</button><button type="button" id="remove-hero-media">Remove media</button></div>
+                                    <div class="hero-fit-control" id="hero-fit-control" hidden>
+                                        <span>Image fit</span>
+                                        <div class="image-fit-actions">
+                                            <button type="button" data-hero-fit="cover">Fill frame</button>
+                                            <button type="button" data-hero-fit="contain">Show whole image</button>
+                                        </div>
+                                    </div>
+                                    <div class="hero-zoom-control" id="hero-zoom-control" hidden>
+                                        <span>Desktop image zoom</span>
+                                        <div class="image-control__actions">
+                                            <button type="button" id="hero-zoom-out" aria-label="Zoom Hero image out">−</button>
+                                            <output id="hero-zoom-value" aria-live="polite">100%</output>
+                                            <button type="button" id="hero-zoom-in" aria-label="Zoom Hero image in">＋</button>
+                                            <button type="button" id="hero-zoom-reset">Reset</button>
+                                        </div>
+                                        <small>Desktop only. Mobile stays at the natural crop.</small>
+                                    </div>
+                                    <div class="focal-control" id="hero-media-focal" hidden><label><span>Left / right focus</span><input id="hero-media-focal-x" type="range" min="0" max="100" step="1"></label><label><span>Up / down focus</span><input id="hero-media-focal-y" type="range" min="0" max="100" step="1"></label></div>
+                                    <progress id="hero-media-progress" max="100" value="0" hidden></progress>
+                                    <p class="image-control__status" id="hero-media-status" aria-live="polite"></p>
+                                </div>
+                                <label><span>Instagram Reel fallback URL</span><input name="hero.reelUrl" type="url" maxlength="2048"><small>Used only when no uploaded Hero media is active. Leave blank to use the bundled website image.</small></label>
                             </div>
                         </section>
 
@@ -77,8 +113,7 @@
                                 <div class="field-pair"><label><span>Heading first line</span><input name="about.titleLine1" maxlength="120" required></label><label><span>Heading second line</span><input name="about.titleLine2" maxlength="120" required></label></div>
                                 <label><span>Description</span><textarea name="about.body" maxlength="2000" rows="6" required></textarea></label>
                                 <fieldset><legend>Core values</legend><div class="value-grid" data-values="about"></div></fieldset>
-                                <div class="field-pair"><label><span>Button text</span><input name="about.cta.label" maxlength="80" required></label><label><span>Button link</span><input name="about.cta.href" maxlength="2048" required></label></div>
-                                <div class="image-control" data-image-control="about" data-upload-scope="reviews-page/about"><span class="image-control__label">Portrait</span><div class="image-control__preview"><img alt="Current About Stephanie image"><span>No uploaded image — using the website default</span></div><div class="image-control__actions"><label class="image-upload-button"><span>Upload image</span><input type="file" accept="image/jpeg,image/png,image/webp"></label><button type="button" data-remove-image>Remove image</button></div><div class="focal-control" hidden><label><span>Left / right focus</span><input data-focal-x type="range" min="0" max="100" step="1"></label><label><span>Up / down focus</span><input data-focal-y type="range" min="0" max="100" step="1"></label></div><p class="image-control__status" aria-live="polite"></p></div>
+                                <div class="image-control" data-image-control="about" data-upload-scope="reviews-page/about"><span class="image-control__label">Portrait</span><div class="image-control__preview"><img alt="Current About Stephanie image"><span>No uploaded image — using the website default</span></div><div class="image-control__actions"><label class="image-upload-button"><span>Upload image</span><input type="file" accept="image/jpeg,image/png,image/webp"></label><button type="button" data-remove-image>Remove image</button></div><div class="managed-image-adjustments" data-image-adjustments hidden><div class="image-fit-actions"><button type="button" data-image-fit="cover">Fill frame</button><button type="button" data-image-fit="contain">Show whole image</button></div><div class="image-zoom-actions"><button type="button" data-image-zoom="-5" aria-label="Zoom out">−</button><output data-image-zoom-value>100%</output><button type="button" data-image-zoom="5" aria-label="Zoom in">＋</button><button type="button" data-image-zoom-reset>Reset</button></div></div><div class="focal-control" hidden><label><span>Left / right focus</span><input data-focal-x type="range" min="0" max="100" step="1"></label><label><span>Up / down focus</span><input data-focal-y type="range" min="0" max="100" step="1"></label></div><p class="image-control__status" aria-live="polite"></p></div>
                             </div>
                         </section>
 
@@ -88,7 +123,7 @@
                                 <label><span>Small heading</span><input name="featuredStory.eyebrow" maxlength="120" required></label>
                                 <div class="field-pair"><label><span>Heading first line</span><input name="featuredStory.titleLine1" maxlength="120" required></label><label><span>Heading second line</span><input name="featuredStory.titleLine2" maxlength="120" required></label></div>
                                 <fieldset class="review-picker"><legend>Choose the client story to feature</legend><p>Only published, active reviews are available.</p><div class="review-picker__options" id="featured-review-options"></div></fieldset>
-                                <div class="image-control" data-image-control="featuredStory" data-upload-scope="reviews-page/featured-story"><span class="image-control__label">Section image</span><div class="image-control__preview"><img alt="Current Featured Story image"><span>No uploaded image — using the website default</span></div><div class="image-control__actions"><label class="image-upload-button"><span>Upload image</span><input type="file" accept="image/jpeg,image/png,image/webp"></label><button type="button" data-remove-image>Remove image</button></div><div class="focal-control" hidden><label><span>Left / right focus</span><input data-focal-x type="range" min="0" max="100" step="1"></label><label><span>Up / down focus</span><input data-focal-y type="range" min="0" max="100" step="1"></label></div><p class="image-control__status" aria-live="polite"></p></div>
+                                <div class="image-control" data-image-control="featuredStory" data-upload-scope="reviews-page/featured-story"><span class="image-control__label">Section image</span><div class="image-control__preview"><img alt="Current Featured Story image"><span>No uploaded image — using the website default</span></div><div class="image-control__actions"><label class="image-upload-button"><span>Upload image</span><input type="file" accept="image/jpeg,image/png,image/webp"></label><button type="button" data-remove-image>Remove image</button></div><div class="managed-image-adjustments" data-image-adjustments hidden><div class="image-fit-actions"><button type="button" data-image-fit="cover">Fill frame</button><button type="button" data-image-fit="contain">Show whole image</button></div><div class="image-zoom-actions"><button type="button" data-image-zoom="-5" aria-label="Zoom out">−</button><output data-image-zoom-value>100%</output><button type="button" data-image-zoom="5" aria-label="Zoom in">＋</button><button type="button" data-image-zoom-reset>Reset</button></div></div><div class="focal-control" hidden><label><span>Left / right focus</span><input data-focal-x type="range" min="0" max="100" step="1"></label><label><span>Up / down focus</span><input data-focal-y type="range" min="0" max="100" step="1"></label></div><p class="image-control__status" aria-live="polite"></p></div>
                             </div>
                         </section>
 
@@ -97,8 +132,7 @@
                             <div class="editor-section__body">
                                 <label><span>Small heading</span><input name="finalCta.eyebrow" maxlength="80" required></label>
                                 <label><span>Heading</span><input name="finalCta.title" maxlength="160" required></label>
-                                <div class="field-pair"><label><span>Button text</span><input name="finalCta.cta.label" maxlength="80" required></label><label><span>Button link</span><input name="finalCta.cta.href" maxlength="2048" required></label></div>
-                                <div class="image-control" data-image-control="finalCta" data-upload-scope="reviews-page/final-cta"><span class="image-control__label">Background image</span><div class="image-control__preview"><img alt="Current Final CTA background"><span>No uploaded image — using the website default</span></div><div class="image-control__actions"><label class="image-upload-button"><span>Upload image</span><input type="file" accept="image/jpeg,image/png,image/webp"></label><button type="button" data-remove-image>Remove image</button></div><div class="focal-control" hidden><label><span>Left / right focus</span><input data-focal-x type="range" min="0" max="100" step="1"></label><label><span>Up / down focus</span><input data-focal-y type="range" min="0" max="100" step="1"></label></div><p class="image-control__status" aria-live="polite"></p></div>
+                                <div class="image-control" data-image-control="finalCta" data-upload-scope="reviews-page/final-cta"><span class="image-control__label">Background image</span><div class="image-control__preview"><img alt="Current Final CTA background"><span>No uploaded image — using the website default</span></div><div class="image-control__actions"><label class="image-upload-button"><span>Upload image</span><input type="file" accept="image/jpeg,image/png,image/webp"></label><button type="button" data-remove-image>Remove image</button></div><div class="managed-image-adjustments" data-image-adjustments hidden><div class="image-fit-actions"><button type="button" data-image-fit="cover">Fill frame</button><button type="button" data-image-fit="contain">Show whole image</button></div><div class="image-zoom-actions"><button type="button" data-image-zoom="-5" aria-label="Zoom out">−</button><output data-image-zoom-value>100%</output><button type="button" data-image-zoom="5" aria-label="Zoom in">＋</button><button type="button" data-image-zoom-reset>Reset</button></div></div><div class="focal-control" hidden><label><span>Left / right focus</span><input data-focal-x type="range" min="0" max="100" step="1"></label><label><span>Up / down focus</span><input data-focal-y type="range" min="0" max="100" step="1"></label></div><p class="image-control__status" aria-live="polite"></p></div>
                             </div>
                         </section>
                     </form>

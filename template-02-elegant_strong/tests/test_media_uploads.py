@@ -32,6 +32,16 @@ def make_image_file(width=120, height=80, image_format="PNG"):
     )
 
 
+def make_video_file(video_format="mp4"):
+    if video_format == "mp4":
+        data = b"\x00\x00\x00\x18ftypisom" + b"\x00" * 64
+        mime_type = "video/mp4"
+    else:
+        data = b"\x1a\x45\xdf\xa3" + b"\x00webm" + b"\x00" * 64
+        mime_type = "video/webm"
+    return FileStorage(stream=io.BytesIO(data), filename=f"hero.{video_format}", content_type=mime_type)
+
+
 class MediaProcessingTestCase(unittest.TestCase):
     def test_processes_supported_image_as_webp(self):
         output, width, height = media_storage.process_image_upload(make_image_file())
@@ -58,6 +68,40 @@ class MediaProcessingTestCase(unittest.TestCase):
             f"https://example.supabase.co/storage/v1/object/public/site-media/{path}",
         )
         self.assertIsNone(media_storage.derive_public_url("../unsafe.webp"))
+
+    def test_validates_mp4_and_webm_signatures(self):
+        mp4, mp4_type, mp4_extension = media_storage.process_video_upload(make_video_file("mp4"))
+        self.assertTrue(mp4)
+        self.assertEqual((mp4_type, mp4_extension), ("video/mp4", "mp4"))
+        webm, webm_type, webm_extension = media_storage.process_video_upload(make_video_file("webm"))
+        self.assertTrue(webm)
+        self.assertEqual((webm_type, webm_extension), ("video/webm", "webm"))
+
+    def test_rejects_mislabeled_and_oversized_video(self):
+        mp4 = make_video_file("mp4")
+        mislabeled = FileStorage(
+            stream=io.BytesIO(mp4.stream.read()),
+            filename="hero.webm",
+            content_type="video/webm",
+        )
+        with self.assertRaises(media_storage.MediaValidationError):
+            media_storage.process_video_upload(mislabeled)
+        with patch.object(media_storage, "MAXIMUM_VIDEO_UPLOAD_BYTES", 10):
+            with self.assertRaises(media_storage.MediaValidationError):
+                media_storage.process_video_upload(make_video_file("mp4"))
+
+    @patch("media_storage.httpx.post")
+    def test_uploads_hero_video_without_image_processing(self, http_post):
+        http_post.return_value.raise_for_status.return_value = None
+        result = media_storage.upload_image(make_video_file("mp4"), "reviews-page/hero")
+        self.assertEqual(result["mediaType"], "video")
+        self.assertEqual(result["mimeType"], "video/mp4")
+        self.assertRegex(result["storagePath"], r"^reviews-page/hero/[0-9a-f]{32}\.mp4$")
+        self.assertNotIn("width", result)
+
+    def test_video_is_not_allowed_in_image_only_scope(self):
+        with self.assertRaises(media_storage.MediaValidationError):
+            media_storage.upload_image(make_video_file("mp4"), "reviews-page/about")
 
 
 class MediaEndpointTestCase(unittest.TestCase):

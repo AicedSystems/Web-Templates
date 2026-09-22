@@ -9,8 +9,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/dashboard.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='admin/reviews/css/reviews.css', v='1') }}">
-    <script src="{{ url_for('static', filename='admin/reviews/js/reviews.js', v='1') }}" defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/shared/css/image-position-control.css', v='1') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/reviews/css/reviews.css', v='6') }}">
+    <script src="{{ url_for('static', filename='admin/shared/js/image-position-control.js', v='1') }}" defer></script>
+    <script src="{{ url_for('static', filename='admin/reviews/js/reviews.js', v='5') }}" defer></script>
 </head>
 <body>
     <div class="admin-shell">
@@ -67,14 +69,36 @@
                 <button id="close-review-dialog" type="button" aria-label="Close review form">×</button>
             </header>
             <div class="review-form__body">
-                <input id="review-id" type="hidden">
-                <label class="review-field"><span>Client Name</span><input id="review-client-name" maxlength="120" required></label>
-                <label class="review-field review-field--wide"><span>Quote</span><textarea id="review-quote" maxlength="2000" rows="6" required></textarea></label>
-                <label class="review-field"><span>Client Type <small>Optional</small></span><input id="review-client-type" maxlength="80" placeholder="Buyer, Seller, Agent…"></label>
-                <label class="review-field"><span>Rating <small>Optional</small></span><select id="review-rating"><option value="">No rating</option><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option></select></label>
-                <label class="review-field review-field--wide"><span>Client Image URL <small>Optional, HTTP(S) only</small></span><input id="review-image-url" type="url" placeholder="https://…"></label>
-                <label class="review-field"><span>Display Order</span><input id="review-display-order" type="number" min="0" step="1" value="0" required></label>
-                <label class="review-published"><input id="review-is-published" type="checkbox"><span><strong>Published</strong><small>Show this active review through the public API.</small></span></label>
+                <section class="review-form__content" aria-labelledby="review-content-title">
+                    <h3 id="review-content-title"><span>01</span> Content</h3>
+                    <input id="review-id" type="hidden">
+                    <label class="review-field"><span>Client name</span><input id="review-client-name" maxlength="120" placeholder="Enter client name" required></label>
+                    <label class="review-field"><span>Client quote</span><textarea id="review-quote" maxlength="2000" rows="6" placeholder="What did your client say?" required></textarea></label>
+                    <label class="review-field"><span>Client type <small>Optional</small></span><input id="review-client-type" maxlength="80" placeholder="Buyer, Seller, Agent…"></label>
+                    <fieldset class="review-rating-control"><legend>Rating <small>Optional</small></legend><input id="review-rating" type="hidden"><div aria-label="Choose a rating"><button type="button" data-review-rating="1" aria-label="1 star">☆</button><button type="button" data-review-rating="2" aria-label="2 stars">☆</button><button type="button" data-review-rating="3" aria-label="3 stars">☆</button><button type="button" data-review-rating="4" aria-label="4 stars">☆</button><button type="button" data-review-rating="5" aria-label="5 stars">☆</button></div></fieldset>
+                    <div class="review-image-control" id="review-image-control">
+                        <span>Client photo <small>Optional</small></span>
+                        <div class="review-image-dropzone" id="review-image-dropzone" tabindex="0" role="button" aria-label="Upload client photo"><span aria-hidden="true">▧</span><strong id="review-image-action">Upload client photo</strong><small>Drag an image here or browse files · JPEG, PNG, or WebP · 8 MB maximum</small><input id="review-image-file" type="file" accept="image/jpeg,image/png,image/webp"></div>
+                        <div class="review-image-actions"><button id="replace-review-image" type="button" hidden>Replace photo</button><button id="remove-review-image" type="button" disabled>Remove photo</button></div>
+                        <fieldset class="review-image-fit" id="review-image-fit" hidden><legend>Photo fit</legend><div><label><input type="radio" name="review-image-fit" value="cover"><span>Fill frame</span></label><label><input type="radio" name="review-image-fit" value="contain"><span>Show whole image</span></label></div></fieldset>
+                        <div class="review-image-focal" id="review-image-focal" hidden><label><span>Left / right focus</span><input id="review-image-focal-x" type="range" min="0" max="100" step="1"></label><label><span>Up / down focus</span><input id="review-image-focal-y" type="range" min="0" max="100" step="1"></label></div>
+                        <p id="review-image-status" aria-live="polite"></p>
+                    </div>
+                    <label class="review-field review-field--order"><span>Display order</span><input id="review-display-order" type="number" min="0" step="1" value="0" required><small>Lower numbers appear first.</small></label>
+                    <label class="review-published"><input id="review-is-published" type="checkbox"><span><strong>Publish when ready</strong><small>Show this review on the public Reviews page.</small></span></label>
+                </section>
+                <aside class="review-form__preview" aria-labelledby="review-preview-title">
+                    <h3 id="review-preview-title">Live preview</h3>
+                    <article class="review-card-preview">
+                        <div class="review-card-preview__media" id="review-preview-media"><img id="review-preview-image" alt=""><span id="review-preview-placeholder">Client photo</span></div>
+                        <div class="review-card-preview__body">
+                            <p class="review-card-preview__stars" id="review-preview-stars" aria-label="No rating">☆☆☆☆☆</p>
+                            <blockquote id="review-preview-quote">“Your client's testimonial will appear here.”</blockquote>
+                            <div class="review-card-preview__details"><strong id="review-preview-name">Client Name</strong><span id="review-preview-type">Client Story</span></div>
+                        </div>
+                    </article>
+                    <p>Preview of the published review card. Drag the photo to reposition it.</p>
+                </aside>
                 <p class="review-form__status" id="review-form-status" aria-live="polite"></p>
             </div>
             <footer class="review-form__actions"><button id="cancel-review" type="button">Cancel</button><button class="review-form__save" id="save-review" type="submit">Save Review</button></footer>

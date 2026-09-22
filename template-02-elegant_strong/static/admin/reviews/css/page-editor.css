@@ -43,14 +43,45 @@
 .image-control__preview.has-image img { display: block; }
 .image-control__preview.has-image span { display: none; }
 .image-control__preview span { max-width: 240px; padding: 18px; font-size: .7rem; line-height: 1.5; }
+.image-position-help { margin: -4px 0 0; color: var(--admin-muted); font-size: .64rem; line-height: 1.45; }
 .image-control__actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .image-upload-button, .image-control__actions button { min-height: 37px; padding: 0 12px; display: inline-flex !important; align-items: center; justify-content: center; border: 1px solid var(--admin-ink); border-radius: 7px; color: var(--admin-ink); background: #fff; font-size: .68rem; font-weight: 700; cursor: pointer; }
 .image-upload-button input { position: absolute; opacity: 0; pointer-events: none; }
 .image-control__actions button { border-color: var(--admin-line); }
 .image-control__actions button:disabled, .image-upload-button.is-busy { opacity: .45; cursor: wait; }
+.managed-image-adjustments { padding: 11px; display: grid; gap: 9px; border-radius: 7px; background: var(--admin-canvas); }
+.managed-image-adjustments[hidden] { display: none; }
+.image-fit-actions, .image-zoom-actions { display: flex; align-items: center; gap: 7px; }
+.image-fit-actions button, .image-zoom-actions button { min-height: 35px; padding: 0 10px; border: 1px solid var(--admin-line); border-radius: 7px; color: var(--admin-ink); background: #fff; font: 700 .66rem var(--admin-font); cursor: pointer; }
+.image-fit-actions button.is-active { border-color: var(--admin-ink); box-shadow: inset 0 0 0 1px var(--admin-ink); }
+.image-zoom-actions output { min-width: 45px; font-size: .68rem; font-weight: 700; text-align: center; }
 .focal-control { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .focal-control input { width: 100%; accent-color: var(--admin-taupe); }
 .image-control__status { min-height: 1.2em; margin: 0; color: var(--admin-muted); font-size: .66rem; }
+.hero-media-priority { padding: 13px; border-radius: 7px; background: var(--admin-canvas); }
+.hero-media-priority strong { font-size: .7rem; }
+.hero-media-priority ol { margin: 9px 0; padding-left: 20px; color: var(--admin-muted); font-size: .68rem; line-height: 1.65; }
+.hero-media-priority p { margin: 0; color: #725a47; font-size: .68rem; font-weight: 700; }
+.hero-media-dropzone { min-height: 138px; padding: 18px; display: grid; align-content: center; justify-items: center; gap: 6px; border: 1px dashed var(--admin-taupe); border-radius: 8px; color: var(--admin-muted); background: #fbfaf8; text-align: center; cursor: pointer; transition: border-color .16s ease, background .16s ease; }
+.hero-media-dropzone:hover, .hero-media-dropzone:focus-visible, .hero-media-dropzone.is-dragging { border-color: var(--admin-ink); outline: none; background: #f3eee8; }
+.hero-media-dropzone > span { font-size: 1.35rem; }
+.hero-media-dropzone strong { color: var(--admin-ink); font-size: .76rem; }
+.hero-media-dropzone small { font-size: .64rem; line-height: 1.45; }
+.hero-media-dropzone input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.hero-media-preview video { width: 100%; height: 240px; display: none; object-fit: cover; }
+.hero-media-preview.has-video video { display: block; }
+.hero-media-preview.has-video img, .hero-media-preview.has-video > span { display: none; }
+.hero-media-control progress { width: 100%; height: 8px; accent-color: var(--admin-taupe); }
+.hero-zoom-control { padding: 12px; display: grid; gap: 9px; border-radius: 7px; background: var(--admin-canvas); }
+.hero-zoom-control[hidden] { display: none; }
+.hero-fit-control { padding: 12px; display: grid; gap: 9px; border-radius: 7px; background: var(--admin-canvas); }
+.hero-fit-control[hidden] { display: none; }
+.hero-fit-control > span { color: var(--admin-ink); font-size: .7rem; font-weight: 700; }
+.hero-zoom-control > span { color: var(--admin-ink); font-size: .7rem; font-weight: 700; }
+.hero-zoom-control .image-control__actions { align-items: center; }
+.hero-zoom-control .image-control__actions button { min-width: 38px; }
+.hero-zoom-control output { min-width: 48px; color: var(--admin-ink); font-size: .72rem; font-weight: 700; text-align: center; }
+.hero-zoom-control small { color: var(--admin-muted); font-size: .64rem; line-height: 1.45; }
 .review-picker > p { margin: 2px 0 13px; color: var(--admin-muted); font-size: .7rem; }
 .review-picker__options { max-height: 280px; overflow-y: auto; display: grid; gap: 8px; }
 .review-choice { padding: 11px; display: grid !important; grid-template-columns: 20px 42px 1fr; align-items: center; gap: 9px; border: 1px solid var(--admin-line); border-radius: 8px; background: #fff; cursor: pointer; }

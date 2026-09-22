@@ -29,6 +29,7 @@ def page_payload(featured_review_id=None):
                 {"title": "Lasting", "subtitle": "Relationships"},
             ],
             "reelUrl": "https://www.instagram.com/reel/example/",
+            "media": None,
         },
         "about": {
             "eyebrow": "About Stephanie",
@@ -61,6 +62,13 @@ def page_payload(featured_review_id=None):
 
 
 class ReviewPageContentApiTestCase(unittest.TestCase):
+    def test_public_agents_page_is_available_without_authentication(self):
+        response = self.client.get("/agents")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"A partner in", response.data)
+        self.assertIn(b"data-agent-application", response.data)
+        self.assertEqual(self.client.get("/agents/").status_code, 200)
+
     @classmethod
     def setUpClass(cls):
         cls.context = app.app_context()
@@ -157,6 +165,92 @@ class ReviewPageContentApiTestCase(unittest.TestCase):
         }
         response = self.client.put("/api/admin/reviews-page", headers=self.auth, json=invalid)
         self.assertEqual(response.status_code, 400)
+
+    def test_page_image_fit_and_zoom_are_saved_and_rendered(self):
+        payload = page_payload()
+        payload["featuredStory"]["image"] = {
+            "storagePath": f"reviews-page/featured-story/{'b' * 32}.webp",
+            "focalX": 61,
+            "focalY": 37,
+            "fit": "contain",
+            "zoom": 120,
+        }
+        response = self.client.put("/api/admin/reviews-page", headers=self.auth, json=payload)
+        self.assertEqual(response.status_code, 200)
+        image = response.get_json()["featuredStory"]["image"]
+        self.assertEqual(image["fit"], "contain")
+        self.assertEqual(image["zoom"], 120)
+        public_page = self.client.get("/reviews")
+        self.assertIn(b"--managed-image-fit: contain", public_page.data)
+        self.assertIn(b"--managed-image-zoom: 1.2", public_page.data)
+
+        for invalid_image in ({**payload["featuredStory"]["image"], "fit": "stretch"}, {**payload["featuredStory"]["image"], "zoom": 151}):
+            invalid = page_payload()
+            invalid["featuredStory"]["image"] = invalid_image
+            self.assertEqual(self.client.put("/api/admin/reviews-page", headers=self.auth, json=invalid).status_code, 400)
+
+    def test_hero_video_contract_and_public_priority(self):
+        payload = page_payload()
+        payload["hero"]["media"] = {
+            "storagePath": f"reviews-page/hero/{'c' * 32}.mp4",
+            "mediaType": "video",
+            "mimeType": "video/mp4",
+        }
+        response = self.client.put("/api/admin/reviews-page", headers=self.auth, json=payload)
+        self.assertEqual(response.status_code, 200)
+        public_page = self.client.get("/reviews")
+        self.assertIn(b"<video", public_page.data)
+        self.assertIn(b"autoplay muted loop playsinline", public_page.data)
+        self.assertNotIn(b"instagram-media", public_page.data)
+
+    def test_hero_image_desktop_zoom_is_saved_and_rendered(self):
+        payload = page_payload()
+        payload["hero"]["media"] = {
+            "storagePath": f"reviews-page/hero/{'e' * 32}.webp",
+            "mediaType": "image",
+            "mimeType": "image/webp",
+            "focalX": 63,
+            "focalY": 42,
+            "desktopZoom": 115,
+            "desktopFit": "contain",
+        }
+        response = self.client.put("/api/admin/reviews-page", headers=self.auth, json=payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()["hero"]["media"]["desktopZoom"], 115)
+        public_page = self.client.get("/reviews")
+        self.assertIn(b"--hero-desktop-zoom: 1.15", public_page.data)
+        self.assertIn(b"--hero-media-position: 63% 42%", public_page.data)
+        self.assertIn(b"reviews-hero__managed-media--fit-contain", public_page.data)
+
+    def test_hero_image_zoom_defaults_and_rejects_unsafe_values(self):
+        payload = page_payload()
+        payload["hero"]["media"] = {
+            "storagePath": f"reviews-page/hero/{'f' * 32}.webp",
+            "mediaType": "image",
+            "mimeType": "image/webp",
+            "focalX": 50,
+            "focalY": 50,
+        }
+        response = self.client.put("/api/admin/reviews-page", headers=self.auth, json=payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()["hero"]["media"]["desktopZoom"], 100)
+        self.assertEqual(response.get_json()["hero"]["media"]["desktopFit"], "cover")
+        for invalid_zoom in (95, 105.5, 135, 112):
+            invalid = page_payload()
+            invalid["hero"]["media"] = {**payload["hero"]["media"], "desktopZoom": invalid_zoom}
+            self.assertEqual(self.client.put("/api/admin/reviews-page", headers=self.auth, json=invalid).status_code, 400)
+        invalid = page_payload()
+        invalid["hero"]["media"] = {**payload["hero"]["media"], "desktopFit": "stretch"}
+        self.assertEqual(self.client.put("/api/admin/reviews-page", headers=self.auth, json=invalid).status_code, 400)
+
+    def test_hero_media_rejects_unmanaged_or_mismatched_video(self):
+        payload = page_payload()
+        payload["hero"]["media"] = {
+            "storagePath": f"reviews-page/hero/{'d' * 32}.mp4",
+            "mediaType": "video",
+            "mimeType": "video/webm",
+        }
+        self.assertEqual(self.client.put("/api/admin/reviews-page", headers=self.auth, json=payload).status_code, 400)
 
 
 if __name__ == "__main__":

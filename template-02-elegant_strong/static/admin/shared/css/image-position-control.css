@@ -1,0 +1,42 @@
+.image-control__preview.is-positionable {
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+
+.image-control__preview.is-positionable::after {
+    content: "Drag to reposition";
+    padding: 6px 9px;
+    position: absolute;
+    right: 9px;
+    bottom: 9px;
+    z-index: 2;
+    border-radius: 999px;
+    color: #fff;
+    background: rgba(23, 23, 23, .72);
+    font-size: .6rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .16s ease;
+}
+
+.image-control__preview.is-positionable:hover::after,
+.image-control__preview.is-positionable:focus-visible::after {
+    opacity: 1;
+}
+
+.image-control__preview.is-positioning {
+    cursor: grabbing;
+}
+
+.image-control__preview.is-positioning::after {
+    content: "Release to set position";
+    opacity: 1;
+}
+
+.image-control__preview.is-positionable:focus-visible {
+    outline: 2px solid var(--admin-taupe, #a69282);
+    outline-offset: 2px;
+}

@@ -163,6 +163,7 @@ class ReviewsApiTestCase(unittest.TestCase):
             {"clientName": "Client", "quote": "Review", "clientImagePath": "other/unmanaged.webp"},
             {"clientName": "Client", "quote": "Review", "clientImageFocalX": -1},
             {"clientName": "Client", "quote": "Review", "clientImageFocalY": 101},
+            {"clientName": "Client", "quote": "Review", "clientImageFit": "stretch"},
         )
         for payload in invalid_payloads:
             with self.subTest(payload=payload):
@@ -181,6 +182,7 @@ class ReviewsApiTestCase(unittest.TestCase):
                 "clientImagePath": storage_path,
                 "clientImageFocalX": 64,
                 "clientImageFocalY": 27,
+                "clientImageFit": "contain",
                 "isPublished": True,
             },
         )
@@ -193,6 +195,7 @@ class ReviewsApiTestCase(unittest.TestCase):
         )
         self.assertEqual(payload["clientImageFocalX"], 64)
         self.assertEqual(payload["clientImageFocalY"], 27)
+        self.assertEqual(payload["clientImageFit"], "contain")
         public_payload = self.client.get("/api/reviews").get_json()[0]
         self.assertEqual(public_payload["clientImageUrl"], payload["clientImageUrl"])
         self.assertEqual(public_payload["clientImageFocalX"], 64)

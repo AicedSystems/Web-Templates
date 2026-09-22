@@ -30,6 +30,7 @@ class Review(db.Model):
         CheckConstraint("display_order >= 0", name="ck_reviews_display_order_nonnegative"),
         CheckConstraint("client_image_focal_x BETWEEN 0 AND 100", name="ck_reviews_image_focal_x_range"),
         CheckConstraint("client_image_focal_y BETWEEN 0 AND 100", name="ck_reviews_image_focal_y_range"),
+        CheckConstraint("client_image_fit IN ('cover', 'contain')", name="ck_reviews_image_fit"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -39,6 +40,7 @@ class Review(db.Model):
     client_image_path: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     client_image_focal_x: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=50)
     client_image_focal_y: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=50)
+    client_image_fit: Mapped[str] = mapped_column(String(10), nullable=False, default="cover")
     rating: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     client_type: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
     display_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

@@ -421,6 +421,7 @@ def serialize_review_summary(review):
         "clientImageUrl": client_image_url,
         "clientImageFocalX": getattr(review, "client_image_focal_x", 50),
         "clientImageFocalY": getattr(review, "client_image_focal_y", 50),
+        "clientImageFit": getattr(review, "client_image_fit", "cover"),
         "rating": review.rating,
         "clientType": review.client_type,
         "displayOrder": review.display_order,
@@ -439,7 +440,7 @@ def serialize_admin_review(review):
     return summary
 
 
-def serialize_page_image(image):
+def serialize_page_image(image, default_fit="cover"):
     if image is None:
         return None
     storage_path = image.get("storagePath") if isinstance(image, dict) else None
@@ -450,13 +451,39 @@ def serialize_page_image(image):
         "publicUrl": media_storage.derive_public_url(storage_path),
         "focalX": image.get("focalX", 50),
         "focalY": image.get("focalY", 50),
+        "fit": image.get("fit", default_fit),
+        "zoom": image.get("zoom", 100),
     }
+
+
+def serialize_hero_media(media):
+    if media is None or not isinstance(media, dict):
+        return None
+    storage_path = media.get("storagePath")
+    media_type = media.get("mediaType")
+    mime_type = media.get("mimeType")
+    if not media_storage.is_managed_storage_path(storage_path):
+        return None
+    serialized = {
+        "storagePath": storage_path,
+        "publicUrl": media_storage.derive_public_url(storage_path),
+        "mediaType": media_type,
+        "mimeType": mime_type,
+    }
+    if media_type == "image":
+        serialized.update({
+            "focalX": media.get("focalX", 50),
+            "focalY": media.get("focalY", 50),
+            "desktopZoom": media.get("desktopZoom", 100),
+            "desktopFit": media.get("desktopFit", "cover"),
+        })
+    return serialized
 
 
 def serialize_review_page_content(content, eligible_reviews=None, featured_review=None):
     payload = {
-        "hero": content.hero,
-        "about": {**content.about, "image": serialize_page_image(content.about.get("image"))},
+        "hero": {**content.hero, "media": serialize_hero_media(content.hero.get("media"))},
+        "about": {**content.about, "image": serialize_page_image(content.about.get("image"), "contain")},
         "featuredStory": {
             **content.featured_story,
             "image": serialize_page_image(content.featured_story.get("image")),
@@ -531,7 +558,9 @@ def validate_page_values(value, label, expected_count):
 def validate_page_image(value, placement):
     if value is None:
         return None, None
-    if not isinstance(value, dict) or set(value) != {"storagePath", "focalX", "focalY"}:
+    required_keys = {"storagePath", "focalX", "focalY"}
+    allowed_keys = required_keys | {"fit", "zoom"}
+    if not isinstance(value, dict) or not required_keys.issubset(value) or not set(value).issubset(allowed_keys):
         return None, f"{placement} image information is incomplete."
     storage_path = value["storagePath"]
     expected_prefix = f"{PAGE_IMAGE_SCOPES[placement]}/"
@@ -543,7 +572,68 @@ def validate_page_image(value, placement):
         return None, "Horizontal image position must be from 0 through 100."
     if type(focal_y) is not int or not 0 <= focal_y <= 100:
         return None, "Vertical image position must be from 0 through 100."
-    return {"storagePath": storage_path, "focalX": focal_x, "focalY": focal_y}, None
+    fit = value.get("fit", "contain" if placement == "about" else "cover")
+    zoom = value.get("zoom", 100)
+    if fit not in {"cover", "contain"}:
+        return None, "Image fit must fill the frame or show the whole image."
+    if type(zoom) is not int or not 100 <= zoom <= 150 or zoom % 5 != 0:
+        return None, "Image zoom must be from 100 through 150 percent in 5 percent steps."
+    return {"storagePath": storage_path, "focalX": focal_x, "focalY": focal_y, "fit": fit, "zoom": zoom}, None
+
+
+def validate_hero_media(value):
+    if value is None:
+        return None, None
+    if not isinstance(value, dict):
+        return None, "Hero media information is incomplete."
+
+    media_type = value.get("mediaType")
+    storage_path = value.get("storagePath")
+    mime_type = value.get("mimeType")
+    expected_keys = {"storagePath", "mediaType", "mimeType"}
+    if media_type == "image":
+        expected_keys.update({"focalX", "focalY"})
+    allowed_keys = expected_keys | ({"desktopZoom", "desktopFit"} if media_type == "image" else set())
+    if not expected_keys.issubset(value) or not set(value).issubset(allowed_keys):
+        return None, "Hero media information is incomplete."
+    if not media_storage.is_managed_storage_path(storage_path) or not storage_path.startswith("reviews-page/hero/"):
+        return None, "Choose media uploaded for the Hero section."
+
+    extension = storage_path.rsplit(".", 1)[-1].lower()
+    if media_type == "image":
+        if mime_type != "image/webp" or extension != "webp":
+            return None, "Hero image information is invalid."
+        focal_x = value["focalX"]
+        focal_y = value["focalY"]
+        desktop_zoom = value.get("desktopZoom", 100)
+        desktop_fit = value.get("desktopFit", "cover")
+        if type(focal_x) is not int or not 0 <= focal_x <= 100:
+            return None, "Horizontal image position must be from 0 through 100."
+        if type(focal_y) is not int or not 0 <= focal_y <= 100:
+            return None, "Vertical image position must be from 0 through 100."
+        if type(desktop_zoom) is not int or not 100 <= desktop_zoom <= 130 or desktop_zoom % 5 != 0:
+            return None, "Desktop image zoom must be from 100 through 130 percent in 5 percent steps."
+        if desktop_fit not in {"cover", "contain"}:
+            return None, "Desktop image fit must fill the frame or show the whole image."
+        return {
+            "storagePath": storage_path,
+            "mediaType": "image",
+            "mimeType": "image/webp",
+            "focalX": focal_x,
+            "focalY": focal_y,
+            "desktopZoom": desktop_zoom,
+            "desktopFit": desktop_fit,
+        }, None
+    if media_type == "video":
+        expected_mime = {"mp4": "video/mp4", "webm": "video/webm"}.get(extension)
+        if expected_mime is None or mime_type != expected_mime:
+            return None, "Hero video information is invalid."
+        return {
+            "storagePath": storage_path,
+            "mediaType": "video",
+            "mimeType": expected_mime,
+        }, None
+    return None, "Hero media must be an image or video."
 
 
 def validate_review_page_payload(data):
@@ -552,7 +642,7 @@ def validate_review_page_payload(data):
         return None, "The Reviews Page content is incomplete. Refresh and try again."
 
     hero = data["hero"]
-    hero_keys = {"eyebrow", "titleLine1", "titleEmphasis", "description", "cta", "values", "reelUrl"}
+    hero_keys = {"eyebrow", "titleLine1", "titleEmphasis", "description", "cta", "values", "reelUrl", "media"}
     if not isinstance(hero, dict) or set(hero) != hero_keys:
         return None, "Hero content is incomplete."
     validated_hero = {}
@@ -571,11 +661,18 @@ def validate_review_page_payload(data):
     validated_hero["values"], error = validate_page_values(hero["values"], "Hero values", 3)
     if error:
         return None, error
-    reel_url, error = validate_page_link(hero["reelUrl"], "Instagram Reel URL")
-    reel_host = urlparse(reel_url).netloc.lower().removeprefix("www.") if not error else ""
-    if error or (reel_host != "instagram.com" and not reel_host.endswith(".instagram.com")):
-        return None, "Instagram Reel URL must be a valid Instagram link."
-    validated_hero["reelUrl"] = reel_url
+    reel_url = hero["reelUrl"]
+    if reel_url in {None, ""}:
+        validated_hero["reelUrl"] = None
+    else:
+        reel_url, error = validate_page_link(reel_url, "Instagram Reel URL")
+        reel_host = urlparse(reel_url).netloc.lower().removeprefix("www.") if not error else ""
+        if error or (reel_host != "instagram.com" and not reel_host.endswith(".instagram.com")):
+            return None, "Instagram Reel URL must be a valid Instagram link."
+        validated_hero["reelUrl"] = reel_url
+    validated_hero["media"], error = validate_hero_media(hero["media"])
+    if error:
+        return None, error
 
     about = data["about"]
     about_keys = {"eyebrow", "titleLine1", "titleLine2", "body", "cta", "values", "image"}
@@ -669,6 +766,7 @@ def validate_review_payload(data, partial=False):
     allowed_fields = {
         "clientName", "quote", "clientImageUrl", "clientImagePath",
         "clientImageFocalX", "clientImageFocalY", "rating",
+        "clientImageFit",
         "clientType", "displayOrder", "isPublished",
     }
     unknown_fields = sorted(set(data) - allowed_fields)
@@ -733,6 +831,12 @@ def validate_review_payload(data, partial=False):
                 return None, f"{api_field} must be an integer from 0 through 100."
             validated[model_field] = focal_value
 
+    if "clientImageFit" in data:
+        image_fit = data["clientImageFit"]
+        if image_fit not in {"cover", "contain"}:
+            return None, "clientImageFit must fill the frame or show the whole image."
+        validated["client_image_fit"] = image_fit
+
     if "rating" in data:
         rating = data["rating"]
         if rating is not None and (type(rating) is not int or not 1 <= rating <= 5):
@@ -768,6 +872,7 @@ def validate_review_payload(data, partial=False):
         validated.setdefault("client_image_path", None)
         validated.setdefault("client_image_focal_x", 50)
         validated.setdefault("client_image_focal_y", 50)
+        validated.setdefault("client_image_fit", "cover")
         validated.setdefault("rating", None)
         validated.setdefault("client_type", None)
         validated.setdefault("display_order", 0)
@@ -822,6 +927,11 @@ def render_reviews_page(editor_preview=False):
 @app.get("/reviews", strict_slashes=False)
 def reviews():
     return render_reviews_page()
+
+
+@app.get("/agents", strict_slashes=False)
+def agents():
+    return render_template("site/agents.html")
 
 
 @app.get("/admin/blog")
@@ -1222,6 +1332,7 @@ def list_reviews():
             Review.client_image_path,
             Review.client_image_focal_x,
             Review.client_image_focal_y,
+            Review.client_image_fit,
             Review.rating,
             Review.client_type,
             Review.display_order,
@@ -1245,6 +1356,7 @@ def list_admin_reviews():
             Review.client_image_path,
             Review.client_image_focal_x,
             Review.client_image_focal_y,
+            Review.client_image_fit,
             Review.rating,
             Review.client_type,
             Review.display_order,
@@ -1276,6 +1388,7 @@ def get_review(review_id):
             Review.client_image_path,
             Review.client_image_focal_x,
             Review.client_image_focal_y,
+            Review.client_image_fit,
             Review.rating,
             Review.client_type,
             Review.display_order,
