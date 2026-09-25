@@ -1,17 +1,18 @@
+{% from 'site/_icons.html' import icon %}
 <div class="consultation-modal" data-consultation-modal hidden>
     <div class="consultation-modal__backdrop" data-consultation-close></div>
     <section class="consultation-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="consultation-modal-title" tabindex="-1">
-        <button class="consultation-modal__close" type="button" data-consultation-close aria-label="Close consultation options">×</button>
+        <button class="consultation-modal__close" type="button" data-consultation-close aria-label="Close consultation options">{{ icon('x', 'md') }}</button>
         <header>
             <p class="consultation-modal__eyebrow">Book a consultation</p>
             <h2 id="consultation-modal-title">How can I help you?</h2>
             <p>Choose what you’d like to discuss, and you’ll be taken to my Calendly to find a time that works for you.</p>
         </header>
         <div class="consultation-modal__choices">
-            <a href="https://calendly.com/connectwithstephm" target="_blank" rel="noopener" data-consultation-choice><span class="consultation-modal__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v10h-6v-6H9v6H3Z"/></svg></span><span><strong>I’m Looking to Buy</strong><small>Discuss your home-buying goals, get expert guidance, and take the next step with confidence.</small></span><b aria-hidden="true">›</b></a>
-            <a href="https://calendly.com/connectwithstephm" target="_blank" rel="noopener" data-consultation-choice><span class="consultation-modal__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m4 13 9-9h7v7l-9 9-7-7Z"/><circle cx="16.5" cy="7.5" r="1"/></svg></span><span><strong>I’m Looking to Sell</strong><small>Explore your selling strategy, learn about your home’s value, and create a plan that fits your goals.</small></span><b aria-hidden="true">›</b></a>
-            <a href="https://calendly.com/connectwithstephm" target="_blank" rel="noopener" data-consultation-choice><span class="consultation-modal__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h16v12H9l-5 4V4Z"/><path d="M8 9h8M8 12h5"/></svg></span><span><strong>General Consultation</strong><small>Have questions or want to learn more? Let’s connect and find the best path forward.</small></span><b aria-hidden="true">›</b></a>
+            <a href="https://calendly.com/connectwithstephm" target="_blank" rel="noopener" data-consultation-choice><span class="consultation-modal__icon">{{ icon('house', 'lg') }}</span><span><strong>I’m Looking to Buy</strong><small>Discuss your home-buying goals, get expert guidance, and take the next step with confidence.</small></span>{{ icon('chevron-right', 'md', 'consultation-modal__chevron') }}</a>
+            <a href="https://calendly.com/connectwithstephm" target="_blank" rel="noopener" data-consultation-choice><span class="consultation-modal__icon">{{ icon('tag', 'lg') }}</span><span><strong>I’m Looking to Sell</strong><small>Explore your selling strategy, learn about your home’s value, and create a plan that fits your goals.</small></span>{{ icon('chevron-right', 'md', 'consultation-modal__chevron') }}</a>
+            <a href="https://calendly.com/connectwithstephm" target="_blank" rel="noopener" data-consultation-choice><span class="consultation-modal__icon">{{ icon('message', 'lg') }}</span><span><strong>General Consultation</strong><small>Have questions or want to learn more? Let’s connect and find the best path forward.</small></span>{{ icon('chevron-right', 'md', 'consultation-modal__chevron') }}</a>
         </div>
-        <p class="consultation-modal__security"><span aria-hidden="true">▣</span> You’ll be redirected to Stephanie’s secure Calendly scheduling page.</p>
+        <p class="consultation-modal__security">{{ icon('lock', 'sm') }} You’ll be redirected to Stephanie’s secure Calendly scheduling page.</p>
     </section>
 </div>

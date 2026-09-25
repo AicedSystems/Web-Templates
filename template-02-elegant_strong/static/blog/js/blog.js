@@ -42,6 +42,10 @@ function renderPublishedImage(image, post) {
     };
     image.src = `/api/posts/${post.id}/featured-image`;
     image.alt = "";
+    const settings = post.featuredImageSettings || {};
+    image.style.objectFit = ["cover", "contain"].includes(settings.fit) ? settings.fit : "cover";
+    image.style.objectPosition = `${Number.isInteger(settings.focalX) ? settings.focalX : 50}% ${Number.isInteger(settings.focalY) ? settings.focalY : 50}%`;
+    image.style.setProperty("--article-image-zoom", String(Number.isInteger(settings.zoom) ? settings.zoom / 100 : 1));
 }
 
 function formatPublishedDate(value) {

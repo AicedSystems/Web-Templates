@@ -1,0 +1,21 @@
+<footer class="site-footer">
+    <div class="site-footer__inner">
+        <a class="site-footer__logo" href="/" aria-label="Stephanie J Mendoza home">
+            <img data-logo-image src="{{ url_for('static', filename='site/images/realtor-logo.png') }}" alt="Stephanie J Mendoza Real Estate Agent">
+        </a>
+        <div class="site-footer__contact">
+            <div class="site-footer__identity">
+                <strong data-realtor-name>Stephanie J Mendoza</strong>
+                <span>Real Estate Agent</span>
+                <span>DRE #<span data-realtor-license>02006601</span></span>
+                <span data-realtor-brokerage>Real Broker</span>
+            </div>
+            <a data-phone-link data-realtor-phone href="tel:16614351239">(661) 435-1239</a>
+            <a data-email-link data-realtor-email href="mailto:RealtorStephanieAV@gmail.com">RealtorStephanieAV@gmail.com</a>
+            {% include 'site/_social_links.html' %}
+        </div>
+        <div class="site-footer__legal">
+            <p>&copy; <span data-footer-year>2026</span> <span data-realtor-name>Stephanie J Mendoza</span>. All rights reserved.</p>
+        </div>
+    </div>
+</footer>

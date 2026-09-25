@@ -21,7 +21,7 @@ if (buyerInquiryForm) {
         });
     });
 
-    buyerInquiryForm.addEventListener("submit", (event) => {
+    buyerInquiryForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         requiredFields.forEach(updateBuyerField);
         if (!buyerInquiryForm.checkValidity()) {
@@ -29,6 +29,33 @@ if (buyerInquiryForm) {
             buyerInquiryForm.querySelector(":invalid")?.focus();
             return;
         }
-        status.textContent = "Your information is ready. Online submission will be connected with the future page editor phase.";
+        const submitButton = buyerInquiryForm.querySelector('button[type="submit"]');
+        const payload = Object.fromEntries(new FormData(buyerInquiryForm).entries());
+        payload.audience = buyerInquiryForm.dataset.audience;
+        submitButton.disabled = true;
+        submitButton.setAttribute("aria-busy", "true");
+        status.textContent = "Sending your inquiry…";
+
+        try {
+            const response = await fetch("/api/inquiries", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.message || "We could not send your inquiry right now.");
+            buyerInquiryForm.reset();
+            requiredFields.forEach((field) => {
+                field.setAttribute("aria-invalid", "false");
+                const error = buyerInquiryForm.querySelector(`[data-error-for="${field.id}"]`);
+                if (error) error.textContent = "";
+            });
+            status.textContent = result.message || "Thank you. Stephanie will be in touch soon.";
+        } catch (error) {
+            status.textContent = error.message;
+        } finally {
+            submitButton.disabled = false;
+            submitButton.removeAttribute("aria-busy");
+        }
     });
 }

@@ -31,6 +31,7 @@ if (applicationForm) {
 const resourceViewport = document.querySelector(".resource-carousel__viewport");
 const resourcePrevious = document.querySelector("[data-resource-previous]");
 const resourceNext = document.querySelector("[data-resource-next]");
+const resourceReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 function resourceScrollAmount() {
     const card = resourceViewport?.querySelector(".resource-card");
@@ -45,8 +46,9 @@ function updateResourceButtons() {
 }
 
 if (resourceViewport && resourcePrevious && resourceNext) {
-    resourcePrevious.addEventListener("click", () => resourceViewport.scrollBy({ left: -resourceScrollAmount(), behavior: "smooth" }));
-    resourceNext.addEventListener("click", () => resourceViewport.scrollBy({ left: resourceScrollAmount(), behavior: "smooth" }));
+    const scrollBehavior = () => resourceReducedMotion.matches ? "auto" : "smooth";
+    resourcePrevious.addEventListener("click", () => resourceViewport.scrollBy({ left: -resourceScrollAmount(), behavior: scrollBehavior() }));
+    resourceNext.addEventListener("click", () => resourceViewport.scrollBy({ left: resourceScrollAmount(), behavior: scrollBehavior() }));
     resourceViewport.addEventListener("scroll", updateResourceButtons, { passive: true });
     window.addEventListener("resize", updateResourceButtons);
     updateResourceButtons();

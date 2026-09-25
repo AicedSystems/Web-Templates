@@ -64,6 +64,8 @@ class BlogArticleRedesignTestCase(unittest.TestCase):
         self.assertIn("IntersectionObserver", source)
         self.assertIn("`/api/posts/${post.id}/featured-image`", source)
         self.assertIn("articleCoverFallback.hidden = false", source)
+        self.assertIn("post.featuredImageSettings", source)
+        self.assertIn("articleImage.style.objectPosition", source)
 
     def test_responsive_article_css_contains_tablet_and_mobile_collapses(self):
         source = Path(app.static_folder, "blog/css/public-blog.css").read_text(encoding="utf-8")
@@ -73,11 +75,23 @@ class BlogArticleRedesignTestCase(unittest.TestCase):
         self.assertIn(".article-toc-mobile", source)
         self.assertIn("max-height: calc(100dvh - 56px)", source)
         self.assertIn("overscroll-behavior: contain", source)
+        self.assertIn(".article__main-column { min-width: 0; grid-column: 2; }", source)
+        self.assertIn(".article__aside { min-width: 0; grid-column: 3; }", source)
 
     def test_blog_cards_use_the_same_published_featured_image_endpoint(self):
         source = Path(app.static_folder, "blog/js/blog.js").read_text(encoding="utf-8")
         self.assertIn("`/api/posts/${post.id}/featured-image`", source)
         self.assertIn("image.src = fallback", source)
+        self.assertIn("post.featuredImageSettings", source)
+
+    def test_article_editor_exposes_persistent_featured_image_controls(self):
+        template = Path(app.template_folder, "admin/blog/create_post.html").read_text(encoding="utf-8")
+        script = Path(app.static_folder, "admin/blog/js/create_post.js").read_text(encoding="utf-8")
+        self.assertIn('id="featured-image-controls"', template)
+        self.assertIn('data-featured-fit="cover"', template)
+        self.assertIn('data-featured-fit="contain"', template)
+        self.assertIn("featuredImageSettings: { ...featuredImageSettings }", script)
+        self.assertIn("applyFeaturedImagePresentation", script)
 
 
 if __name__ == "__main__":

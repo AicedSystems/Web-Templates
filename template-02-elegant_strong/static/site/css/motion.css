@@ -1,0 +1,131 @@
+:root {
+    --motion-fast: 160ms;
+    --motion-base: 220ms;
+    --motion-reveal: 520ms;
+    --ease-standard: cubic-bezier(.2, .7, .2, 1);
+    --ease-emphasized: cubic-bezier(.22, .68, .28, 1);
+}
+
+/* Reveal states are activated only after motion.js initializes successfully. */
+.motion-ready [data-reveal] {
+    opacity: 0;
+    transition-duration: var(--motion-reveal);
+    transition-property: opacity, transform;
+    transition-timing-function: var(--ease-emphasized);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+}
+
+.motion-ready [data-reveal="fade-up"] {
+    transform: translateY(18px);
+}
+
+.motion-ready [data-reveal="image"] {
+    transform: scale(.985);
+}
+
+.motion-ready [data-reveal].is-revealed {
+    opacity: 1;
+    transform: none;
+    will-change: auto;
+}
+
+.button,
+.blog-hero__button,
+.blog-nav__contact,
+.buyer-resource-card,
+.homepage-blog-card,
+.hero-blog__card,
+.post-card,
+.resource-card {
+    transition-duration: var(--motion-base);
+    transition-timing-function: var(--ease-standard);
+}
+
+.button:hover,
+.button:focus-visible,
+.blog-hero__button:hover,
+.blog-hero__button:focus-visible,
+.blog-nav__contact:hover,
+.blog-nav__contact:focus-visible {
+    transform: translateY(-2px);
+}
+
+.buyer-resource-card:hover,
+.buyer-resource-card:focus-within,
+.homepage-blog-card:hover,
+.homepage-blog-card:focus-within,
+.post-card:hover,
+.post-card:focus-within,
+.resource-card:hover,
+.resource-card:focus-within {
+    transform: translateY(-3px);
+}
+
+:where(a, button, input, select, textarea):focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
+
+@media (max-width: 1180px) {
+    .site-header .mobile-nav {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-10px) scale(.985);
+        transform-origin: top right;
+        visibility: hidden;
+        transition: opacity var(--motion-fast) var(--ease-standard), transform var(--motion-base) var(--ease-standard), visibility 0s linear var(--motion-base);
+    }
+
+    .site-header .mobile-nav.is-open {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0) scale(1);
+        visibility: visible;
+        transition-delay: 0s;
+    }
+
+    .site-header .mobile-menu-button span {
+        transform-origin: center;
+        transition: opacity var(--motion-fast) var(--ease-standard), transform var(--motion-base) var(--ease-standard);
+    }
+
+    .site-header .mobile-menu-button[aria-expanded="true"] span:first-child {
+        transform: translateY(7px) rotate(45deg);
+    }
+
+    .site-header .mobile-menu-button[aria-expanded="true"] span:nth-child(2) {
+        opacity: 0;
+        transform: scaleX(0);
+    }
+
+    .site-header .mobile-menu-button[aria-expanded="true"] span:last-child {
+        transform: translateY(-7px) rotate(-45deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    .motion-ready [data-reveal],
+    .motion-ready [data-reveal].is-revealed {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+
+    .site-header .mobile-nav,
+    .site-header .mobile-menu-button span,
+    .button,
+    .blog-hero__button,
+    .blog-nav__contact,
+    .buyer-resource-card,
+    .homepage-blog-card,
+    .hero-blog__card,
+    .post-card,
+    .resource-card {
+        transition: none;
+    }
+}

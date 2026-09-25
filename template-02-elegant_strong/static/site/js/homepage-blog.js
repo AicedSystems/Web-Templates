@@ -59,7 +59,8 @@ if (homepageBlogList || heroBlogList) {
         excerpt.textContent = post.excerpt || "Read Stephanie's latest real estate insight.";
         const read = document.createElement("span");
         read.className = "homepage-blog-card__read";
-        read.textContent = "Read Article →";
+        read.append(document.createTextNode("Read Article "));
+        window.siteIcons?.append(read, "arrow-right");
 
         copy.append(meta, title, excerpt, read);
         link.append(media, copy);
@@ -87,7 +88,8 @@ if (homepageBlogList || heroBlogList) {
         const title = document.createElement("h2");
         title.textContent = post.title || "Untitled article";
         const read = document.createElement("span");
-        read.textContent = "Read Article →";
+        read.append(document.createTextNode("Read Article "));
+        window.siteIcons?.append(read, "arrow-right");
 
         content.append(category, title, read);
         link.append(image, content);

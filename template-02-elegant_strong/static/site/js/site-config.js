@@ -6,8 +6,8 @@ const realtorData = {
     brokerage: "Real Broker",
 
     social: {
-        facebook: "#",
-        instagram: "https://www.instagram.com/stephaniejmendoza/"
+        facebook: "https://www.facebook.com/stephaniej.mendoza.75/",
+        instagram: "https://www.instagram.com/stephaniejmendoza/?hl=en"
     },
 
     hero: {
@@ -17,9 +17,10 @@ const realtorData = {
     images: {
         logo: "/static/site/images/realtor-logo.png",
         hero: "/static/site/images/hero-portrait.png",
-        clients: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1400&q=88",
+        // Alternate original: /static/site/images/home-clients-living-room-original.webp
+        clients: "/static/site/images/home-clients-living-room.webp",
         agents: "/static/site/images/agents-feature.jpg",
-        about: "/static/site/images/about-portrait.webp"
+        about: "/static/site/images/steph-about-portrait.webp"
     },
 
     reviewsPage: {

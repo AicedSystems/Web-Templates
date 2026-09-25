@@ -4,8 +4,14 @@
 }
 
 .client-journey-page .site-header {
-    position: relative;
+    position: sticky;
+    top: 0;
     border-bottom: 1px solid rgba(22, 21, 19, 0.12);
+}
+
+body.client-journey-page .site-header.is-scrolled {
+    position: sticky;
+    top: 0;
 }
 
 .client-journey-page .main-nav__link {
@@ -357,12 +363,12 @@
     text-transform: uppercase;
 }
 
-.guide-card__download > span:first-child {
+.guide-card__download > .site-icon:first-child {
     width: 34px;
     height: 42px;
     display: grid;
     border: 1px solid #a9aaa5;
-    font-size: 1.1rem;
+    padding: 7px;
     place-items: center;
 }
 
@@ -392,6 +398,16 @@
     margin-top: 24px;
     display: grid;
     gap: 12px;
+}
+
+.buyer-field--website {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
 }
 
 .buyer-field {
@@ -455,6 +471,10 @@
     color: #737572;
     font-size: .61rem;
     line-height: 1.5;
+}
+
+.buyer-inquiry__privacy .site-icon {
+    margin-top: 1px;
 }
 
 .buyer-resources {

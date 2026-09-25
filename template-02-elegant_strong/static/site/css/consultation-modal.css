@@ -3,20 +3,24 @@ body.has-consultation-modal { overflow: hidden; }
 .consultation-modal[hidden] { display: none; }
 .consultation-modal__backdrop { position: absolute; inset: 0; background: rgba(28,29,29,.55); backdrop-filter: blur(4px); }
 .consultation-modal__dialog { width: min(100%,650px); max-height: min(90vh,850px); padding: clamp(32px,5vw,56px); position: relative; overflow-y: auto; border: 1px solid rgba(42,43,43,.12); border-radius: 20px; outline: none; background: #f8f7f4; box-shadow: 0 30px 90px rgba(24,25,25,.22); }
-.consultation-modal__close { width: 42px; height: 42px; position: absolute; top: 15px; right: 15px; border: 0; background: transparent; color: #777873; font: 300 2rem/1 "Manrope",sans-serif; cursor: pointer; }
+.consultation-modal.motion-enabled .consultation-modal__backdrop { opacity: 0; transition: opacity var(--motion-base) var(--ease-standard); }
+.consultation-modal.motion-enabled .consultation-modal__dialog { opacity: 0; transform: translateY(8px) scale(.985); transition: opacity var(--motion-base) var(--ease-standard), transform var(--motion-base) var(--ease-emphasized); }
+.consultation-modal.motion-enabled.is-open .consultation-modal__backdrop { opacity: 1; }
+.consultation-modal.motion-enabled.is-open .consultation-modal__dialog { opacity: 1; transform: none; }
+.consultation-modal__close { width: 42px; height: 42px; position: absolute; top: 15px; right: 15px; display: grid; border: 0; background: transparent; color: #777873; cursor: pointer; place-items: center; }
 .consultation-modal__dialog > header { text-align: center; }
 .consultation-modal__eyebrow { color: #757772; font: 600 .67rem/1.4 "Manrope",sans-serif; letter-spacing: .2em; text-transform: uppercase; }
 .consultation-modal__dialog h2 { margin-top: 15px; font: italic 500 clamp(2.8rem,6vw,4.6rem)/1 "Bodoni Moda",serif; letter-spacing: -.055em; }
 .consultation-modal__dialog header > p:last-child { max-width: 47ch; margin: 19px auto 0; color: #626466; font: 400 .95rem/1.65 "Manrope",sans-serif; }
 .consultation-modal__choices { margin-top: 34px; display: grid; gap: 16px; }
-.consultation-modal__choices > a { min-height: 122px; padding: 20px 24px; display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 22px; border: 1px solid rgba(42,43,43,.12); border-radius: 13px; background: rgba(255,255,255,.58); color: #292b2c; box-shadow: 0 8px 24px rgba(35,36,35,.035); text-decoration: none; transition: border-color .18s ease,box-shadow .18s ease,transform .18s ease; }
+.consultation-modal__choices > a { min-height: 122px; padding: 20px 24px; display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 22px; border: 1px solid rgba(42,43,43,.12); border-radius: 13px; background: rgba(255,255,255,.58); color: #292b2c; box-shadow: 0 8px 24px rgba(35,36,35,.035); text-decoration: none; transition: border-color var(--motion-fast) var(--ease-standard), box-shadow var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard); }
 .consultation-modal__choices > a:hover,.consultation-modal__choices > a:focus-visible { border-color: rgba(72,74,72,.38); box-shadow: 0 12px 30px rgba(35,36,35,.09); transform: translateY(-2px); }
 .consultation-modal__choices a > span:nth-child(2) { display: grid; gap: 7px; }
 .consultation-modal__choices strong { font: 500 1.45rem/1.1 "Bodoni Moda",serif; }
 .consultation-modal__choices small { max-width: 39ch; color: #626466; font: 400 .76rem/1.5 "Manrope",sans-serif; }
-.consultation-modal__choices b { color: #656762; font: 300 2.2rem/1 "Manrope",sans-serif; }
+.consultation-modal__chevron { color: #656762; }
 .consultation-modal__icon { width: 66px; height: 66px; display: grid; border-radius: 50%; background: #e8e5df; color: #81705a; place-items: center; }
 .consultation-modal__icon svg { width: 31px; height: 31px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.45; }
 .consultation-modal__security { margin: 27px 0 0; color: #797a76; font: 400 .72rem/1.5 "Manrope",sans-serif; text-align: center; }
 @media (max-width:600px) { .consultation-modal { padding: 10px; } .consultation-modal__dialog { max-height: 94vh; padding: 38px 17px 25px; border-radius: 14px; } .consultation-modal__dialog h2 { font-size: 2.65rem; } .consultation-modal__choices { margin-top: 25px; gap: 12px; } .consultation-modal__choices > a { min-height: 104px; padding: 15px; gap: 13px; } .consultation-modal__icon { width: 52px; height: 52px; } .consultation-modal__icon svg { width: 25px; height: 25px; } .consultation-modal__choices strong { font-size: 1.15rem; } .consultation-modal__choices small { font-size: .68rem; } }
-@media (prefers-reduced-motion:reduce) { .consultation-modal__choices > a { transition: none; } }
+@media (prefers-reduced-motion:reduce) { .consultation-modal.motion-enabled .consultation-modal__backdrop, .consultation-modal.motion-enabled .consultation-modal__dialog, .consultation-modal__choices > a { transition: none; } }

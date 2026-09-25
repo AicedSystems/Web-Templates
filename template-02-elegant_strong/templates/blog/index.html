@@ -8,22 +8,27 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='blog/css/public-blog.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/consultation-modal.css', v='1') }}">
-    <script src="{{ url_for('static', filename='blog/js/blog.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='site/js/consultation-modal.js', v='1') }}" defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='blog/css/public-blog.css', v='5') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/icons.css', v='3') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/consultation-modal.css', v='2') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/motion.css', v='1') }}">
+    <script src="{{ url_for('static', filename='blog/js/blog.js', v='2') }}" defer></script>
+    <script src="{{ url_for('static', filename='site/js/site-config.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='site/js/script.js', v='6') }}" defer></script>
+    <script src="{{ url_for('static', filename='site/js/consultation-modal.js', v='2') }}" defer></script>
+    <script src="{{ url_for('static', filename='site/js/motion.js', v='1') }}" defer></script>
 </head>
+{% from 'site/_icons.html' import icon %}
 <body>
     <header class="blog-header">
-        <a class="blog-wordmark" href="/#home" aria-label="Stephanie J Mendoza home">
+        <a class="blog-wordmark" href="/" aria-label="Stephanie J Mendoza home">
             <img src="{{ url_for('static', filename='site/images/realtor-logo.png') }}" alt="Stephanie J Mendoza Real Estate Agent">
         </a>
         <nav class="blog-nav" aria-label="Main navigation">
-            <a href="/#home">Home</a>
+            <a href="/">Home</a>
             <a href="/buyers">Buyers</a>
             <a href="/sellers">Sellers</a>
             <a href="/agents">Agents</a>
-            <a href="/#about">About</a>
             <a class="blog-nav__active" href="/blog" aria-current="page">Blog</a>
             <a href="/reviews">Reviews</a>
             <a class="blog-nav__contact" href="/contact">Contact Me</a>
@@ -31,12 +36,12 @@
     </header>
 
     <main>
-        <section class="blog-hero" aria-labelledby="blog-heading">
+        <section class="blog-hero" aria-labelledby="blog-heading" data-reveal="fade">
             <div class="blog-hero__copy">
                 <p class="blog-eyebrow">Insights / Guidance / Real Estate</p>
                 <h1 id="blog-heading">Thoughtful guidance<br>for your next move.</h1>
                 <p>Practical real estate advice, local perspective, and ideas for building a business with intention.</p>
-                <a class="blog-hero__button" href="#latest-posts-heading">Explore All Articles <span aria-hidden="true">→</span></a>
+                <a class="blog-hero__button" href="#latest-posts-heading">Explore All Articles {{ icon('arrow-right', 'sm', 'site-icon--arrow') }}</a>
             </div>
 
             <aside class="featured-post" aria-labelledby="featured-post-heading">
@@ -56,7 +61,7 @@
                             <div class="featured-article__copy">
                                 <h2 id="featured-post-title"></h2>
                                 <p id="featured-post-excerpt"></p>
-                                <span>Read Article <span aria-hidden="true">→</span></span>
+                                <span>Read Article {{ icon('arrow-right', 'sm', 'site-icon--arrow') }}</span>
                             </div>
                         </div>
                     </a>
@@ -64,7 +69,7 @@
             </aside>
         </section>
 
-        <section class="post-feed" aria-labelledby="latest-posts-heading">
+        <section class="post-feed" aria-labelledby="latest-posts-heading" data-reveal="fade-up">
             <div class="post-feed__heading">
                 <div class="post-feed__title">
                     <p class="blog-eyebrow">From the Blog</p>
@@ -74,7 +79,7 @@
                 <div class="post-filter" data-post-filter>
                     <button class="post-filter__button" type="button" aria-expanded="false" aria-controls="post-filter-menu">
                         <span>Filter</span>
-                        <span aria-hidden="true">↓</span>
+                        {{ icon('chevron-down', 'sm') }}
                     </button>
                     <div class="post-filter__menu" id="post-filter-menu" hidden>
                         <button type="button" data-category="all" aria-pressed="true">All Articles</button>
@@ -104,7 +109,7 @@
                             </div>
                             <h3 class="post-card__title"></h3>
                             <p class="post-card__excerpt"></p>
-                            <span class="post-card__action">Read Article <span aria-hidden="true">→</span></span>
+                            <span class="post-card__action">Read Article {{ icon('arrow-right', 'sm', 'site-icon--arrow') }}</span>
                         </div>
                     </a>
                 </article>
@@ -112,11 +117,7 @@
         </section>
     </main>
 
-    <footer class="blog-footer">
-        <a href="/#home">Stephanie J Mendoza</a>
-        <p>Real estate guidance rooted in genuine connection.</p>
-        <a href="/contact">Let's Connect <span aria-hidden="true">→</span></a>
-    </footer>
+    {% include 'blog/_site_footer.html' %}
     {% include 'site/_consultation_modal.html' %}
 </body>
 </html>

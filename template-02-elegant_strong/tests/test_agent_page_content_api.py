@@ -254,7 +254,7 @@ class AgentPageContentApiTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"CMS Hero", response.data)
         self.assertIn(b"CMS Agent", response.data)
-        self.assertIn(b"CMS Application", response.data)
+        self.assertIn(b'CMS<br class="application-title__compact-break"> Application', response.data)
         self.assertIn(b"CMS Final CTA", response.data)
         self.assertIn(b'href="/contact">Let\'s Connect', response.data)
         self.assertIn(b'id="agent-license"', response.data)

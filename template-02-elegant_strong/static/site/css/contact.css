@@ -10,14 +10,79 @@
 }
 
 .contact-page .site-header {
-    position: relative;
+    position: sticky;
+    top: 0;
     border-bottom: 1px solid var(--contact-line);
     background: var(--contact-paper);
+}
+
+.contact-page .site-header.is-scrolled {
+    position: sticky;
+    top: 0;
 }
 
 .contact-page .main-nav__link { color: var(--contact-ink); }
 .contact-page .main-nav__link::after { background: var(--contact-ink); }
 .contact-page .button--light { border-color: var(--contact-ink); background: var(--contact-ink); color: #fff; }
+
+.contact-page .main-nav,
+.contact-page .main-nav ul,
+.contact-page .main-nav__link,
+.contact-page .button--light {
+    transition-duration: 180ms;
+    transition-property: color, font-size, gap, min-height, padding, transform;
+    transition-timing-function: ease;
+}
+
+@media (max-width: 1180px) {
+    .contact-page .mobile-nav {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-10px) scale(.985);
+        transform-origin: top right;
+        visibility: hidden;
+        transition: opacity 180ms ease, transform 220ms ease, visibility 0s linear 220ms;
+    }
+
+    .contact-page .mobile-nav.is-open {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0) scale(1);
+        visibility: visible;
+        transition-delay: 0s;
+    }
+
+    .contact-page .mobile-menu-button span {
+        transform-origin: center;
+        transition: opacity 160ms ease, transform 220ms ease;
+    }
+
+    .contact-page .mobile-menu-button[aria-expanded="true"] span:first-child {
+        transform: translateY(7px) rotate(45deg);
+    }
+
+    .contact-page .mobile-menu-button[aria-expanded="true"] span:nth-child(2) {
+        opacity: 0;
+        transform: scaleX(0);
+    }
+
+    .contact-page .mobile-menu-button[aria-expanded="true"] span:last-child {
+        transform: translateY(-7px) rotate(-45deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .contact-page .site-header,
+    .contact-page .wordmark img,
+    .contact-page .main-nav,
+    .contact-page .main-nav ul,
+    .contact-page .main-nav__link,
+    .contact-page .button--light,
+    .contact-page .mobile-nav,
+    .contact-page .mobile-menu-button span {
+        transition: none;
+    }
+}
 
 .contact-hero {
     width: min(100% - 32px, 1500px);
@@ -183,4 +248,11 @@
     .contact-field input,
     .contact-field select,
     .contact-field textarea { transition: none; }
+}
+.contact-field--website {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
 }

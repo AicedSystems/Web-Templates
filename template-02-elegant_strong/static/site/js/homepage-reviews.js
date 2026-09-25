@@ -29,7 +29,9 @@ if (homepageReviews) {
             const stars = document.createElement("span");
             stars.className = "review-card__stars";
             stars.setAttribute("aria-label", `${rating} out of 5 stars`);
-            stars.textContent = "★".repeat(Math.min(5, Math.max(1, rating)));
+            for (let index = 0; index < Math.min(5, Math.max(1, rating)); index += 1) {
+                window.siteIcons?.append(stars, "star");
+            }
             caption.append(stars);
         }
         card.append(quote, caption);

@@ -9,6 +9,7 @@ from secrets import compare_digest
 from datetime import datetime
 from urllib.parse import urlparse
 
+import httpx
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -20,6 +21,9 @@ app = Flask(__name__)
 database_url = os.environ.get("DATABASE_URL")
 editor_username = os.environ.get("EDITOR_USERNAME")
 editor_password = os.environ.get("EDITOR_PASSWORD")
+follow_up_boss_api_key = os.environ.get("FOLLOW_UP_BOSS_API_KEY", "").strip()
+follow_up_boss_system = os.environ.get("FOLLOW_UP_BOSS_SYSTEM", "").strip()
+follow_up_boss_system_key = os.environ.get("FOLLOW_UP_BOSS_SYSTEM_KEY", "").strip()
 
 if not database_url:
     raise RuntimeError("DATABASE_URL must be set to a PostgreSQL connection URL.")
@@ -123,6 +127,15 @@ MAXIMUM_REVIEW_IMAGE_URL_LENGTH = 2_048
 MAXIMUM_REVIEW_DISPLAY_ORDER = 2_147_483_647
 MAXIMUM_PAGE_SHORT_TEXT_LENGTH = 160
 MAXIMUM_PAGE_BODY_LENGTH = 2_000
+FOLLOW_UP_BOSS_EVENTS_URL = "https://api.followupboss.com/v1/events"
+FOLLOW_UP_BOSS_SOURCE = "Stephanie Mendoza Website"
+INQUIRY_TIMELINES = {
+    "As soon as possible",
+    "Within 3 months",
+    "Within 6 months",
+    "Within a year",
+    "Just exploring",
+}
 PAGE_IMAGE_SCOPES = {
     "about": "reviews-page/about",
     "featuredStory": "reviews-page/featured-story",
@@ -557,6 +570,12 @@ def serialize_post_summary(post):
         "title": post.title,
         "category": post.category,
         "excerpt": post.excerpt,
+        "featuredImageSettings": {
+            "focalX": post.featured_image_focal_x,
+            "focalY": post.featured_image_focal_y,
+            "fit": post.featured_image_fit,
+            "zoom": post.featured_image_zoom,
+        },
         "publishedDate": (
             f"{post.published_at.isoformat()}Z" if post.published_at else None
         ),
@@ -1979,6 +1998,111 @@ def sellers():
     return render_audience_page("sellers")
 
 
+@app.post("/api/inquiries")
+def create_public_inquiry():
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"message": "Please submit the inquiry form again."}), 400
+
+    # A filled honeypot is treated as a successful no-op so automated spam does
+    # not learn how to bypass it.
+    if str(data.get("website", "")).strip():
+        return jsonify({"message": "Thank you. Stephanie will be in touch soon."}), 200
+
+    form_type = str(data.get("formType", "journey")).strip().lower()
+    is_contact_form = form_type == "contact"
+
+    if is_contact_form:
+        first_name = str(data.get("firstName", "")).strip()
+        last_name = str(data.get("lastName", "")).strip()
+        name = f"{first_name} {last_name}".strip()
+    else:
+        first_name = ""
+        last_name = ""
+        name = str(data.get("name", "")).strip()
+    email = str(data.get("email", "")).strip()
+    phone = str(data.get("phone", "")).strip()
+    timeline = str(data.get("timeline", "")).strip()
+    audience = str(data.get("audience", "")).strip().lower()
+    interest = str(data.get("interest", "")).strip()
+    message = str(data.get("message", "")).strip()
+
+    if is_contact_form and (not first_name or not last_name or len(first_name) > 80 or len(last_name) > 80):
+        return jsonify({"message": "Please enter your first and last name."}), 400
+    if not name or len(name) > 161:
+        return jsonify({"message": "Please enter your full name."}), 400
+    if not email or len(email) > 254 or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
+        return jsonify({"message": "Please enter a valid email address."}), 400
+    if (not is_contact_form and not phone) or len(phone) > 30:
+        return jsonify({"message": "Please enter your phone number."}), 400
+    if is_contact_form:
+        allowed_interests = {
+            "Buying a home",
+            "Selling a home",
+            "Real estate mentorship",
+            "General real estate question",
+            "Something else",
+        }
+        if interest not in allowed_interests:
+            return jsonify({"message": "Please choose what you are interested in."}), 400
+        if not message or len(message) > 2000:
+            return jsonify({"message": "Please enter a message of 2,000 characters or fewer."}), 400
+    else:
+        if timeline not in INQUIRY_TIMELINES:
+            return jsonify({"message": "Please choose a timeline."}), 400
+        if audience not in AUDIENCE_PAGE_TYPES:
+            return jsonify({"message": "Please choose whether you are buying or selling."}), 400
+
+    if not (follow_up_boss_api_key and follow_up_boss_system and follow_up_boss_system_key):
+        app.logger.error("Follow Up Boss inquiry delivery is not configured.")
+        return jsonify({"message": "Online inquiries are temporarily unavailable. Please contact Stephanie directly."}), 503
+
+    name_parts = name.split(None, 1)
+    person = {"firstName": name_parts[0], "emails": [{"value": email}]}
+    if phone:
+        person["phones"] = [{"value": phone}]
+    if len(name_parts) == 2:
+        person["lastName"] = name_parts[1]
+
+    if is_contact_form:
+        event_type = "Seller Inquiry" if interest == "Selling a home" else "General Inquiry"
+        event_message = f"Website contact form. Interest: {interest}.\n\nMessage:\n{message}"
+    else:
+        event_type = "Seller Inquiry" if audience == "sellers" else "General Inquiry"
+        event_message = f"Website {audience[:-1]} inquiry. Timeline: {timeline}."
+
+    event_payload = {
+        "source": FOLLOW_UP_BOSS_SOURCE,
+        "system": follow_up_boss_system,
+        "type": event_type,
+        "message": event_message,
+        "person": person,
+    }
+    headers = {
+        "Accept": "application/json",
+        "X-System": follow_up_boss_system,
+        "X-System-Key": follow_up_boss_system_key,
+    }
+
+    try:
+        response = httpx.post(
+            FOLLOW_UP_BOSS_EVENTS_URL,
+            json=event_payload,
+            headers=headers,
+            auth=(follow_up_boss_api_key, ""),
+            timeout=10.0,
+        )
+    except httpx.RequestError:
+        app.logger.exception("Follow Up Boss inquiry delivery failed.")
+        return jsonify({"message": "We could not send your inquiry right now. Please try again shortly."}), 502
+
+    if response.status_code not in {200, 201}:
+        app.logger.error("Follow Up Boss rejected an inquiry with status %s.", response.status_code)
+        return jsonify({"message": "We could not send your inquiry right now. Please contact Stephanie directly."}), 502
+
+    return jsonify({"message": "Thank you. Stephanie will be in touch soon."}), 200
+
+
 @app.get("/admin/audience/<page_type>")
 @require_editor_auth
 def admin_audience_page_editor(page_type):
@@ -2890,13 +3014,19 @@ def list_posts():
             Post.category,
             Post.excerpt,
             Post.published_at,
+            Post.featured_image_focal_x,
+            Post.featured_image_focal_y,
+            Post.featured_image_fit,
+            Post.featured_image_zoom,
         )
         .where(Post.status == "published")
         .order_by(Post.published_at.desc(), Post.id.desc())
     )
     posts = db.session.execute(statement).all()
 
-    return jsonify([serialize_post_summary(post) for post in posts])
+    response = jsonify([serialize_post_summary(post) for post in posts])
+    response.headers["Cache-Control"] = "no-store"
+    return response
 
 
 @app.get("/api/posts/<int:post_id>/featured-image")
@@ -2946,6 +3076,10 @@ def list_admin_posts():
             Post.excerpt,
             Post.published_at,
             Post.status,
+            Post.featured_image_focal_x,
+            Post.featured_image_focal_y,
+            Post.featured_image_fit,
+            Post.featured_image_zoom,
         )
         .where(Post.status.in_({"published", "archived"}))
         .order_by(Post.published_at.desc(), Post.id.desc())

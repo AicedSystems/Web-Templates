@@ -76,7 +76,9 @@ function makeReviewCard(review) {
         const stars = document.createElement("p");
         stars.className = "review-card__stars";
         stars.setAttribute("aria-label", `${review.rating} out of 5 stars`);
-        stars.textContent = "★".repeat(Math.min(5, Math.max(1, Number(review.rating))));
+        for (let index = 0; index < Math.min(5, Math.max(1, Number(review.rating))); index += 1) {
+            window.siteIcons?.append(stars, "star");
+        }
         client.append(stars);
     }
     body.append(quote, client);

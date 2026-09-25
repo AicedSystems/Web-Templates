@@ -1,6 +1,12 @@
 .reviews-page .site-header {
-    position: relative;
+    position: sticky;
+    top: 0;
     background: var(--color-paper);
+}
+
+body.reviews-page .site-header.is-scrolled {
+    position: sticky;
+    top: 0;
 }
 
 .reviews-page .main-nav__link {
@@ -748,6 +754,7 @@
     }
 
     .reviews-hero__visual {
+        order: -1;
         min-height: 500px;
     }
 
