@@ -10,9 +10,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='site/css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='site/css/reviews.css', v='12') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/consultation-modal.css', v='1') }}">
     <script src="{{ url_for('static', filename='site/js/site-config.js') }}" defer></script>
     <script src="{{ url_for('static', filename='site/js/script.js') }}" defer></script>
     <script src="{{ url_for('static', filename='site/js/reviews.js', v='8') }}" defer></script>
+    <script src="{{ url_for('static', filename='site/js/consultation-modal.js', v='1') }}" defer></script>
     {% if editor_preview %}<script src="{{ url_for('static', filename='admin/reviews/js/page-preview.js', v='6') }}" defer></script>{% endif %}
 </head>
 <body class="reviews-page{% if editor_preview %} reviews-page--editor-preview{% endif %}">
@@ -24,11 +26,12 @@
         <nav class="main-nav" aria-label="Main navigation">
             <ul>
                 <li><a class="main-nav__link" href="/">Home</a></li>
-                <li><a class="main-nav__link" href="/#clients">Clients</a></li>
+                <li><a class="main-nav__link" href="/buyers">Buyers</a></li>
+                <li><a class="main-nav__link" href="/sellers">Sellers</a></li>
                 <li><a class="main-nav__link" href="/agents">Agents</a></li>
                 <li><a class="main-nav__link" href="/blog">Blog</a></li>
                 <li><a class="main-nav__link main-nav__link--active" href="/reviews">Reviews</a></li>
-                <li><a class="button button--light" href="/#contact">Contact Me</a></li>
+                <li><a class="button button--light" href="/contact">Contact Me</a></li>
             </ul>
         </nav>
         <button class="mobile-menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="mobile-navigation" aria-label="Open navigation menu">
@@ -36,8 +39,8 @@
         </button>
         <nav class="mobile-nav" id="mobile-navigation" data-mobile-nav aria-label="Mobile navigation" hidden>
             <ul>
-                <li><a href="/">Home</a></li><li><a href="/#clients">Clients</a></li><li><a href="/agents">Agents</a></li>
-                <li><a href="/blog">Blog</a></li><li><a href="/reviews">Reviews</a></li><li><a href="/#contact">Contact</a></li>
+                <li><a href="/">Home</a></li><li><a href="/buyers">Buyers</a></li><li><a href="/sellers">Sellers</a></li><li><a href="/agents">Agents</a></li>
+                <li><a href="/blog">Blog</a></li><li><a href="/reviews">Reviews</a></li><li><a href="/contact">Contact</a></li>
             </ul>
         </nav>
     </header>
@@ -49,7 +52,7 @@
                 <h1 id="reviews-title">{{ page.hero.titleLine1 if page else 'A partner in' }}<br><em>{{ page.hero.titleEmphasis if page else 'your next chapter.' }}</em></h1>
                 <span class="reviews-hero__rule" aria-hidden="true"></span>
                 <p>{{ page.hero.description if page else 'Buying, selling, or investing—every move deserves clear guidance, genuine care, and a trusted advocate by your side.' }}</p>
-                <a class="button" href="{{ page.hero.cta.href if page else '/#contact' }}">{{ page.hero.cta.label if page else "Let's Connect" }} <span aria-hidden="true">&rarr;</span></a>
+                <a class="button" href="/contact">{{ page.hero.cta.label if page else "Let's Connect" }} <span aria-hidden="true">&rarr;</span></a>
                 <dl class="reviews-hero__values" aria-label="Stephanie's approach">
                     {% set hero_values = page.hero['values'] if page else [{'title':'Local','subtitle':'Expertise'},{'title':'Client-first','subtitle':'Approach'},{'title':'Lasting','subtitle':'Relationships'}] %}
                     {% for value in hero_values %}<div><dt>{{ value.title }}</dt><dd>{{ value.subtitle }}</dd></div>{% endfor %}
@@ -78,7 +81,7 @@
             </div>
         </section>
 
-        <section class="reviews-showcase" aria-labelledby="stories-title">
+        <section class="reviews-showcase" id="client-stories" aria-labelledby="stories-title">
             <div class="reviews-showcase__heading">
                 <p class="eyebrow">Client stories</p>
                 <h2 id="stories-title">Real People. Real Results.</h2>
@@ -134,7 +137,7 @@
             <div>
                 <p class="eyebrow">{{ page.finalCta.eyebrow if page else "Ready for what's next?" }}</p>
                 <h2 id="reviews-cta-title">{{ page.finalCta.title if page else "Let's Make It Happen Together." }}</h2>
-                <a class="button" href="{{ page.finalCta.cta.href if page else '/#contact' }}">{{ page.finalCta.cta.label if page else 'Contact Me' }} <span aria-hidden="true">&rarr;</span></a>
+                <a class="button" href="/contact">{{ page.finalCta.cta.label if page else 'Contact Me' }} <span aria-hidden="true">&rarr;</span></a>
             </div>
         </section>
     </main>
@@ -175,6 +178,7 @@
             </div>
         </div>
     </footer>
+    {% include 'site/_consultation_modal.html' %}
     <script async src="https://www.instagram.com/embed.js"></script>
 </body>
 </html>

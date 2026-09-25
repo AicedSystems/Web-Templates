@@ -20,9 +20,11 @@
             </a>
 
             <nav class="admin-nav" aria-label="Content Studio navigation">
+                {% include 'admin/_sidebar_navigation.html' %}
                 <a class="admin-nav__link admin-nav__link--active" href="{{ url_for('admin_blog_dashboard') }}" aria-current="page">
                     <span aria-hidden="true">⌂</span> Dashboard
                 </a>
+                <a class="admin-nav__link" href="{{ url_for('admin_home_page_editor') }}"><span aria-hidden="true">◆</span> Home Page</a>
                 <a class="admin-nav__link" href="{{ url_for('admin_blog_new') }}">
                     <span aria-hidden="true">＋</span> Create Article
                 </a>
@@ -38,6 +40,9 @@
                 <a class="admin-nav__link" href="{{ url_for('admin_reviews_page_editor') }}">
                     <span aria-hidden="true">▱</span> Reviews Page
                 </a>
+                <a class="admin-nav__link" href="{{ url_for('admin_agents_page_editor') }}"><span aria-hidden="true">◇</span> Agents Page</a>
+                <a class="admin-nav__link" href="{{ url_for('admin_audience_page_editor', page_type='buyers') }}"><span aria-hidden="true">⌂</span> Buyers Page</a>
+                <a class="admin-nav__link" href="{{ url_for('admin_audience_page_editor', page_type='sellers') }}"><span aria-hidden="true">⌂</span> Sellers Page</a>
                 <a class="admin-nav__link" href="{{ admin_site.blog_url }}">
                     <span aria-hidden="true">↗</span> Public Blog
                 </a>

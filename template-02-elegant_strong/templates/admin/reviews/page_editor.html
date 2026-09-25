@@ -22,12 +22,17 @@
                 <span>{{ admin_site.admin_title }}</span>
             </a>
             <nav class="admin-nav" aria-label="Content Studio navigation">
+                {% include 'admin/_sidebar_navigation.html' %}
                 <a class="admin-nav__link" href="{{ url_for('admin_blog_dashboard') }}"><span aria-hidden="true">⌂</span> Dashboard</a>
+                <a class="admin-nav__link" href="{{ url_for('admin_home_page_editor') }}"><span aria-hidden="true">◆</span> Home Page</a>
                 <a class="admin-nav__link" href="{{ url_for('admin_blog_new') }}"><span aria-hidden="true">＋</span> Create Article</a>
                 <a class="admin-nav__link" href="{{ url_for('admin_blog_new_paste') }}"><span aria-hidden="true">▤</span> Paste Article</a>
                 <a class="admin-nav__link" href="{{ url_for('admin_blog_archived') }}"><span aria-hidden="true">□</span> Archived Articles</a>
                 <a class="admin-nav__link" href="{{ url_for('admin_reviews_manager') }}"><span aria-hidden="true">★</span> Reviews</a>
                 <a class="admin-nav__link admin-nav__link--active" href="{{ url_for('admin_reviews_page_editor') }}" aria-current="page"><span aria-hidden="true">▱</span> Reviews Page</a>
+                <a class="admin-nav__link" href="{{ url_for('admin_agents_page_editor') }}"><span aria-hidden="true">◇</span> Agents Page</a>
+                <a class="admin-nav__link" href="{{ url_for('admin_audience_page_editor', page_type='buyers') }}"><span aria-hidden="true">⌂</span> Buyers Page</a>
+                <a class="admin-nav__link" href="{{ url_for('admin_audience_page_editor', page_type='sellers') }}"><span aria-hidden="true">⌂</span> Sellers Page</a>
                 <a class="admin-nav__link" href="{{ admin_site.blog_url }}"><span aria-hidden="true">↗</span> Public Blog</a>
             </nav>
             <div class="admin-sidebar__footer"><span>Private workspace</span><a href="{{ admin_site.live_site_url }}">View Live Site <span aria-hidden="true">↗</span></a></div>

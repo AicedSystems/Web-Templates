@@ -24,10 +24,14 @@
             </a>
             <nav aria-label="Editor navigation">
                 <a href="{{ url_for('admin_blog_dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('admin_home_page_editor') }}">Home Page</a>
                 <a href="{{ url_for('admin_blog_new') }}">New Article</a>
                 <a href="{{ url_for('admin_blog_new_paste') }}">Paste Article</a>
                 <a href="{{ url_for('admin_reviews_manager') }}">Reviews</a>
                 <a href="{{ url_for('admin_reviews_page_editor') }}">Reviews Page</a>
+                <a href="{{ url_for('admin_agents_page_editor') }}">Agents Page</a>
+                <a href="{{ url_for('admin_audience_page_editor', page_type='buyers') }}">Buyers Page</a>
+                <a href="{{ url_for('admin_audience_page_editor', page_type='sellers') }}">Sellers Page</a>
                 <a href="{{ admin_site.blog_url }}">Public Blog</a>
                 <a href="{{ admin_site.live_site_url }}">Live Site</a>
             </nav>
@@ -112,6 +116,21 @@
                             <span id="preview-no-image"><strong>Choose an image</strong><small>JPEG, PNG, or WebP up to 5 MB</small></span>
                         </label>
                         <button class="editor-link-button" id="remove-thumbnail-button" type="button" hidden>Remove image</button>
+                        <div class="featured-image-controls" id="featured-image-controls" hidden>
+                            <div class="featured-image-controls__row" aria-label="Image fit">
+                                <button type="button" data-featured-fit="cover">Fill frame</button>
+                                <button type="button" data-featured-fit="contain">Show whole image</button>
+                            </div>
+                            <div class="featured-image-controls__row" aria-label="Image zoom">
+                                <button type="button" id="featured-image-zoom-out" aria-label="Zoom image out">−</button>
+                                <output id="featured-image-zoom-value">100%</output>
+                                <button type="button" id="featured-image-zoom-in" aria-label="Zoom image in">＋</button>
+                                <button type="button" id="featured-image-reset">Reset</button>
+                            </div>
+                            <label><span>Left / right focus</span><input id="featured-image-focal-x" type="range" min="0" max="100" step="1" value="50"></label>
+                            <label><span>Up / down focus</span><input id="featured-image-focal-y" type="range" min="0" max="100" step="1" value="50"></label>
+                            <p>These controls adjust the article card, preview, and published cover photo.</p>
+                        </div>
                     </section>
 
                     <section class="editor-panel editor-preview" aria-labelledby="preview-title-heading">
@@ -123,9 +142,18 @@
                                 </svg>
                             </button>
                         </div>
-                        <p class="editor-preview__category" id="preview-category">Select a category</p>
-                        <h3 id="preview-title">Your article title</h3>
-                        <p id="preview-excerpt">Your article summary will appear here.</p>
+                        <article class="editor-post-card-preview">
+                            <div class="editor-post-card-preview__media">
+                                <img id="post-card-preview-image" alt="" hidden>
+                                <span id="post-card-preview-placeholder" aria-hidden="true">SJ</span>
+                            </div>
+                            <div class="editor-post-card-preview__body">
+                                <p class="editor-preview__category" id="preview-category">Select a category</p>
+                                <h3 id="preview-title">Your article title</h3>
+                                <p id="preview-excerpt">Your article summary will appear here.</p>
+                                <span>Read Article →</span>
+                            </div>
+                        </article>
                     </section>
                     <section class="editor-panel editor-actions">
                         <p class="publishing-status" id="publishing-status" aria-live="polite"></p>

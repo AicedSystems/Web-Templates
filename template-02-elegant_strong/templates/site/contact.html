@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Contact Stephanie J Mendoza to discuss your Antelope Valley real estate goals.">
+    <title>Contact | Stephanie J Mendoza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/contact.css', v='1') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/consultation-modal.css', v='1') }}">
+    <script src="{{ url_for('static', filename='site/js/site-config.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='site/js/script.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='site/js/contact.js', v='1') }}" defer></script>
+    <script src="{{ url_for('static', filename='site/js/consultation-modal.js', v='1') }}" defer></script>
+</head>
+<body class="contact-page">
+    <header class="site-header">
+        <a class="wordmark" href="/" aria-label="Stephanie J Mendoza home"><img data-logo-image src="{{ url_for('static', filename='site/images/realtor-logo.png') }}" alt="Stephanie J Mendoza Real Estate Agent"></a>
+        <nav class="main-nav" aria-label="Main navigation">
+            <ul>
+                <li><a class="main-nav__link" href="/">Home</a></li>
+                <li><a class="main-nav__link" href="/buyers">Buyers</a></li>
+                <li><a class="main-nav__link" href="/sellers">Sellers</a></li>
+                <li><a class="main-nav__link" href="/agents">Agents</a></li>
+                <li><a class="main-nav__link" href="/blog">Blog</a></li>
+                <li><a class="main-nav__link" href="/reviews">Reviews</a></li>
+                <li><a class="button button--light" href="/contact" aria-current="page">Contact Me</a></li>
+            </ul>
+        </nav>
+        <button class="mobile-menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="mobile-navigation" aria-label="Open navigation menu"><span></span><span></span><span></span></button>
+        <nav class="mobile-nav" id="mobile-navigation" data-mobile-nav aria-label="Mobile navigation" hidden>
+            <ul><li><a href="/">Home</a></li><li><a href="/buyers">Buyers</a></li><li><a href="/sellers">Sellers</a></li><li><a href="/agents">Agents</a></li><li><a href="/blog">Blog</a></li><li><a href="/reviews">Reviews</a></li><li><a href="/contact" aria-current="page">Contact</a></li></ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="contact-hero" aria-labelledby="contact-title">
+            <div class="contact-hero__copy">
+                <p class="eyebrow">Let’s connect</p>
+                <h1 id="contact-title">I’d Love to Hear<br>from You.</h1>
+                <p>Whether you have a question, want to discuss your goals, or are ready to take the next step, I’m here to help. Send a message or reach out directly using the information below.</p>
+            </div>
+            <figure class="contact-hero__media"><img src="{{ url_for('static', filename='site/images/contactpagehero.webp') }}" alt="Bright and welcoming living room prepared for a conversation about home"></figure>
+        </section>
+
+        <section class="contact-workspace" aria-label="Contact options">
+            <div class="contact-form-card">
+                <header><p class="eyebrow">Start a conversation</p><h2>Send a Message</h2><p>Fill out the form below and I’ll be in touch soon.</p></header>
+                <form class="contact-form" data-contact-form novalidate>
+                    <div class="contact-form__row">
+                        <div class="contact-field"><label for="contact-first-name">First name *</label><input id="contact-first-name" name="firstName" type="text" autocomplete="given-name" maxlength="80" required><small data-error-for="contact-first-name"></small></div>
+                        <div class="contact-field"><label for="contact-last-name">Last name *</label><input id="contact-last-name" name="lastName" type="text" autocomplete="family-name" maxlength="80" required><small data-error-for="contact-last-name"></small></div>
+                    </div>
+                    <div class="contact-field"><label for="contact-email">Email address *</label><input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" required><small data-error-for="contact-email"></small></div>
+                    <div class="contact-field"><label for="contact-phone">Phone number</label><input id="contact-phone" name="phone" type="tel" autocomplete="tel" maxlength="30"><small data-error-for="contact-phone"></small></div>
+                    <div class="contact-field"><label for="contact-interest">I’m interested in *</label><select id="contact-interest" name="interest" required><option value="">Select an option</option><option>Buying a home</option><option>Selling a home</option><option>Real estate mentorship</option><option>General real estate question</option><option>Something else</option></select><small data-error-for="contact-interest"></small></div>
+                    <div class="contact-field"><label for="contact-message">Your message *</label><textarea id="contact-message" name="message" rows="5" maxlength="2000" required></textarea><small data-error-for="contact-message"></small></div>
+                    <button class="button" type="submit">Send Message <span aria-hidden="true">→</span></button>
+                    <p class="contact-form__status" data-contact-status role="status"></p>
+                </form>
+            </div>
+
+            <aside class="contact-options">
+                <article class="consultation-card">
+                    <div><p class="eyebrow">Prefer to talk now?</p><h2>Schedule a Consultation</h2><p>Choose a time to talk through your goals and the next step that makes sense for you.</p></div>
+                    <span class="contact-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M8 14h2M14 14h2M8 17h2M14 17h2"/></svg></span>
+                    <button class="button" type="button" data-consultation-open>Schedule a Consultation <span aria-hidden="true">→</span></button>
+                </article>
+                <article class="direct-contact-card">
+                    <h2>Other Ways to Connect</h2>
+                    <ul>
+                        <li><span class="contact-icon" aria-hidden="true">☎</span><div><strong>Call or Text</strong><a data-phone-link data-realtor-phone href="tel:16614351239">(661) 435-1239</a></div></li>
+                        <li><span class="contact-icon" aria-hidden="true">✉</span><div><strong>Email</strong><a data-email-link data-realtor-email href="mailto:RealtorStephanieAV@gmail.com">RealtorStephanieAV@gmail.com</a></div></li>
+                        <li><span class="contact-icon" aria-hidden="true">⌖</span><div><strong>Service Area</strong><span>Antelope Valley, California</span></div></li>
+                        <li><span class="contact-icon" aria-hidden="true">◷</span><div><strong>Availability</strong><span>Consultations by appointment</span></div></li>
+                    </ul>
+                </article>
+            </aside>
+        </section>
+
+        {% include 'site/_consultation_modal.html' %}
+    </main>
+
+    <footer class="site-footer"><div class="site-footer__inner"><a class="site-footer__logo" href="/" aria-label="Stephanie J Mendoza home"><img data-logo-image src="{{ url_for('static', filename='site/images/realtor-logo.png') }}" alt="Stephanie J Mendoza Real Estate Agent"></a><div class="site-footer__contact"><div class="site-footer__identity"><strong data-realtor-name>Stephanie J Mendoza</strong><span>Real Estate Agent</span><span>DRE #<span data-realtor-license>02006601</span></span><span data-realtor-brokerage>Real Broker</span></div><a data-phone-link data-realtor-phone href="tel:16614351239">(661) 435-1239</a><a data-email-link data-realtor-email href="mailto:RealtorStephanieAV@gmail.com">RealtorStephanieAV@gmail.com</a><div class="site-footer__socials" aria-label="Social media links"><a data-facebook-link href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4.5A15 15 0 0 0 14.4 4C11.8 4 10 5.6 10 8.6V11H7v4h3v7h4v-7h3.2l.5-4H14V8.6c0-.4.2-.6.6-.6Z"/></svg></a><a data-instagram-link href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" class="social-dot"/></svg></a></div></div><div class="site-footer__legal"><nav aria-label="Legal links"><a href="#">Privacy Policy</a><a href="#">Terms of Use</a></nav><p>&copy; <span data-footer-year>2026</span> <span data-realtor-name>Stephanie J Mendoza</span>. All rights reserved.</p></div></div></footer>
+</body>
+</html>

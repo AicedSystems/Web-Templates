@@ -9,10 +9,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='site/css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/consultation-modal.css', v='1') }}">
     <script src="{{ url_for('static', filename='site/js/site-config.js') }}" defer></script>
     <script src="{{ url_for('static', filename='site/js/script.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='site/js/homepage-reviews.js', v='1') }}" defer></script>
+    <script src="{{ url_for('static', filename='site/js/homepage-blog.js', v='1') }}" defer></script>
+    <script src="{{ url_for('static', filename='site/js/homepage-hero-media.js', v='1') }}" defer></script>
+    <script src="{{ url_for('static', filename='site/js/consultation-modal.js', v='1') }}" defer></script>
+    {% if editor_preview %}<link rel="stylesheet" href="{{ url_for('static', filename='admin/home/css/page-preview.css', v='1') }}"><script src="{{ url_for('static', filename='admin/home/js/page-preview.js', v='1') }}" defer></script>{% endif %}
 </head>
-<body>
+<body{% if editor_preview %} data-home-preview="true"{% endif %}>
+    <script id="homepage-articles-data" type="application/json">{{ home_articles|tojson }}</script>
     <header class="site-header">
         <a class="wordmark" href="#home" aria-label="Stephanie J Mendoza home">
             <img data-logo-image src="{{ url_for('static', filename='site/images/realtor-logo.png') }}"
@@ -21,11 +28,12 @@
         <nav class="main-nav" aria-label="Main navigation">
             <ul>
                 <li><a class="main-nav__link main-nav__link--active" href="#home">Home</a></li>
-                <li><a class="main-nav__link" href="#clients">Clients</a></li>
+                <li><a class="main-nav__link" href="/buyers">Buyers</a></li>
+                <li><a class="main-nav__link" href="/sellers">Sellers</a></li>
                 <li><a class="main-nav__link" href="/agents">Agents</a></li>
                 <li><a class="main-nav__link" href="/blog">Blog</a></li>
                 <li><a class="main-nav__link" href="/reviews">Reviews</a></li>
-                <li><a class="button button--light" href="#contact">Contact Me</a></li>
+                <li><a class="button button--light" href="/contact">Contact Me</a></li>
             </ul>
         </nav>
 
@@ -39,85 +47,69 @@
         <nav class="mobile-nav" id="mobile-navigation" data-mobile-nav aria-label="Mobile navigation" hidden>
             <ul>
                 <li><a href="#home">Home</a></li>
-                <li><a href="#clients">Clients</a></li>
+                <li><a href="/buyers">Buyers</a></li>
+                <li><a href="/sellers">Sellers</a></li>
                 <li><a href="/agents">Agents</a></li>
                 <li><a href="/blog">Blog</a></li>
                 <li><a href="/reviews">Reviews</a></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="/contact">Contact</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
-        <section class="hero" id="home" aria-labelledby="hero-heading">
+        {% set has_managed_hero_media = (home_page.hero.mediaType == 'video' and home_page.hero.video) or home_page.hero.image %}
+        <section class="hero{% if has_managed_hero_media %} hero--managed-media{% else %} hero--fallback-media{% endif %}" id="home" aria-labelledby="hero-heading" data-home-section="hero">
             <div class="hero__copy">
-                <p class="eyebrow">Real estate. Real connections. Real results.</p>
-                <h1 id="hero-heading">Guiding clients forward.<br><span>Empowering agents to grow.</span></h1>
+                <p class="eyebrow">{{ home_page.hero.eyebrow }}</p>
+                <h1 id="hero-heading">{{ home_page.hero.headingLine1 }}<br><span>{{ home_page.hero.headingLine2 }}</span></h1>
                 <span class="hero__rule" aria-hidden="true"></span>
-                <p class="hero__intro" data-hero-intro>Helping buyers and sellers make confident moves throughout the Antelope Valley while mentoring agents to build the business and life they deserve.</p>
+                <p class="hero__intro" data-hero-intro data-cms-text="true">{{ home_page.hero.description }}</p>
                 <div class="hero__actions">
-                    <a class="button" href="#clients">I'm a Client</a>
+                    <a class="button" href="#clients">Buy or Sell a Home</a>
                     <a class="button button--outline" href="/agents">I'm an Agent</a>
                 </div>
                 <div class="hero-blog">
-                    <p class="hero-blog__label">From the Blog</p>
-                    <!-- Temporary static demo cards. Replace with API-loaded published posts during future CMS integration. -->
+                    <p class="hero-blog__label">{{ home_page.blog.previewLabel }}</p>
                     <div class="hero-blog__list" data-blog-preview>
-                        <a class="hero-blog__card" href="/blog">
-                            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&amp;fit=crop&amp;w=500&amp;q=85"
-                                alt="Modern home exterior">
-                            <div class="hero-blog__content">
-                                <p>Buying Insights</p>
-                                <h2>3 questions to ask before buying your next home</h2>
-                                <span>Read Article →</span>
-                            </div>
-                        </a>
-                        <a class="hero-blog__card" href="/blog">
-                            <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&amp;fit=crop&amp;w=500&amp;q=85"
-                                alt="Professionals collaborating around a table">
-                            <div class="hero-blog__content">
-                                <p>Agent Growth</p>
-                                <h2>Building a real estate business that lasts</h2>
-                                <span>Read Article →</span>
-                            </div>
-                        </a>
-                        <a class="hero-blog__card" href="/blog">
-                            <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&amp;fit=crop&amp;w=500&amp;q=85"
-                                alt="House keys resting beside a model home">
-                            <div class="hero-blog__content">
-                                <p>Selling Strategy</p>
-                                <h2>Simple ways to prepare your home for market</h2>
-                                <span>Read Article →</span>
-                            </div>
-                        </a>
+                        <p class="hero-blog__status">Loading published articles…</p>
                     </div>
                 </div>
             </div>
 
-            <div class="hero__visual" aria-label="Portrait of Stephanie J Mendoza">
-                <img data-hero-image src="{{ url_for('static', filename='site/images/hero-portrait.png') }}"
-                    alt="Stephanie J Mendoza wearing a black suit">
+            <div class="hero__visual" aria-label="Portrait of Stephanie J Mendoza" data-home-hero-media>
+                {% if home_page.hero.mediaType == 'video' and home_page.hero.video %}
+                <div class="hero__media-frame hero__media-frame--managed" data-home-hero-media-frame>
+                <video data-hero-video data-cms-image="true" src="{{ home_page.hero.video.publicUrl }}" style="--home-image-position: {{ home_page.hero.video.focalX }}% {{ home_page.hero.video.focalY }}%" autoplay muted loop playsinline preload="metadata"></video>
+                </div>
+                {% elif home_page.hero.image %}
+                <div class="hero__media-frame hero__media-frame--managed" data-home-hero-media-frame>
+                <img data-hero-image data-cms-image="true" src="{{ home_page.hero.image.publicUrl }}" style="--home-image-position: {{ home_page.hero.image.focalX }}% {{ home_page.hero.image.focalY }}%; --home-image-fit: {{ home_page.hero.image.fit }}; --home-image-zoom: {{ home_page.hero.image.zoom / 100 }}" alt="Stephanie J Mendoza wearing a black suit">
+                </div>
+                {% else %}
+                <img data-hero-image src="{{ url_for('static', filename='site/images/hero-portrait.png') }}" alt="Stephanie J Mendoza wearing a black suit">
+                {% endif %}
             </div>
 
             <div class="hero-directory" aria-label="Explore Stephanie's services">
                 <a class="directory-item" href="#clients">
                     <span class="directory-item__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M15 14a5 5 0 0 1 6 5v1"/></svg></span>
-                    <h2>For Clients</h2><p>Buying, selling, and everything in between. I'm here for you.</p>
+                    <h2>{{ home_page.serviceDirectory["items"][0].heading }}</h2><p>{{ home_page.serviceDirectory["items"][0].description }}</p>
                 </a>
                 <a class="directory-item" href="#about">
                     <span class="directory-item__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5M5.5 10v10h13V10M9.5 20v-6h5v6"/></svg></span>
-                    <h2>About Stephanie</h2><p>Your realtor. Your mentor. Your advocate.</p>
+                    <h2>{{ home_page.serviceDirectory["items"][1].heading }}</h2><p>{{ home_page.serviceDirectory["items"][1].description }}</p>
                 </a>
                 <a class="directory-item" href="/agents">
                     <span class="directory-item__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="1"/><path d="M9 7V4h6v3M3 12h18M10 12v2h4v-2"/></svg></span>
-                    <h2>For Agents</h2><p>Mentorship, training, and support to help you build and grow.</p>
+                    <h2>{{ home_page.serviceDirectory["items"][2].heading }}</h2><p>{{ home_page.serviceDirectory["items"][2].description }}</p>
                 </a>
             </div>
         </section>
-        <section class="clients-section" id="clients" aria-labelledby="clients-heading">
+        <section class="clients-section" id="clients" aria-labelledby="clients-heading" data-home-section="clients">
             <div class="clients-section__media">
-                <img data-clients-image
-                    src="https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&amp;fit=crop&amp;w=1400&amp;q=88"
+                <img data-clients-image{% if home_page.clients.image %} data-cms-image="true" src="{{ home_page.clients.image.publicUrl }}" style="--home-image-position: {{ home_page.clients.image.focalX }}% {{ home_page.clients.image.focalY }}%; --home-image-fit: {{ home_page.clients.image.fit }}; --home-image-zoom: {{ home_page.clients.image.zoom / 100 }}"{% else %}
+                    src="https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&amp;fit=crop&amp;w=1400&amp;q=88"{% endif %}
                     alt="Warm, elegant living room interior">
 
                 <div class="service-area">
@@ -125,62 +117,56 @@
                         <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/>
                         <circle cx="12" cy="10" r="2.5"/>
                     </svg>
-                    <p>Proudly serving the<br>Antelope Valley<br>&amp; surrounding areas</p>
+                    <p>{{ home_page.clients.serviceArea }}</p>
                 </div>
             </div>
 
             <div class="clients-section__content">
-                <p class="section-number">01 / For Clients</p>
-                <h2 id="clients-heading">Buy with clarity.<br>Sell with confidence.</h2>
+                <p class="section-number">{{ home_page.clients.eyebrow }}</p>
+                <h2 id="clients-heading">{{ home_page.clients.headingLine1 }}<br>{{ home_page.clients.headingLine2 }}</h2>
                 <span class="clients-section__rule" aria-hidden="true"></span>
                 <p class="clients-section__intro">
-                    Whether you're buying your first home, upgrading, downsizing, or selling a property you've outgrown, I provide expert guidance and a seamless experience from start to finish.
+                    {{ home_page.clients.description }}
                 </p>
 
                 <nav class="service-links" aria-label="Client services">
-                    <a href="#contact">
-                        <span>Buying a Home</span>
-                        <small>01</small>
+                    <a href="/buyers">
+                        <span>{{ home_page.clients.serviceLabels[0] }}</span>
                         <strong aria-hidden="true">→</strong>
                     </a>
-                    <a href="#contact">
-                        <span>Selling a Home</span>
-                        <small>02</small>
-                        <strong aria-hidden="true">→</strong>
-                    </a>
-                    <a href="#contact">
-                        <span>Client Resources</span>
-                        <small>03</small>
+                    <a href="/sellers">
+                        <span>{{ home_page.clients.serviceLabels[1] }}</span>
                         <strong aria-hidden="true">→</strong>
                     </a>
                 </nav>
             </div>
         </section>
 
-        <section class="about-section" id="about" aria-labelledby="about-heading">
+        <section class="about-section" id="about" aria-labelledby="about-heading" data-home-section="about">
             <div class="about-section__image">
-                <img data-about-image src="{{ url_for('static', filename='site/images/about-portrait.webp') }}"
+                <img data-about-image{% if home_page.about.image %} data-cms-image="true" src="{{ home_page.about.image.publicUrl }}" style="--home-image-position: {{ home_page.about.image.focalX }}% {{ home_page.about.image.focalY }}%; --home-image-fit: {{ home_page.about.image.fit }}; --home-image-zoom: {{ home_page.about.image.zoom / 100 }}"{% else %} src="{{ url_for('static', filename='site/images/about-portrait.webp') }}"{% endif %}
                     alt="Portrait of Stephanie J Mendoza">
             </div>
             <div class="about-section__content">
-                <p class="section-number">About / Stephanie</p>
-                <h2 id="about-heading">Guidance grounded in real connection.</h2>
+                <p class="section-number">{{ home_page.about.eyebrow }}</p>
+                <h2 id="about-heading">{{ home_page.about.heading }}</h2>
                 <p>
-                    Stephanie helps clients move forward with clarity while supporting agents as they build confident, sustainable businesses. Replace this short biography with the realtor's approved story before launch.
+                    {{ home_page.about.description }}
                 </p>
+                <a class="button about-section__button" href="/reviews">{{ home_page.about.buttonLabel }} <span aria-hidden="true">→</span></a>
             </div>
         </section>
 
-        <section class="agents-section" id="agents" aria-labelledby="agents-heading">
+        <section class="agents-section" id="agents" aria-labelledby="agents-heading" data-home-section="agents">
             <div class="agents-section__content">
                 <div class="agents-section__intro">
-                    <p class="section-number">02 / For Agents</p>
-                    <h2 id="agents-heading">Build more than a business.<br>Build something that's yours.</h2>
+                    <p class="section-number">{{ home_page.agents.eyebrow }}</p>
+                    <h2 id="agents-heading">{{ home_page.agents.headingLine1 }}<br>{{ home_page.agents.headingLine2 }}</h2>
                     <span class="agents-section__rule" aria-hidden="true"></span>
                     <p>
-                        Through mentorship, training, and a supportive community, I help agents grow their skills, strengthen their confidence, and create the freedom they're working for.
+                        {{ home_page.agents.description }}
                     </p>
-                    <a class="button agents-section__button" href="#contact">Explore Mentorship <span aria-hidden="true">→</span></a>
+                    <a class="button agents-section__button" href="/agents">{{ home_page.agents.buttonLabel }} <span aria-hidden="true">→</span></a>
                 </div>
 
                 <div class="agent-benefits">
@@ -188,67 +174,62 @@
                         <span class="agent-benefit__icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="8" r="2.5"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M15 14a5 5 0 0 1 6 5v1"/></svg>
                         </span>
-                        <div><h3>Mentorship</h3><p>One-on-one guidance from someone who's been there.</p></div>
+                        <div><h3>{{ home_page.agents.benefits[0].heading }}</h3><p>{{ home_page.agents.benefits[0].description }}</p></div>
                     </article>
                     <article class="agent-benefit">
                         <span class="agent-benefit__icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><path d="M3 5.5A9 9 0 0 1 12 7v13a9 9 0 0 0-9-1.5v-13ZM21 5.5A9 9 0 0 0 12 7v13a9 9 0 0 1 9-1.5v-13Z"/></svg>
                         </span>
-                        <div><h3>Training</h3><p>Practical tools and strategies to sharpen your skills.</p></div>
+                        <div><h3>{{ home_page.agents.benefits[1].heading }}</h3><p>{{ home_page.agents.benefits[1].description }}</p></div>
                     </article>
                     <article class="agent-benefit">
                         <span class="agent-benefit__icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3"/><circle cx="5" cy="9" r="2"/><circle cx="19" cy="9" r="2"/><path d="M6 20v-2a6 6 0 0 1 12 0v2M1 19v-1a4 4 0 0 1 5-4M23 19v-1a4 4 0 0 0-5-4"/></svg>
                         </span>
-                        <div><h3>Community</h3><p>A network of motivated agents who support each other.</p></div>
+                        <div><h3>{{ home_page.agents.benefits[2].heading }}</h3><p>{{ home_page.agents.benefits[2].description }}</p></div>
                     </article>
                     <article class="agent-benefit">
                         <span class="agent-benefit__icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V6M16 20v-8M22 20V3M2 20h21M3 8l6-5 6 5 7-7"/></svg>
                         </span>
-                        <div><h3>Growth</h3><p>Build a business and a life you're proud of.</p></div>
+                        <div><h3>{{ home_page.agents.benefits[3].heading }}</h3><p>{{ home_page.agents.benefits[3].description }}</p></div>
                     </article>
                 </div>
             </div>
 
             <div class="agents-section__media">
-                <img data-agents-image src="{{ url_for('static', filename='site/images/agents-feature.jpg') }}"
+                <img data-agents-image{% if home_page.agents.image %} data-cms-image="true" src="{{ home_page.agents.image.publicUrl }}" style="--home-image-position: {{ home_page.agents.image.focalX }}% {{ home_page.agents.image.focalY }}%; --home-image-fit: {{ home_page.agents.image.fit }}; --home-image-zoom: {{ home_page.agents.image.zoom / 100 }}"{% else %} src="{{ url_for('static', filename='site/images/agents-feature.jpg') }}"{% endif %}
                     alt="A diverse group of professionals collaborating around a table">
             </div>
         </section>
 
-        <section class="reviews-section" id="reviews" aria-labelledby="reviews-heading">
+        <section class="reviews-section" id="reviews" aria-labelledby="reviews-heading" data-home-section="reviews">
             <div class="section-shell">
-                <p class="section-number">03 / Kind Words</p>
-                <h2 id="reviews-heading">What clients are saying</h2>
-                <div class="reviews-grid">
-                    <figure class="review-card">
-                        <blockquote>“Stephanie made the entire process feel clear and manageable. We always knew what came next.”</blockquote>
-                        <figcaption><strong>Client Name</strong><span>First-Time Buyer</span></figcaption>
-                    </figure>
-                    <figure class="review-card">
-                        <blockquote>“Her communication and attention to detail gave us confidence from our first meeting through closing.”</blockquote>
-                        <figcaption><strong>Client Name</strong><span>Home Seller</span></figcaption>
-                    </figure>
-                    <figure class="review-card">
-                        <blockquote>“Stephanie leads with honesty, experience, and genuine care for the people she works with.”</blockquote>
-                        <figcaption><strong>Client Name</strong><span>Real Estate Agent</span></figcaption>
-                    </figure>
+                <div class="reviews-section__heading">
+                    <div><p class="section-number">{{ home_page.reviews.eyebrow }}</p><h2 id="reviews-heading">{{ home_page.reviews.heading }}</h2></div>
+                    <a href="/reviews#client-stories">{{ home_page.reviews.linkLabel }} <span aria-hidden="true">→</span></a>
+                </div>
+                <div class="homepage-reviews" data-homepage-reviews>
+                    <button type="button" data-homepage-reviews-previous aria-label="Previous client review">←</button>
+                    <div class="homepage-reviews__viewport">
+                        <div class="reviews-grid" data-homepage-reviews-feed aria-live="off"><p class="homepage-reviews__status">Loading client stories…</p></div>
+                    </div>
+                    <button type="button" data-homepage-reviews-next aria-label="Next client review">→</button>
                 </div>
             </div>
         </section>
 
-        <section class="blog-section" id="blog" aria-labelledby="blog-heading">
+        <section class="blog-section" id="blog" aria-labelledby="blog-heading" data-home-section="blog">
             <div class="section-shell">
-                <p class="section-number">04 / From the Blog</p>
-                <h2 id="blog-heading">Latest insights</h2>
-                <!-- Future Flask/API-rendered published posts will be inserted into this container. -->
+                <p class="section-number">{{ home_page.blog.eyebrow }}</p>
+                <h2 id="blog-heading">{{ home_page.blog.heading }}</h2>
                 <div class="blog-post-list" id="blog-post-list" data-blog-list>
-                    <p>Published articles will appear here.</p>
+                    <p class="homepage-blog__status">Loading latest articles…</p>
                 </div>
+                <a class="homepage-blog__all-link" href="/blog">View All Articles <span aria-hidden="true">→</span></a>
             </div>
         </section>
-        <section class="contact-cta" id="contact" aria-labelledby="contact-heading">
+        <section class="contact-cta" id="contact" aria-labelledby="contact-heading" data-home-section="finalCta">
             <div class="contact-cta__inner">
                 <svg class="contact-cta__branch" viewBox="0 0 190 150" aria-hidden="true">
                     <path d="M88 150C86 112 89 72 116 18M89 113C65 98 49 78 43 53M94 91c22-8 40-24 50-47M67 89C48 84 32 73 21 57M108 58c20-5 37-17 48-34"/>
@@ -256,12 +237,12 @@
                 </svg>
 
                 <div class="contact-cta__copy">
-                    <p class="section-number">Ready When You Are</p>
-                    <h2 id="contact-heading">Let's create your next chapter.</h2>
-                    <p>Whether you're buying, selling, or ready to grow your business—I'd love to help.</p>
+                    <p class="section-number">{{ home_page.finalCta.eyebrow }}</p>
+                    <h2 id="contact-heading">{{ home_page.finalCta.heading }}</h2>
+                    <p>{{ home_page.finalCta.description }}</p>
                 </div>
 
-                <a class="button contact-cta__button" data-email-link href="mailto:RealtorStephanieAV@gmail.com">Let's Connect</a>
+                <a class="button contact-cta__button" href="/contact">{{ home_page.finalCta.buttonLabel }}</a>
             </div>
         </section>
     </main>
@@ -302,5 +283,6 @@
             </div>
         </div>
     </footer>
+    {% include 'site/_consultation_modal.html' %}
 </body>
 </html>

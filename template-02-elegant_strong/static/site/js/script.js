@@ -6,6 +6,7 @@ function setText(selector, value) {
     if (value === undefined || value === null) return;
 
     forEachMatch(selector, (element) => {
+        if (element.dataset.cmsText === "true") return;
         element.textContent = value;
     });
 }
@@ -14,6 +15,7 @@ function setImage(selector, src) {
     if (!src) return;
 
     forEachMatch(selector, (element) => {
+        if (element.dataset.cmsImage === "true") return;
         element.src = src;
     });
 }
@@ -84,4 +86,25 @@ if (menuButton && mobileNav) {
             menuButton.focus();
         }
     });
+}
+
+const heroCopy = document.querySelector(".hero__copy");
+const heroDirectory = document.querySelector(".hero-directory");
+const heroBlog = document.querySelector(".hero-blog");
+
+if (heroCopy && heroDirectory && heroBlog) {
+    const heroBlogPosition = document.createComment("hero blog desktop position");
+    const compactHeroQuery = window.matchMedia("(max-width: 900px)");
+    heroBlog.before(heroBlogPosition);
+
+    function placeHeroBlog() {
+        if (compactHeroQuery.matches) {
+            heroDirectory.after(heroBlog);
+        } else {
+            heroBlogPosition.after(heroBlog);
+        }
+    }
+
+    placeHeroBlog();
+    compactHeroQuery.addEventListener("change", placeHeroBlog);
 }

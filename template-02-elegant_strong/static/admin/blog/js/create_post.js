@@ -11,6 +11,16 @@ const featuredImageInput = document.querySelector("#post-featured-image");
 const previewImage = document.querySelector("#preview-image");
 const previewNoImage = document.querySelector("#preview-no-image");
 const removeImageButton = document.querySelector("#remove-thumbnail-button");
+const featuredImageControls = document.querySelector("#featured-image-controls");
+const featuredImageFitButtons = document.querySelectorAll("[data-featured-fit]");
+const featuredImageZoomOut = document.querySelector("#featured-image-zoom-out");
+const featuredImageZoomIn = document.querySelector("#featured-image-zoom-in");
+const featuredImageZoomValue = document.querySelector("#featured-image-zoom-value");
+const featuredImageReset = document.querySelector("#featured-image-reset");
+const featuredImageFocalX = document.querySelector("#featured-image-focal-x");
+const featuredImageFocalY = document.querySelector("#featured-image-focal-y");
+const postCardPreviewImage = document.querySelector("#post-card-preview-image");
+const postCardPreviewPlaceholder = document.querySelector("#post-card-preview-placeholder");
 const previewCategory = document.querySelector("#preview-category");
 const previewTitle = document.querySelector("#preview-title");
 const previewExcerpt = document.querySelector("#preview-excerpt");
@@ -57,6 +67,7 @@ const blockDefaults = {
 
 let contentBlocks = [];
 let featuredImageDataUrl = null;
+let featuredImageSettings = { focalX: 50, focalY: 50, fit: "cover", zoom: 100 };
 let isPublishing = false;
 let isAiProcessing = false;
 let aiUndoState = null;
@@ -85,6 +96,7 @@ function getPostData(status = "draft") {
         tags: parseTags(),
         excerpt: excerptInput.value.trim(),
         featuredImage: featuredImageDataUrl,
+        featuredImageSettings: { ...featuredImageSettings },
         status,
         contentBlocks: contentBlocks.map((block) => ({ ...block }))
     };
@@ -513,6 +525,13 @@ function populateEditor(post) {
     categoryInput.value = supportedCategories.has(post.category) ? post.category : "";
     tagsInput.value = Array.isArray(post.tags) ? post.tags.filter((tag) => typeof tag === "string").join(", ") : "";
     featuredImageDataUrl = typeof post.featuredImage === "string" ? post.featuredImage : null;
+    const savedImageSettings = post.featuredImageSettings || {};
+    featuredImageSettings = {
+        focalX: Number.isInteger(savedImageSettings.focalX) ? savedImageSettings.focalX : 50,
+        focalY: Number.isInteger(savedImageSettings.focalY) ? savedImageSettings.focalY : 50,
+        fit: ["cover", "contain"].includes(savedImageSettings.fit) ? savedImageSettings.fit : "cover",
+        zoom: Number.isInteger(savedImageSettings.zoom) ? savedImageSettings.zoom : 100
+    };
     contentBlocks = Array.isArray(post.contentBlocks)
         ? post.contentBlocks.filter((block) => block && supportedBlockTypes.has(block.type)).map((block) => ({ ...block }))
         : [];
@@ -532,8 +551,37 @@ function renderFeaturedImage() {
     previewImage.hidden = !hasImage;
     previewNoImage.hidden = hasImage;
     removeImageButton.hidden = !hasImage;
-    if (hasImage) previewImage.src = featuredImageDataUrl;
-    else previewImage.removeAttribute("src");
+    featuredImageControls.hidden = !hasImage;
+    postCardPreviewImage.hidden = !hasImage;
+    postCardPreviewPlaceholder.hidden = hasImage;
+    if (hasImage) {
+        previewImage.src = featuredImageDataUrl;
+        postCardPreviewImage.src = featuredImageDataUrl;
+        applyFeaturedImagePresentation(previewImage);
+        applyFeaturedImagePresentation(postCardPreviewImage);
+    } else {
+        previewImage.removeAttribute("src");
+        postCardPreviewImage.removeAttribute("src");
+    }
+    featuredImageFocalX.value = String(featuredImageSettings.focalX);
+    featuredImageFocalY.value = String(featuredImageSettings.focalY);
+    featuredImageZoomValue.value = `${featuredImageSettings.zoom}%`;
+    featuredImageFitButtons.forEach((button) => {
+        const active = button.dataset.featuredFit === featuredImageSettings.fit;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+    });
+}
+
+function applyFeaturedImagePresentation(image) {
+    image.style.objectFit = featuredImageSettings.fit;
+    image.style.objectPosition = `${featuredImageSettings.focalX}% ${featuredImageSettings.focalY}%`;
+    image.style.transform = `scale(${featuredImageSettings.zoom / 100})`;
+}
+
+function updateFeaturedImageSettings() {
+    renderFeaturedImage();
+    if (!fullPreviewFeaturedImage.hidden) applyFeaturedImagePresentation(fullPreviewFeaturedImage);
 }
 
 function isHttpUrl(value) {
@@ -604,6 +652,7 @@ function renderFullArticlePreview() {
     fullPreviewFeaturedImage.hidden = !post.featuredImage;
     if (post.featuredImage) fullPreviewFeaturedImage.src = post.featuredImage;
     else fullPreviewFeaturedImage.removeAttribute("src");
+    if (post.featuredImage) applyFeaturedImagePresentation(fullPreviewFeaturedImage);
     const blocks = post.contentBlocks.map(createFullPreviewBlock).filter(Boolean);
     if (!blocks.length) {
         const empty = document.createElement("p");
@@ -695,6 +744,28 @@ removeImageButton.addEventListener("click", () => {
     renderFeaturedImage();
     showStatus("Featured image removed.");
 });
+featuredImageFitButtons.forEach((button) => button.addEventListener("click", () => {
+    featuredImageSettings.fit = button.dataset.featuredFit;
+    if (featuredImageSettings.fit === "contain") featuredImageSettings.zoom = 100;
+    updateFeaturedImageSettings();
+}));
+featuredImageZoomOut.addEventListener("click", () => {
+    featuredImageSettings.zoom = Math.max(100, featuredImageSettings.zoom - 5);
+    updateFeaturedImageSettings();
+});
+featuredImageZoomIn.addEventListener("click", () => {
+    featuredImageSettings.zoom = Math.min(150, featuredImageSettings.zoom + 5);
+    updateFeaturedImageSettings();
+});
+featuredImageReset.addEventListener("click", () => {
+    featuredImageSettings = { focalX: 50, focalY: 50, fit: "cover", zoom: 100 };
+    updateFeaturedImageSettings();
+});
+[featuredImageFocalX, featuredImageFocalY].forEach((input) => input.addEventListener("input", () => {
+    featuredImageSettings.focalX = Number(featuredImageFocalX.value);
+    featuredImageSettings.focalY = Number(featuredImageFocalY.value);
+    updateFeaturedImageSettings();
+}));
 saveDraftButton.addEventListener("click", saveDraft);
 publishButton.addEventListener("click", publishPost);
 viewFullArticleButton.addEventListener("click", () => {

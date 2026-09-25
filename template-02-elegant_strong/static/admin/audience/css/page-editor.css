@@ -1,0 +1,30 @@
+.document-control {
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--admin-line);
+    border-radius: 9px;
+    background: #fff;
+}
+
+.document-control__current {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 7px;
+    background: var(--admin-canvas);
+    font-size: .72rem;
+}
+
+.document-control__current strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.document-control__current a { color: var(--admin-ink); white-space: nowrap; }
+.page-editor__savebar > button[type="button"] { border: 1px solid var(--admin-line); background: #fff; color: var(--admin-ink); }
+.page-editor__savebar > button:disabled { opacity: .45; cursor: not-allowed; }

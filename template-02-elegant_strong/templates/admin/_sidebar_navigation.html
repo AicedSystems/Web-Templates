@@ -1,0 +1,43 @@
+{% set endpoint = request.endpoint or '' %}
+{% set article_endpoints = ['admin_blog_new', 'admin_blog_new_paste', 'admin_blog_new_build', 'admin_blog_archived'] %}
+{% set page_endpoints = ['admin_home_page_editor', 'admin_reviews_page_editor', 'admin_agents_page_editor', 'admin_audience_page_editor'] %}
+{% set review_endpoints = ['admin_reviews_manager'] %}
+
+<script src="{{ url_for('static', filename='admin/blog/js/sidebar-navigation.js', v='1') }}" defer></script>
+
+<a class="admin-nav__link{% if endpoint == 'admin_blog_dashboard' %} admin-nav__link--active{% endif %}" href="{{ url_for('admin_blog_dashboard') }}"{% if endpoint == 'admin_blog_dashboard' %} aria-current="page"{% endif %}><span aria-hidden="true">⌂</span> Overview</a>
+
+<details class="admin-nav-group{% if endpoint in page_endpoints %} admin-nav-group--active{% endif %}"{% if endpoint in page_endpoints %} open{% endif %}>
+    <summary><span>Website Pages</span><b aria-hidden="true">⌄</b></summary>
+    <div class="admin-nav-group__links">
+        <a class="admin-nav__link{% if endpoint == 'admin_home_page_editor' %} admin-nav__link--active{% endif %}" href="{{ url_for('admin_home_page_editor') }}"{% if endpoint == 'admin_home_page_editor' %} aria-current="page"{% endif %}><span aria-hidden="true">◆</span> Home Page</a>
+        <a class="admin-nav__link{% if endpoint == 'admin_audience_page_editor' and request.view_args.get('page_type') == 'buyers' %} admin-nav__link--active{% endif %}" href="{{ url_for('admin_audience_page_editor', page_type='buyers') }}"{% if endpoint == 'admin_audience_page_editor' and request.view_args.get('page_type') == 'buyers' %} aria-current="page"{% endif %}><span aria-hidden="true">⌂</span> Buyers Page</a>
+        <a class="admin-nav__link{% if endpoint == 'admin_audience_page_editor' and request.view_args.get('page_type') == 'sellers' %} admin-nav__link--active{% endif %}" href="{{ url_for('admin_audience_page_editor', page_type='sellers') }}"{% if endpoint == 'admin_audience_page_editor' and request.view_args.get('page_type') == 'sellers' %} aria-current="page"{% endif %}><span aria-hidden="true">⌂</span> Sellers Page</a>
+        <a class="admin-nav__link{% if endpoint == 'admin_agents_page_editor' %} admin-nav__link--active{% endif %}" href="{{ url_for('admin_agents_page_editor') }}"{% if endpoint == 'admin_agents_page_editor' %} aria-current="page"{% endif %}><span aria-hidden="true">◇</span> Agents Page</a>
+        <a class="admin-nav__link{% if endpoint == 'admin_reviews_page_editor' %} admin-nav__link--active{% endif %}" href="{{ url_for('admin_reviews_page_editor') }}"{% if endpoint == 'admin_reviews_page_editor' %} aria-current="page"{% endif %}><span aria-hidden="true">▱</span> Reviews Page</a>
+    </div>
+</details>
+
+<details class="admin-nav-group{% if endpoint in article_endpoints %} admin-nav-group--active{% endif %}"{% if endpoint in article_endpoints %} open{% endif %}>
+    <summary><span>Articles</span><b aria-hidden="true">⌄</b></summary>
+    <div class="admin-nav-group__links">
+        <a class="admin-nav__link{% if endpoint in ['admin_blog_new', 'admin_blog_new_build'] %} admin-nav__link--active{% endif %}" href="{{ url_for('admin_blog_new') }}"{% if endpoint in ['admin_blog_new', 'admin_blog_new_build'] %} aria-current="page"{% endif %}><span aria-hidden="true">＋</span> Create Article</a>
+        <a class="admin-nav__link{% if endpoint == 'admin_blog_new_paste' %} admin-nav__link--active{% endif %}" href="{{ url_for('admin_blog_new_paste') }}"{% if endpoint == 'admin_blog_new_paste' %} aria-current="page"{% endif %}><span aria-hidden="true">▤</span> Paste Article</a>
+        <a class="admin-nav__link{% if endpoint == 'admin_blog_archived' %} admin-nav__link--active{% endif %}" href="{{ url_for('admin_blog_archived') }}"{% if endpoint == 'admin_blog_archived' %} aria-current="page"{% endif %}><span aria-hidden="true">□</span> Archived Articles</a>
+    </div>
+</details>
+
+<details class="admin-nav-group{% if endpoint in review_endpoints %} admin-nav-group--active{% endif %}"{% if endpoint in review_endpoints %} open{% endif %}>
+    <summary><span>Client Stories</span><b aria-hidden="true">⌄</b></summary>
+    <div class="admin-nav-group__links">
+        <a class="admin-nav__link{% if endpoint == 'admin_reviews_manager' %} admin-nav__link--active{% endif %}" href="{{ url_for('admin_reviews_manager') }}"{% if endpoint == 'admin_reviews_manager' %} aria-current="page"{% endif %}><span aria-hidden="true">★</span> Manage Reviews</a>
+    </div>
+</details>
+
+<details class="admin-nav-group">
+    <summary><span>View Website</span><b aria-hidden="true">⌄</b></summary>
+    <div class="admin-nav-group__links">
+        <a class="admin-nav__link" href="{{ admin_site.blog_url }}"><span aria-hidden="true">↗</span> Public Blog</a>
+        <a class="admin-nav__link" href="{{ admin_site.live_site_url }}"><span aria-hidden="true">↗</span> Live Website</a>
+    </div>
+</details>

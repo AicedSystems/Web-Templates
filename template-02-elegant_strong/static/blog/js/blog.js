@@ -34,6 +34,16 @@ function getListingImage(post) {
     return categoryImages[post.category] || categoryImages["market-updates"];
 }
 
+function renderPublishedImage(image, post) {
+    const fallback = getListingImage(post);
+    image.onerror = () => {
+        image.onerror = null;
+        image.src = fallback;
+    };
+    image.src = `/api/posts/${post.id}/featured-image`;
+    image.alt = "";
+}
+
 function formatPublishedDate(value) {
     const date = new Date(value);
 
@@ -46,18 +56,6 @@ function formatPublishedDate(value) {
         day: "numeric",
         year: "numeric"
     }).format(date);
-}
-
-function isDisplayableImage(value) {
-    if (typeof value !== "string") return false;
-
-    if (/^data:image\/(?:jpeg|png|webp);base64,/i.test(value)) return true;
-
-    try {
-        return ["http:", "https:"].includes(new URL(value).protocol);
-    } catch {
-        return false;
-    }
 }
 
 function createPostCard(post, index) {
@@ -79,25 +77,15 @@ function createPostCard(post, index) {
     date.dateTime = post.publishedDate || "";
     date.textContent = formatPublishedDate(post.publishedDate);
 
-    const listingImage = isDisplayableImage(post.featuredImage)
-        ? post.featuredImage
-        : getListingImage(post);
-
-    if (listingImage) {
-        image.src = listingImage;
-        image.alt = `Featured image for ${post.title || "article"}`;
-        placeholder.hidden = true;
-    } else {
-        image.hidden = true;
-    }
+    renderPublishedImage(image, post);
+    placeholder.hidden = true;
 
     return card;
 }
 
 function renderFeaturedPost(post, postCount) {
     featuredPostLink.href = `/blog/${post.id}`;
-    featuredPostImage.src = getListingImage(post);
-    featuredPostImage.alt = `Featured image for ${post.title || "article"}`;
+    renderPublishedImage(featuredPostImage, post);
     featuredPostCategory.textContent = categoryLabels[post.category] || post.category || "Insights";
     featuredPostDate.dateTime = post.publishedDate || "";
     featuredPostDate.textContent = formatPublishedDate(post.publishedDate);

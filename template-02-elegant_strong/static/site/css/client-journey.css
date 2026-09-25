@@ -1,0 +1,752 @@
+.client-journey-page {
+    background: var(--color-paper);
+    color: var(--color-text);
+}
+
+.client-journey-page .site-header {
+    position: relative;
+    border-bottom: 1px solid rgba(22, 21, 19, 0.12);
+}
+
+.client-journey-page .main-nav__link {
+    color: var(--color-text);
+}
+
+.client-journey-page .main-nav__link::after {
+    background: var(--color-text);
+}
+
+.client-journey-page .button--light {
+    border-color: var(--color-text);
+    background: var(--color-text);
+    color: var(--color-white);
+}
+
+.client-journey-hero {
+    min-height: 560px;
+    padding: clamp(130px, 12vw, 168px) clamp(30px, 5vw, 76px) clamp(56px, 8vw, 112px);
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
+    align-items: center;
+    gap: clamp(40px, 7vw, 104px);
+}
+
+.client-journey-hero__copy {
+    max-width: 620px;
+}
+
+.client-journey-hero__copy h1 {
+    margin: 16px 0 22px;
+    font-family: var(--font-heading);
+    font-size: clamp(3rem, 5vw, 5.75rem);
+    font-weight: 500;
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+}
+
+.client-journey-hero__copy > p:not(.eyebrow) {
+    max-width: 54ch;
+    margin: 24px 0 30px;
+    color: var(--color-line);
+    font-size: 1.05rem;
+    line-height: 1.75;
+}
+
+.client-journey-hero__rule {
+    display: block;
+    width: 58px;
+    height: 1px;
+    background: var(--color-taupe);
+}
+
+.client-journey-hero__placeholder {
+    min-height: 380px;
+    border: 1px solid rgba(22, 21, 19, 0.15);
+    border-radius: 24px;
+    background: linear-gradient(145deg, rgba(190, 177, 158, 0.2), rgba(255, 255, 255, 0.65));
+    display: grid;
+    place-content: center;
+    gap: 10px;
+    padding: 32px;
+    text-align: center;
+}
+
+.client-journey-hero__placeholder span {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 4vw, 3.8rem);
+}
+
+.client-journey-hero__placeholder p {
+    margin: 0;
+    color: var(--color-line);
+}
+
+/* Buyer guide: cooler greige treatment shared with the Agents experience. */
+.client-journey-page--buyers,
+.client-journey-page--sellers {
+    --buyers-paper: #f1f0ed;
+    --buyers-card: #f8f7f4;
+    --buyers-greige: #deddd8;
+    --buyers-muted: #626466;
+    --buyers-charcoal: #292b2c;
+    background: var(--buyers-paper);
+}
+
+.client-journey-page--buyers .site-header,
+.client-journey-page--sellers .site-header {
+    background: var(--buyers-paper);
+}
+
+.buyers-hero {
+    width: min(100% - 32px, 1500px);
+    min-height: 560px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(380px, .85fr) minmax(0, 1.15fr);
+    overflow: hidden;
+    background: #dfded9;
+    --buyers-hero-position: 50% 44%;
+    --buyers-hero-zoom: 1;
+}
+
+.buyers-hero__media {
+    min-width: 0;
+    min-height: 560px;
+    position: relative;
+    overflow: hidden;
+    background: #d9d9d4;
+}
+
+.buyers-hero__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: var(--buyers-hero-fit, cover);
+    object-position: var(--buyers-hero-position);
+    filter: saturate(.72) contrast(1.04);
+    transform: scale(var(--buyers-hero-zoom));
+    transform-origin: var(--buyers-hero-position);
+}
+
+.buyers-hero__copy {
+    padding: clamp(24px, 2.4vw, 34px) clamp(38px, 4vw, 60px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.buyers-hero__copy > .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: #70736f;
+}
+
+.buyers-hero__copy > .eyebrow span {
+    width: 58px;
+    height: 1px;
+    background: #a5a6a1;
+}
+
+.buyers-hero__copy h1 {
+    max-width: 12ch;
+    margin-top: 19px;
+    font: 500 clamp(3.3rem, 4.5vw, 5.1rem)/.91 var(--font-heading);
+    letter-spacing: -.058em;
+}
+
+.buyers-hero__copy > p:not(.eyebrow) {
+    max-width: 53ch;
+    margin-top: 25px;
+    color: #555857;
+    font-size: clamp(.8rem, .9vw, .91rem);
+    line-height: 1.65;
+}
+
+.buyers-hero__values {
+    width: 100%;
+    margin-top: 30px;
+    padding-inline: clamp(10px, 2vw, 26px);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(18px, 2.4vw, 34px);
+}
+
+.buyers-hero__values li {
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    text-align: center;
+}
+
+.buyers-hero__values li > span {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    border-radius: 50%;
+    background: #deddd8;
+    color: #626461;
+    place-items: center;
+}
+
+.buyers-hero__values svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.4;
+}
+
+.buyers-hero__values strong {
+    color: #555856;
+    font-size: .58rem;
+    letter-spacing: .16em;
+    line-height: 1.45;
+    text-transform: uppercase;
+}
+
+.buyers-hero--reversed .buyers-hero__media {
+    order: 2;
+}
+
+.buyers-hero--reversed .buyers-hero__copy {
+    order: 1;
+}
+
+.buyers-hero--reversed {
+    grid-template-columns: minmax(0, 1.15fr) minmax(380px, .85fr);
+}
+
+.buyers-guide {
+    padding: clamp(42px, 6vw, 78px) clamp(28px, 7vw, 110px);
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(340px, .75fr);
+    align-items: stretch;
+    gap: clamp(30px, 5vw, 70px);
+    background: linear-gradient(120deg, #eceae6, #f4f3f0 62%, #e5e4df);
+}
+
+.buyers-guide--reversed .buyers-guide__resource {
+    order: 2;
+}
+
+.buyers-guide--reversed .buyer-inquiry {
+    order: 1;
+}
+
+.buyers-guide__resource {
+    min-width: 0;
+}
+
+.buyers-guide__heading .eyebrow,
+.buyer-inquiry > .eyebrow,
+.buyer-resources__heading .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #737571;
+}
+
+.buyers-guide__heading .eyebrow span,
+.buyer-inquiry > .eyebrow span,
+.buyer-resources__heading .eyebrow span {
+    width: 46px;
+    height: 1px;
+    background: #a7a7a1;
+}
+
+.buyers-guide__heading h1 {
+    margin-top: 12px;
+    font: 500 clamp(3rem, 4.8vw, 5.4rem)/.96 var(--font-heading);
+    letter-spacing: -.055em;
+}
+
+.buyers-guide__heading > p:last-child {
+    max-width: 680px;
+    margin-top: 14px;
+    color: var(--buyers-muted);
+    font-size: .88rem;
+    line-height: 1.7;
+}
+
+.guide-card {
+    margin-top: 24px;
+    overflow: hidden;
+    border: 1px solid #d1d1cc;
+    border-radius: 12px;
+    background: var(--buyers-card);
+    box-shadow: 0 18px 35px rgba(42, 44, 45, .09);
+}
+
+.guide-card__media {
+    height: clamp(220px, 27vw, 370px);
+    position: relative;
+    overflow: hidden;
+}
+
+.guide-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: var(--guide-image-fit, cover);
+    object-position: var(--guide-image-position, center);
+    filter: saturate(.62) contrast(1.07);
+    transform: scale(var(--guide-image-zoom, 1));
+    transform-origin: var(--guide-image-position, center);
+}
+
+.guide-card__media > span {
+    padding: 8px 13px;
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    background: rgba(248, 247, 244, .94);
+    color: #5e605e;
+    font-size: .58rem;
+    font-weight: 700;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+}
+
+.guide-card__body {
+    padding: 20px 24px 24px;
+}
+
+.guide-card__body h2 {
+    font: 500 clamp(1.75rem, 2.7vw, 2.65rem)/1 var(--font-heading);
+    letter-spacing: -.035em;
+}
+
+.guide-card__body > p {
+    max-width: 62ch;
+    margin-top: 8px;
+    color: var(--buyers-muted);
+    font-size: .78rem;
+    line-height: 1.65;
+}
+
+.guide-card__actions {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: minmax(190px, 1fr) auto;
+    align-items: center;
+    gap: 24px;
+}
+
+.guide-card__actions .button {
+    gap: 18px;
+    border-color: var(--buyers-charcoal);
+    background: var(--buyers-charcoal);
+}
+
+.button--disabled,
+.guide-card__download--disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.guide-card__download {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #555856;
+    font-size: .59rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    line-height: 1.5;
+    text-transform: uppercase;
+}
+
+.guide-card__download > span:first-child {
+    width: 34px;
+    height: 42px;
+    display: grid;
+    border: 1px solid #a9aaa5;
+    font-size: 1.1rem;
+    place-items: center;
+}
+
+.buyer-inquiry {
+    padding: clamp(30px, 4vw, 50px);
+    align-self: stretch;
+    border: 1px solid #d3d3ce;
+    border-radius: 10px;
+    background: rgba(249, 248, 245, .92);
+    box-shadow: 0 18px 42px rgba(42, 44, 45, .08);
+}
+
+.buyer-inquiry h2 {
+    margin-top: 14px;
+    font: 500 clamp(2rem, 2.8vw, 3.05rem)/1 var(--font-heading);
+    letter-spacing: -.05em;
+}
+
+.buyer-inquiry > p:not(.eyebrow, .buyer-inquiry__privacy) {
+    margin-top: 18px;
+    color: var(--buyers-muted);
+    font-size: .78rem;
+    line-height: 1.65;
+}
+
+.buyer-inquiry__form {
+    margin-top: 24px;
+    display: grid;
+    gap: 12px;
+}
+
+.buyer-field {
+    display: grid;
+}
+
+.buyer-field label {
+    margin-bottom: 6px;
+    font-size: .65rem;
+    font-weight: 700;
+}
+
+.buyer-field input,
+.buyer-field select {
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 13px;
+    border: 1px solid #cecfcb;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, .72);
+    color: var(--color-text);
+    font: .74rem var(--font-body);
+}
+
+.buyer-field input:focus,
+.buyer-field select:focus {
+    border-color: #686b6a;
+    outline: 2px solid rgba(72, 75, 74, .12);
+}
+
+.buyer-field [aria-invalid="true"] {
+    border-color: #985d58;
+}
+
+.buyer-field small {
+    min-height: 14px;
+    margin-top: 3px;
+    color: #985d58;
+    font-size: .6rem;
+}
+
+.buyer-inquiry__form > .button {
+    width: 100%;
+    gap: 16px;
+    border-color: var(--buyers-charcoal);
+    background: var(--buyers-charcoal);
+}
+
+.buyer-inquiry__status {
+    min-height: 18px;
+    color: #555856;
+    font-size: .65rem;
+    line-height: 1.45;
+}
+
+.buyer-inquiry__privacy {
+    margin-top: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: #737572;
+    font-size: .61rem;
+    line-height: 1.5;
+}
+
+.buyer-resources {
+    padding: clamp(48px, 6vw, 78px) clamp(28px, 6vw, 90px);
+    background: #f6f5f2;
+}
+
+.buyer-resources__heading {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.buyer-resources__heading .eyebrow {
+    justify-content: center;
+}
+
+.buyer-resources__heading h2 {
+    margin-top: 10px;
+    font: 500 clamp(2.7rem, 4.3vw, 4.8rem)/.96 var(--font-heading);
+    letter-spacing: -.05em;
+}
+
+.buyer-resources__heading > p:last-child {
+    max-width: 680px;
+    margin: 14px auto 0;
+    color: var(--buyers-muted);
+    font-size: .82rem;
+    line-height: 1.7;
+}
+
+.buyer-resource-grid {
+    width: min(100%, 1380px);
+    margin: 30px auto 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.buyer-resource-card {
+    overflow: hidden;
+    border: 1px solid #d5d5d0;
+    background: var(--buyers-card);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.buyer-resource-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 30px rgba(42, 44, 45, .09);
+}
+
+.buyer-resource-card__media {
+    aspect-ratio: 16 / 8.5;
+    position: relative;
+    overflow: hidden;
+}
+
+.buyer-resource-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(.58) contrast(1.06);
+}
+
+.buyer-resource-card__media span {
+    padding: 7px 11px;
+    position: absolute;
+    bottom: 0;
+    left: 18px;
+    background: rgba(244, 243, 240, .95);
+    color: #626461;
+    font-size: .55rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.buyer-resource-card__body {
+    padding: 17px 18px 18px;
+}
+
+.buyer-resource-card__body > p:first-child,
+.buyer-resource-card time {
+    color: #777976;
+    font-size: .55rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.buyer-resource-card h3 {
+    margin-top: 7px;
+    font: 500 clamp(1.3rem, 1.8vw, 1.8rem)/1.08 var(--font-heading);
+}
+
+.buyer-resource-card h3 + p {
+    margin-top: 9px;
+    color: var(--buyers-muted);
+    font-size: .72rem;
+    line-height: 1.6;
+}
+
+.buyer-resource-card time {
+    margin-top: 13px;
+    display: block;
+}
+
+.buyer-resource-card__link {
+    margin-top: 16px;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: var(--buyers-charcoal);
+    color: #fff;
+    font-size: .58rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.buyer-resources__empty {
+    width: min(100%, 680px);
+    margin: 30px auto 0;
+    padding: 34px;
+    border: 1px solid #d5d5d0;
+    text-align: center;
+}
+
+.buyer-resources__empty p {
+    color: var(--buyers-muted);
+}
+
+.buyer-resources__empty a {
+    margin-top: 14px;
+    display: inline-block;
+    font-size: .65rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+    .buyers-hero {
+        width: 100%;
+        min-height: 0;
+        grid-template-columns: 1fr;
+    }
+
+    .buyers-hero--reversed .buyers-hero__media,
+    .buyers-hero--reversed .buyers-hero__copy,
+    .buyers-guide--reversed .buyers-guide__resource,
+    .buyers-guide--reversed .buyer-inquiry {
+        order: initial;
+    }
+
+    .buyers-hero__media {
+        min-height: 0;
+        height: clamp(340px, 62vw, 460px);
+    }
+
+    .buyers-hero__copy {
+        padding: 36px clamp(28px, 7vw, 64px);
+    }
+
+    .buyers-guide {
+        grid-template-columns: 1fr;
+    }
+
+    .buyer-inquiry {
+        width: min(100%, 680px);
+    }
+
+    .buyer-resource-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .client-journey-hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
+    }
+
+    .client-journey-hero__placeholder {
+        min-height: 280px;
+    }
+}
+
+@media (max-width: 560px) {
+    .buyers-hero__media {
+        height: 330px;
+    }
+
+    .buyers-hero__copy {
+        padding: 32px 22px 36px;
+    }
+
+    .buyers-hero__copy h1 {
+        font-size: clamp(3.3rem, 16vw, 4.7rem);
+    }
+
+    .buyers-hero__values {
+        padding-inline: 4px;
+        gap: 8px;
+    }
+
+    .buyers-hero__values li > span {
+        width: 48px;
+        height: 48px;
+    }
+
+    .buyers-guide,
+    .buyer-resources {
+        padding-inline: 20px;
+    }
+
+    .guide-card__media {
+        height: 220px;
+    }
+
+    .guide-card__actions {
+        grid-template-columns: 1fr;
+        justify-items: stretch;
+    }
+
+    .guide-card__download {
+        justify-content: center;
+    }
+
+    .buyer-inquiry {
+        padding: 28px 22px;
+    }
+
+    .buyer-resource-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .client-journey-hero {
+        padding-top: 44px;
+        padding-bottom: 56px;
+    }
+
+    .client-journey-hero__copy h1 {
+        font-size: clamp(2.75rem, 14vw, 4.25rem);
+    }
+
+    .client-journey-hero__placeholder {
+        min-height: 220px;
+        border-radius: 16px;
+    }
+}
+.client-journey-page--editor-preview [data-editor-region] {
+    position: relative;
+    cursor: pointer;
+    outline: 1px solid transparent;
+    outline-offset: -4px;
+    transition: outline-color .16s ease, box-shadow .16s ease;
+}
+
+.client-journey-page--editor-preview [data-editor-region]::before {
+    padding: 6px 9px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 30;
+    border-radius: 999px;
+    color: #fff;
+    background: rgba(30, 32, 33, .86);
+    content: attr(data-editor-label);
+    font: 600 .62rem/1 "Manrope", sans-serif;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-3px);
+    transition: opacity .16s ease, transform .16s ease;
+}
+
+.client-journey-page--editor-preview [data-editor-region]:hover,
+.client-journey-page--editor-preview [data-editor-region]:focus-visible,
+.client-journey-page--editor-preview [data-editor-region].is-selected {
+    outline-color: rgba(91, 95, 94, .95);
+    box-shadow: inset 0 0 0 3px rgba(91, 95, 94, .13);
+}
+
+.client-journey-page--editor-preview [data-editor-region]:hover::before,
+.client-journey-page--editor-preview [data-editor-region]:focus-visible::before,
+.client-journey-page--editor-preview [data-editor-region].is-selected::before {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.client-journey-page--editor-preview .site-header,
+.client-journey-page--editor-preview .site-footer,
+.client-journey-page--editor-preview .buyer-inquiry__form {
+    pointer-events: none;
+}

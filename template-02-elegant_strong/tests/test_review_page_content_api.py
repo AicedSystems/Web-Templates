@@ -1,6 +1,7 @@
 import base64
 import os
 import unittest
+from unittest.mock import patch
 
 
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
@@ -62,10 +63,47 @@ def page_payload(featured_review_id=None):
 
 
 class ReviewPageContentApiTestCase(unittest.TestCase):
+    def test_public_buyer_and_seller_pages_are_available(self):
+        resources = [{
+            "id": 17,
+            "title": "A Buyer Resource",
+            "category": "Market Updates",
+            "excerpt": "Helpful guidance for buyers.",
+            "publishedDate": "Sep 23, 2026",
+            "publishedDateTime": "2026-09-23",
+            "fallbackImage": "https://images.example/buyer.jpg",
+        }]
+        with patch("app.get_audience_resource_posts", return_value=resources):
+            buyers_response = self.client.get("/buyers")
+        with patch("app.get_audience_resource_posts", return_value=resources):
+            sellers_response = self.client.get("/sellers")
+
+        self.assertEqual(buyers_response.status_code, 200)
+        self.assertEqual(sellers_response.status_code, 200)
+        self.assertEqual(self.client.get("/buyers/").status_code, 200)
+        self.assertEqual(self.client.get("/sellers/").status_code, 200)
+        self.assertIn(b"The Home Buyer", buyers_response.data)
+        self.assertIn(b'id="buyers-hero"', buyers_response.data)
+        self.assertIn(b"buyers-hero.jpg", buyers_response.data)
+        self.assertIn(b"Your Next", buyers_response.data)
+        self.assertIn(b"A Buyer Resource", buyers_response.data)
+        self.assertIn(b'href="/blog/17"', buyers_response.data)
+        self.assertIn(b"PDF Guide", buyers_response.data)
+        self.assertIn(b"Your Best Move", sellers_response.data)
+        self.assertIn(b"Strong Strategy.", sellers_response.data)
+        self.assertIn(b'id="sellers-hero"', sellers_response.data)
+        self.assertIn(b"buyers-hero--reversed", sellers_response.data)
+        self.assertIn(b"buyers-guide--reversed", sellers_response.data)
+        self.assertIn(b"sellersecondimg.webp", sellers_response.data)
+        self.assertIn(b"A Buyer Resource", sellers_response.data)
+        self.assertIn(b"Helpful Resources for Sellers", sellers_response.data)
+        self.assertIn(b'aria-current="page">Buyers', buyers_response.data)
+        self.assertIn(b'aria-current="page">Sellers', sellers_response.data)
+
     def test_public_agents_page_is_available_without_authentication(self):
         response = self.client.get("/agents")
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b"A partner in", response.data)
+        self.assertIn(b"A Mentor for", response.data)
         self.assertIn(b"data-agent-application", response.data)
         self.assertEqual(self.client.get("/agents/").status_code, 200)
 

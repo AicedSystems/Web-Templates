@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Real estate insights from Stephanie J Mendoza.">
-    <title>Article | Stephanie J Mendoza</title>
+    <meta name="description" content="{{ article_meta.excerpt if article_meta else 'Real estate insights from Stephanie J Mendoza.' }}">
+    <link rel="canonical" href="{{ request.url_root.rstrip('/') }}{{ url_for('article', post_id=post_id) }}">
+    <title>{{ article_meta.title if article_meta else 'Article' }} | Stephanie J Mendoza</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='blog/css/public-blog.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/consultation-modal.css', v='1') }}">
     <script src="{{ url_for('static', filename='blog/js/article.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='site/js/consultation-modal.js', v='1') }}" defer></script>
 </head>
 <body>
     <header class="blog-header">
@@ -18,12 +21,13 @@
         </a>
         <nav class="blog-nav" aria-label="Main navigation">
             <a href="/#home">Home</a>
-            <a href="/#clients">Clients</a>
+            <a href="/buyers">Buyers</a>
+            <a href="/sellers">Sellers</a>
             <a href="/agents">Agents</a>
             <a href="/#about">About</a>
             <a class="blog-nav__active" href="/blog">Blog</a>
             <a href="/reviews">Reviews</a>
-            <a class="blog-nav__contact" href="/#contact">Contact Me</a>
+            <a class="blog-nav__contact" href="/contact">Contact Me</a>
         </nav>
     </header>
 
@@ -41,17 +45,61 @@
 
             <figure class="article__featured-media" id="article-media" hidden>
                 <img id="article-image" alt="">
+                <div class="article__cover-fallback" id="article-cover-fallback" hidden aria-hidden="true"><span>SJ</span><p>Real Estate Insights</p></div>
             </figure>
 
-            <div class="article__content" id="article-content"></div>
-            <ul class="article__tags" id="article-tags" aria-label="Article tags"></ul>
+            <details class="article-toc-mobile" id="article-toc-mobile" hidden>
+                <summary>On This Page</summary>
+                <ol id="article-toc-mobile-list"></ol>
+            </details>
+
+            <div class="article__layout">
+                <nav class="article-toc" id="article-toc" aria-labelledby="article-toc-title" hidden>
+                    <div class="article-sidebar-card">
+                        <p id="article-toc-title">On This Page</p>
+                        <ol id="article-toc-list"></ol>
+                    </div>
+                </nav>
+
+                <div class="article__main-column">
+                    <div class="article__content" id="article-content"></div>
+                    <ul class="article__tags" id="article-tags" aria-label="Article tags"></ul>
+                </div>
+
+                <aside class="article__aside" aria-label="Article resources">
+                    <section class="article-consultation">
+                        <p class="blog-eyebrow">Have a question?</p>
+                        <h2>Let’s Talk Real Estate</h2>
+                        <p>Have questions about buying or selling in the Antelope Valley?</p>
+                        <button type="button" data-consultation-open>Schedule a Consultation <span aria-hidden="true">→</span></button>
+                    </section>
+
+                    {% if related_posts %}
+                    <section class="related-articles" aria-labelledby="related-articles-title">
+                        <p class="blog-eyebrow">Keep Reading</p>
+                        <h2 id="related-articles-title">Related Articles</h2>
+                        <div class="related-articles__list">
+                            {% for related in related_posts %}
+                            <article class="related-article">
+                                <a href="{{ url_for('article', post_id=related.id) }}">
+                                    <div class="related-article__media"><img src="{{ url_for('get_published_post_featured_image', post_id=related.id) }}" alt="" loading="lazy"><span aria-hidden="true">SJ</span></div>
+                                    <div><p>{{ related.category }}</p><h3>{{ related.title }}</h3>{% if related.publishedDate %}<time>{{ related.publishedDate }}</time>{% endif %}</div>
+                                </a>
+                            </article>
+                            {% endfor %}
+                        </div>
+                    </section>
+                    {% endif %}
+                </aside>
+            </div>
         </article>
     </main>
 
     <footer class="blog-footer">
         <a href="/#home">Stephanie J Mendoza</a>
         <p>Real estate guidance rooted in genuine connection.</p>
-        <a href="/#contact">Let's Connect <span aria-hidden="true">→</span></a>
+        <a href="/contact">Let's Connect <span aria-hidden="true">→</span></a>
     </footer>
+    {% include 'site/_consultation_modal.html' %}
 </body>
 </html>

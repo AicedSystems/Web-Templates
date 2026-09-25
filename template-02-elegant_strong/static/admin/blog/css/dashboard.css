@@ -100,6 +100,44 @@ img {
     gap: 6px;
 }
 
+/* Legacy direct links remain in older templates while the shared grouped nav is adopted. */
+.admin-nav > .admin-nav__link { display: none; }
+.admin-nav > .admin-nav__link:first-child { display: flex; }
+
+.admin-nav-group {
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, .025);
+}
+
+.admin-nav-group summary {
+    min-height: 44px;
+    padding: 0 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: rgba(255, 255, 255, .62);
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    cursor: pointer;
+    list-style: none;
+}
+
+.admin-nav-group summary::-webkit-details-marker { display: none; }
+.admin-nav-group summary:hover,
+.admin-nav-group summary:focus-visible { color: #fff; background: rgba(255, 255, 255, .06); outline: 0; }
+.admin-nav-group summary b { font-size: .9rem; font-weight: 400; transition: transform 160ms ease; }
+.admin-nav-group[open] summary b { transform: rotate(180deg); }
+.admin-nav-group__links { padding: 0 6px 7px; display: grid; gap: 3px; }
+.admin-nav-group--active > .admin-nav-group__links { display: grid !important; }
+.admin-nav-group--active > summary b { transform: rotate(180deg); }
+.admin-nav-group__links .admin-nav__link { min-height: 39px; padding-inline: 10px; font-size: .75rem; }
+.admin-nav-group__links .admin-nav__link span { width: 19px; font-size: .92rem; }
+
 .admin-nav__link {
     width: 100%;
     min-height: 47px;

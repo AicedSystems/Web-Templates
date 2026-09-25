@@ -7,8 +7,13 @@ const articleExcerpt = document.querySelector("#article-excerpt");
 const articleDate = document.querySelector("#article-date");
 const articleMedia = document.querySelector("#article-media");
 const articleImage = document.querySelector("#article-image");
+const articleCoverFallback = document.querySelector("#article-cover-fallback");
 const articleContent = document.querySelector("#article-content");
 const articleTags = document.querySelector("#article-tags");
+const articleToc = document.querySelector("#article-toc");
+const articleTocList = document.querySelector("#article-toc-list");
+const articleTocMobile = document.querySelector("#article-toc-mobile");
+const articleTocMobileList = document.querySelector("#article-toc-mobile-list");
 
 const categoryLabels = {
     "market-updates": "Market Updates",
@@ -138,6 +143,78 @@ function renderContentBlocks(post) {
     articleContent.replaceChildren(...blocks.map(createArticleBlock).filter(Boolean));
 }
 
+function headingSlug(value) {
+    return value.normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "section";
+}
+
+function buildTableOfContents() {
+    const headings = [...articleContent.querySelectorAll("h2")];
+    if (headings.length < 2) return;
+
+    const usedIds = new Map();
+    const entries = headings.map((heading) => {
+        const base = headingSlug(heading.textContent);
+        const count = (usedIds.get(base) || 0) + 1;
+        usedIds.set(base, count);
+        heading.id = count === 1 ? base : `${base}-${count}`;
+        return { id: heading.id, text: heading.textContent };
+    });
+
+    function linksFor(container) {
+        return entries.map((entry) => {
+            const item = document.createElement("li");
+            const link = document.createElement("a");
+            link.href = `#${entry.id}`;
+            link.textContent = entry.text;
+            item.append(link);
+            return item;
+        });
+    }
+
+    articleTocList.replaceChildren(...linksFor(articleTocList));
+    articleTocMobileList.replaceChildren(...linksFor(articleTocMobileList));
+    articleToc.hidden = false;
+    articleTocMobile.hidden = false;
+
+    if (!("IntersectionObserver" in window)) return;
+    const desktopLinks = [...articleTocList.querySelectorAll("a")];
+    const observer = new IntersectionObserver((observed) => {
+        const visible = observed.filter((entry) => entry.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+        if (!visible) return;
+        desktopLinks.forEach((link) => {
+            const active = link.hash === `#${visible.target.id}`;
+            link.classList.toggle("is-active", active);
+            if (active) link.setAttribute("aria-current", "location");
+            else link.removeAttribute("aria-current");
+        });
+    }, { rootMargin: "-18% 0px -68%", threshold: 0 });
+    headings.forEach((heading) => observer.observe(heading));
+}
+
+function renderArticleCover(post) {
+    articleMedia.hidden = false;
+    articleCoverFallback.hidden = true;
+    articleImage.hidden = false;
+    articleImage.alt = "";
+    articleImage.src = `/api/posts/${post.id}/featured-image`;
+    const settings = post.featuredImageSettings || {};
+    const focalX = Number.isInteger(settings.focalX) ? settings.focalX : 50;
+    const focalY = Number.isInteger(settings.focalY) ? settings.focalY : 50;
+    const fit = ["cover", "contain"].includes(settings.fit) ? settings.fit : "cover";
+    const zoom = Number.isInteger(settings.zoom) ? settings.zoom : 100;
+    articleImage.style.objectFit = fit;
+    articleImage.style.objectPosition = `${focalX}% ${focalY}%`;
+    articleImage.style.transform = `scale(${zoom / 100})`;
+    articleImage.addEventListener("error", () => {
+        articleImage.hidden = true;
+        articleCoverFallback.hidden = false;
+    }, { once: true });
+}
+
 function renderArticle(post) {
     articleCategory.textContent = categoryLabels[post.category] || post.category || "Insights";
     articleTitle.textContent = post.title || "Untitled article";
@@ -146,6 +223,8 @@ function renderArticle(post) {
     articleDate.dateTime = post.publishedDate || "";
     articleDate.textContent = formatPublishedDate(post.publishedDate);
     renderContentBlocks(post);
+    buildTableOfContents();
+    renderArticleCover(post);
     document.title = `${post.title || "Article"} | Stephanie J Mendoza`;
 
     const tags = Array.isArray(post.tags) ? post.tags : [];
@@ -156,15 +235,13 @@ function renderArticle(post) {
     }));
     articleTags.hidden = tags.length === 0;
 
-    if (isSafeImageSource(post.featuredImage)) {
-        articleImage.src = post.featuredImage;
-        articleImage.alt = `Featured image for ${post.title || "article"}`;
-        articleMedia.hidden = false;
-    }
-
     articleStatus.hidden = true;
     articleDetail.hidden = false;
 }
+
+document.querySelectorAll(".related-article__media img").forEach((image) => {
+    image.addEventListener("error", () => image.hidden = true, { once: true });
+});
 
 async function loadArticle() {
     try {

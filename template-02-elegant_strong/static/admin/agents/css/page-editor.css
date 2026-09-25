@@ -1,0 +1,5 @@
+.editor-section select { width: 100%; min-height: 43px; padding: 9px 11px; border: 1px solid var(--admin-line); border-radius: 7px; color: var(--admin-ink); background: #fff; font: .8rem var(--admin-font); }
+.locked-note { margin: 0; padding: 12px; border-radius: 7px; color: var(--admin-muted); background: var(--admin-canvas); font-size: .68rem; line-height: 1.55; }
+.hero-media-preview video { width: 100%; height: 210px; display: none; object-fit: cover; }
+.hero-media-preview.has-video video { display: block; }
+.hero-media-preview.has-video img, .hero-media-preview.has-video > span { display: none; }
