@@ -624,13 +624,22 @@ function createFullPreviewBlock(block) {
     if (block.type === "youtube") {
         const embedUrl = getYouTubeEmbedUrl(block.url);
         if (!embedUrl) return null;
+        const video = document.createElement("figure");
+        video.className = "full-preview-block full-preview-block--youtube-wrap";
         const frame = document.createElement("iframe");
-        frame.className = "full-preview-block full-preview-block--youtube";
+        frame.className = "full-preview-block--youtube";
         frame.src = embedUrl;
         frame.title = "YouTube video";
         frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
         frame.allowFullscreen = true;
-        return frame;
+        const fallback = document.createElement("a");
+        fallback.className = "full-preview-block--youtube-fallback";
+        fallback.href = embedUrl.replace("youtube-nocookie.com/embed/", "youtube.com/watch?v=");
+        fallback.target = "_blank";
+        fallback.rel = "noopener noreferrer";
+        fallback.textContent = "Video not playing? Watch on YouTube →";
+        video.append(frame, fallback);
+        return video;
     }
     if (block.type === "cta" && typeof block.text === "string" && isHttpUrl(block.url)) {
         const link = document.createElement("a");

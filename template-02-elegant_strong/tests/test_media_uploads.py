@@ -98,6 +98,7 @@ class MediaProcessingTestCase(unittest.TestCase):
         self.assertIsNone(media_storage.derive_public_url("../unsafe.webp"))
 
     def test_validates_mp4_and_webm_signatures(self):
+        self.assertEqual(media_storage.MAXIMUM_VIDEO_UPLOAD_BYTES, 150 * 1024 * 1024)
         mp4, mp4_type, mp4_extension = media_storage.process_video_upload(make_video_file("mp4"))
         self.assertTrue(mp4)
         self.assertEqual((mp4_type, mp4_extension), ("video/mp4", "mp4"))

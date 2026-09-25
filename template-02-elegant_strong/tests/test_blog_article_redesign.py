@@ -64,6 +64,8 @@ class BlogArticleRedesignTestCase(unittest.TestCase):
         self.assertIn("IntersectionObserver", source)
         self.assertIn("`/api/posts/${post.id}/featured-image`", source)
         self.assertIn("articleCoverFallback.hidden = false", source)
+        self.assertIn("Video not playing? Watch on YouTube", source)
+        self.assertIn('fallback.rel = "noopener noreferrer"', source)
         self.assertIn("post.featuredImageSettings", source)
         self.assertIn("articleImage.style.objectPosition", source)
 

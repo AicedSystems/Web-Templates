@@ -10,13 +10,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='site/css/styles.css', v='4') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='site/css/icons.css', v='3') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/reviews.css', v='13') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/reviews.css', v='16') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='site/css/consultation-modal.css', v='2') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='site/css/motion.css', v='1') }}">
     <script src="{{ url_for('static', filename='site/js/site-config.js') }}" defer></script>
     <script src="{{ url_for('static', filename='site/js/script.js', v='6') }}" defer></script>
     <script src="{{ url_for('static', filename='site/js/icons.js', v='1') }}" defer></script>
-    <script src="{{ url_for('static', filename='site/js/reviews.js', v='9') }}" defer></script>
+    <script src="{{ url_for('static', filename='site/js/reviews.js', v='11') }}" defer></script>
     <script src="{{ url_for('static', filename='site/js/consultation-modal.js', v='2') }}" defer></script>
     <script src="{{ url_for('static', filename='site/js/motion.js', v='1') }}" defer></script>
     {% if editor_preview %}<script src="{{ url_for('static', filename='admin/reviews/js/page-preview.js', v='6') }}" defer></script>{% endif %}
@@ -146,6 +146,17 @@
             </div>
         </section>
     </main>
+
+    <dialog class="review-modal" data-review-modal aria-labelledby="review-modal-name">
+        <button class="review-modal__close" type="button" data-review-modal-close aria-label="Close client review">{{ icon('x', 'md') }}</button>
+        <div class="review-modal__media" data-review-modal-media hidden><img data-review-modal-image alt=""></div>
+        <div class="review-modal__content">
+            <p class="eyebrow">Client story</p>
+            <p class="review-modal__stars" data-review-modal-stars></p>
+            <blockquote data-review-modal-quote></blockquote>
+            <p class="review-modal__client"><strong id="review-modal-name" data-review-modal-name></strong><span data-review-modal-type></span></p>
+        </div>
+    </dialog>
 
     <footer class="site-footer">
         <div class="site-footer__inner">

@@ -6,8 +6,8 @@
     <title>For Agents | Stephanie J Mendoza</title>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/styles.css', v='4') }}"><link rel="stylesheet" href="{{ url_for('static', filename='site/css/icons.css', v='3') }}"><link rel="stylesheet" href="{{ url_for('static', filename='site/css/agents.css', v='29') }}"><link rel="stylesheet" href="{{ url_for('static', filename='site/css/consultation-modal.css', v='2') }}"><link rel="stylesheet" href="{{ url_for('static', filename='site/css/motion.css', v='1') }}">
-    <script src="{{ url_for('static', filename='site/js/site-config.js') }}" defer></script><script src="{{ url_for('static', filename='site/js/script.js', v='6') }}" defer></script><script src="{{ url_for('static', filename='site/js/agents.js', v='2') }}" defer></script><script src="{{ url_for('static', filename='site/js/consultation-modal.js', v='2') }}" defer></script><script src="{{ url_for('static', filename='site/js/motion.js', v='1') }}" defer></script>{% if editor_preview %}<script src="{{ url_for('static', filename='admin/agents/js/page-preview.js', v='1') }}" defer></script>{% endif %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='site/css/styles.css', v='4') }}"><link rel="stylesheet" href="{{ url_for('static', filename='site/css/icons.css', v='3') }}"><link rel="stylesheet" href="{{ url_for('static', filename='site/css/agents.css', v='34') }}"><link rel="stylesheet" href="{{ url_for('static', filename='site/css/consultation-modal.css', v='2') }}"><link rel="stylesheet" href="{{ url_for('static', filename='site/css/motion.css', v='1') }}">
+    <script src="{{ url_for('static', filename='site/js/site-config.js') }}" defer></script><script src="{{ url_for('static', filename='site/js/script.js', v='6') }}" defer></script><script src="{{ url_for('static', filename='site/js/agents.js', v='7') }}" defer></script><script src="{{ url_for('static', filename='site/js/consultation-modal.js', v='2') }}" defer></script><script src="{{ url_for('static', filename='site/js/motion.js', v='1') }}" defer></script>{% if editor_preview %}<script src="{{ url_for('static', filename='admin/agents/js/page-preview.js', v='1') }}" defer></script>{% endif %}
 </head>
 {% from 'site/_icons.html' import icon %}
 <body class="agents-page{% if editor_preview %} agents-page--editor-preview{% endif %}">
@@ -39,10 +39,20 @@
         <div class="agent-testimonial__visual">{% if agents_page.spotlight.image %}<img src="{{ agents_page.spotlight.image.publicUrl }}" alt="{{ agents_page.spotlight.agentName }} with Stephanie" style="--agents-image-position: {{ agents_page.spotlight.image.focalX }}% {{ agents_page.spotlight.image.focalY }}%; --agents-image-fit: {{ agents_page.spotlight.image.fit }}; --agents-image-zoom: {{ agents_page.spotlight.image.zoom / 100 }}">{% else %}<img src="{{ url_for('static', filename='site/images/steph-testimonial-reviews.webp') }}" alt="Stephanie collaborating with another real estate professional">{% endif %}</div>
         <div class="agent-testimonial__content"><p class="eyebrow">Agent spotlight</p><h2 id="agent-testimonial-title">{{ agents_page.spotlight.heading }}</h2><blockquote>“{{ agents_page.spotlight.quote }}”</blockquote><div class="agent-testimonial__person"><p><strong>{{ agents_page.spotlight.agentName }}</strong><span>{{ agents_page.spotlight.attribution }}</span><span class="agent-testimonial__stars"{% if agents_page.spotlight.rating %} aria-label="{{ agents_page.spotlight.rating }} out of 5 stars"{% else %} hidden{% endif %}>{% if agents_page.spotlight.rating %}{% for _ in range(agents_page.spotlight.rating) %}{{ icon('star', 'sm', 'site-icon--star') }}{% endfor %}{% endif %}</span></p></div></div>
     </section>
+    <section class="agent-reviews" id="agent-reviews" aria-labelledby="agent-reviews-title" data-reveal="fade-up">
+        <div class="agent-reviews__heading"><div><p class="eyebrow">Agent experiences</p><h2 id="agent-reviews-title">Growing Together.</h2></div></div>
+        <div class="agent-reviews__carousel" data-agent-reviews-carousel hidden>
+            <button type="button" data-agent-reviews-previous aria-label="Previous agent reviews">{{ icon('chevron-left', 'md') }}</button>
+            <div class="agent-reviews__viewport"><div class="agent-reviews__track" data-agent-reviews-track></div></div>
+            <button type="button" data-agent-reviews-next aria-label="Next agent reviews">{{ icon('chevron-right', 'md') }}</button>
+        </div>
+        <p class="agent-reviews__empty" data-agent-reviews-empty>Agent stories are coming soon.</p>
+    </section>
     <section class="agent-application" id="agent-application" aria-labelledby="application-title">
         {% set application_heading_parts = agents_page.application.heading.rsplit(' ', 1) %}
         <div class="agent-application__intro"><h2 id="application-title">{% if application_heading_parts|length > 1 %}{{ application_heading_parts[0] }}<br class="application-title__compact-break"> {{ application_heading_parts[1] }}{% else %}{{ agents_page.application.heading }}{% endif %}</h2><p>{{ agents_page.application.description }}</p><span class="agent-application__rule" aria-hidden="true"></span><ul>{% for benefit in agents_page.application.benefits %}<li>{{ benefit }}</li>{% endfor %}</ul></div>
         <form class="agent-application__form" data-agent-application novalidate>
+            <div class="form-field" hidden aria-hidden="true"><label for="agent-website">Website</label><input id="agent-website" name="website" type="text" autocomplete="off" tabindex="-1"></div>
             <div class="form-field"><label for="agent-name">Full name *</label><input id="agent-name" name="name" type="text" autocomplete="name" required maxlength="120"><small class="form-error" data-error-for="agent-name"></small></div>
             <div class="form-field"><label for="agent-email">Email *</label><input id="agent-email" name="email" type="email" autocomplete="email" required maxlength="254"><small class="form-error" data-error-for="agent-email"></small></div>
             <div class="form-field"><label for="agent-phone">Phone number *</label><input id="agent-phone" name="phone" type="tel" autocomplete="tel" required maxlength="30"><small class="form-error" data-error-for="agent-phone"></small></div>
@@ -60,6 +70,16 @@
     </section>
     <section class="agents-final-cta" id="agents-final-cta" aria-labelledby="agents-cta-title" data-reveal="fade"{% if agents_page.finalCta.image %} style="--agents-cta-image: url('{{ agents_page.finalCta.image.publicUrl }}'); --agents-cta-position: {{ agents_page.finalCta.image.focalX }}% {{ agents_page.finalCta.image.focalY }}%; --agents-cta-fit: {{ agents_page.finalCta.image.fit }}; --agents-cta-zoom: {{ agents_page.finalCta.image.zoom / 100 }}"{% endif %}><div><p class="eyebrow">Ready to take the next step?</p><h2 id="agents-cta-title">{{ agents_page.finalCta.heading }}</h2><a class="button" href="{{ agents_page.finalCta.button.href }}">{{ agents_page.finalCta.button.label }} {{ icon('arrow-right', 'sm', 'site-icon--arrow') }}</a></div></section>
 </main>
+<dialog class="agent-review-modal" data-agent-review-modal aria-labelledby="agent-review-modal-name">
+    <button class="agent-review-modal__close" type="button" data-agent-review-modal-close aria-label="Close agent review">{{ icon('x', 'md') }}</button>
+    <div class="agent-review-modal__media" data-agent-review-modal-media hidden><img data-agent-review-modal-image alt=""></div>
+    <div class="agent-review-modal__content">
+        <p class="eyebrow">Agent experience</p>
+        <p class="agent-review-modal__stars" data-agent-review-modal-stars></p>
+        <blockquote data-agent-review-modal-quote></blockquote>
+        <p class="agent-review-modal__person"><strong id="agent-review-modal-name" data-agent-review-modal-name></strong><span data-agent-review-modal-role></span></p>
+    </div>
+</dialog>
 <footer class="site-footer"><div class="site-footer__inner"><a class="site-footer__logo" href="/" aria-label="Stephanie J Mendoza home"><img data-logo-image src="{{ url_for('static', filename='site/images/realtor-logo.png') }}" alt="Stephanie J Mendoza Real Estate Agent"></a><div class="site-footer__contact"><div class="site-footer__identity"><strong data-realtor-name>Stephanie J Mendoza</strong><span>Real Estate Agent</span><span>DRE #<span data-realtor-license>02006601</span></span><span data-realtor-brokerage>Real Broker</span></div><a data-phone-link data-realtor-phone href="tel:16614351239">(661) 435-1239</a><a data-email-link data-realtor-email href="mailto:RealtorStephanieAV@gmail.com">RealtorStephanieAV@gmail.com</a>{% include 'site/_social_links.html' %}</div><div class="site-footer__legal"><p>&copy; <span data-footer-year>2026</span> <span data-realtor-name>Stephanie J Mendoza</span>. All rights reserved.</p></div></div></footer>
 {% include 'site/_consultation_modal.html' %}
 </body></html>

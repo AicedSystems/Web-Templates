@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 
 import httpx
 from flask import Flask, jsonify, redirect, render_template, request, url_for
+from sqlalchemy import func, or_, text
 from sqlalchemy.exc import SQLAlchemyError
 
 import media_storage
@@ -24,6 +25,8 @@ editor_password = os.environ.get("EDITOR_PASSWORD")
 follow_up_boss_api_key = os.environ.get("FOLLOW_UP_BOSS_API_KEY", "").strip()
 follow_up_boss_system = os.environ.get("FOLLOW_UP_BOSS_SYSTEM", "").strip()
 follow_up_boss_system_key = os.environ.get("FOLLOW_UP_BOSS_SYSTEM_KEY", "").strip()
+app_environment = os.environ.get("APP_ENV", "development").strip().lower()
+secret_key = os.environ.get("SECRET_KEY", "").strip()
 
 if not database_url:
     raise RuntimeError("DATABASE_URL must be set to a PostgreSQL connection URL.")
@@ -31,7 +34,14 @@ if not database_url:
 if not editor_username or not editor_password:
     raise RuntimeError("EDITOR_USERNAME and EDITOR_PASSWORD must be set.")
 
+if app_environment == "production" and not secret_key:
+    raise RuntimeError("SECRET_KEY must be set in production.")
+
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+app.config["SECRET_KEY"] = secret_key or "local-development-only"
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = app_environment == "production"
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     # Check pooled connections before using them so a connection closed by
     # Supabase is replaced instead of causing the next request to fail.
@@ -41,6 +51,19 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 }
 
 db.init_app(app)
+
+
+@app.after_request
+def apply_security_headers(response):
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+    if app_environment == "production":
+        response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+    if request.path.startswith(("/admin", "/api/admin")):
+        response.headers["Cache-Control"] = "no-store"
+    return response
 
 ADMIN_SITE_DATA = {
     "name": "Stephanie J Mendoza",
@@ -1664,7 +1687,12 @@ def validate_review_page_payload(data):
         return None, "Choose a valid Featured Story review."
     if featured_review_id is not None:
         selected_review = db.session.get(Review, featured_review_id)
-        if selected_review is None or not selected_review.is_published or selected_review.archived_at is not None:
+        if (
+            selected_review is None
+            or not selected_review.is_published
+            or selected_review.archived_at is not None
+            or (selected_review.client_type or "").strip().lower() == "agent"
+        ):
             return None, "Featured Story must use a published, active review."
 
     final_cta = data["finalCta"]
@@ -1697,7 +1725,11 @@ def validate_review_page_payload(data):
 def get_eligible_featured_reviews():
     statement = (
         db.select(Review)
-        .where(Review.is_published.is_(True), Review.archived_at.is_(None))
+        .where(
+            Review.is_published.is_(True),
+            Review.archived_at.is_(None),
+            or_(Review.client_type.is_(None), func.lower(func.trim(Review.client_type)) != "agent"),
+        )
         .order_by(Review.display_order.asc(), Review.id.asc())
     )
     return db.session.scalars(statement).all()
@@ -1909,6 +1941,17 @@ def render_home_page(editor_preview=False):
     )
 
 
+@app.get("/healthz")
+def health_check():
+    try:
+        db.session.execute(text("SELECT 1"))
+    except SQLAlchemyError:
+        db.session.rollback()
+        app.logger.exception("Database health check failed.")
+        return jsonify({"status": "unavailable"}), 503
+    return jsonify({"status": "ok"}), 200
+
+
 @app.get("/")
 def home():
     return render_home_page()
@@ -2011,6 +2054,7 @@ def create_public_inquiry():
 
     form_type = str(data.get("formType", "journey")).strip().lower()
     is_contact_form = form_type == "contact"
+    is_agent_form = form_type == "agent"
 
     if is_contact_form:
         first_name = str(data.get("firstName", "")).strip()
@@ -2026,6 +2070,9 @@ def create_public_inquiry():
     audience = str(data.get("audience", "")).strip().lower()
     interest = str(data.get("interest", "")).strip()
     message = str(data.get("message", "")).strip()
+    license_status = str(data.get("licenseStatus", "")).strip()
+    referral = str(data.get("referral", "")).strip()
+    goals = str(data.get("goals", "")).strip()
 
     if is_contact_form and (not first_name or not last_name or len(first_name) > 80 or len(last_name) > 80):
         return jsonify({"message": "Please enter your first and last name."}), 400
@@ -2047,6 +2094,27 @@ def create_public_inquiry():
             return jsonify({"message": "Please choose what you are interested in."}), 400
         if not message or len(message) > 2000:
             return jsonify({"message": "Please enter a message of 2,000 characters or fewer."}), 400
+    elif is_agent_form:
+        allowed_license_statuses = {
+            "Currently licensed",
+            "In licensing school",
+            "Considering real estate",
+            "Licensed in another state",
+        }
+        allowed_referrals = {
+            "",
+            "Social media",
+            "Friend or colleague",
+            "Industry event",
+            "Online search",
+            "Other",
+        }
+        if license_status not in allowed_license_statuses:
+            return jsonify({"message": "Please choose your current licensing status."}), 400
+        if referral not in allowed_referrals:
+            return jsonify({"message": "Please choose how you heard about Stephanie."}), 400
+        if not goals or len(goals) > 2000:
+            return jsonify({"message": "Please describe your goals in 2,000 characters or fewer."}), 400
     else:
         if timeline not in INQUIRY_TIMELINES:
             return jsonify({"message": "Please choose a timeline."}), 400
@@ -2067,6 +2135,15 @@ def create_public_inquiry():
     if is_contact_form:
         event_type = "Seller Inquiry" if interest == "Selling a home" else "General Inquiry"
         event_message = f"Website contact form. Interest: {interest}.\n\nMessage:\n{message}"
+    elif is_agent_form:
+        event_type = "General Inquiry"
+        referral_line = referral or "Not provided"
+        event_message = (
+            "Website agent application.\n"
+            f"Licensing status: {license_status}.\n"
+            f"Referral source: {referral_line}.\n\n"
+            f"Goals and additional information:\n{goals}"
+        )
     else:
         event_type = "Seller Inquiry" if audience == "sellers" else "General Inquiry"
         event_message = f"Website {audience[:-1]} inquiry. Timeline: {timeline}."
@@ -2218,7 +2295,12 @@ def render_reviews_page(editor_preview=False):
     if content.featured_review_id is not None:
         try:
             candidate = db.session.get(Review, content.featured_review_id)
-            if candidate is not None and candidate.is_published and candidate.archived_at is None:
+            if (
+                candidate is not None
+                and candidate.is_published
+                and candidate.archived_at is None
+                and (candidate.client_type or "").strip().lower() != "agent"
+            ):
                 featured_review = candidate
         except SQLAlchemyError:
             db.session.rollback()
@@ -2511,9 +2593,11 @@ def admin_blog_new_build():
 @app.get("/admin/reviews")
 @require_editor_auth
 def admin_reviews_manager():
+    agent_mode = request.args.get("audience") == "agents"
     return render_template(
         "admin/reviews/index.html",
         admin_site=ADMIN_SITE_DATA,
+        agent_mode=agent_mode,
     )
 
 
@@ -3177,7 +3261,38 @@ def list_reviews():
             Review.client_type,
             Review.display_order,
         )
-        .where(Review.is_published.is_(True), Review.archived_at.is_(None))
+        .where(
+            Review.is_published.is_(True),
+            Review.archived_at.is_(None),
+            or_(Review.client_type.is_(None), func.lower(func.trim(Review.client_type)) != "agent"),
+        )
+        .order_by(Review.display_order.asc(), Review.id.asc())
+    )
+    reviews = db.session.execute(statement).all()
+    return jsonify([serialize_review_summary(review) for review in reviews])
+
+
+@app.get("/api/agent-reviews", strict_slashes=False)
+def list_agent_reviews():
+    statement = (
+        db.select(
+            Review.id,
+            Review.client_name,
+            Review.quote,
+            Review.client_image_url,
+            Review.client_image_path,
+            Review.client_image_focal_x,
+            Review.client_image_focal_y,
+            Review.client_image_fit,
+            Review.rating,
+            Review.client_type,
+            Review.display_order,
+        )
+        .where(
+            Review.is_published.is_(True),
+            Review.archived_at.is_(None),
+            func.lower(func.trim(Review.client_type)) == "agent",
+        )
         .order_by(Review.display_order.asc(), Review.id.asc())
     )
     reviews = db.session.execute(statement).all()
@@ -3187,6 +3302,7 @@ def list_reviews():
 @app.get("/api/admin/reviews")
 @require_editor_auth
 def list_admin_reviews():
+    audience = request.args.get("audience", "").strip().lower()
     statement = (
         db.select(
             Review.id,
@@ -3205,11 +3321,17 @@ def list_admin_reviews():
             Review.created_at,
             Review.updated_at,
         )
-        .order_by(
-            Review.archived_at.is_not(None).asc(),
-            Review.display_order.asc(),
-            Review.id.asc(),
+    )
+    if audience == "agents":
+        statement = statement.where(func.lower(func.trim(Review.client_type)) == "agent")
+    elif audience == "clients":
+        statement = statement.where(
+            or_(Review.client_type.is_(None), func.lower(func.trim(Review.client_type)) != "agent")
         )
+    statement = statement.order_by(
+        Review.archived_at.is_not(None).asc(),
+        Review.display_order.asc(),
+        Review.id.asc(),
     )
     reviews = db.session.execute(statement).all()
     response = jsonify([serialize_admin_review(review) for review in reviews])

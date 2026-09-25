@@ -1,6 +1,9 @@
 const reviewsStatus = document.querySelector("#reviews-status");
 const reviewsList = document.querySelector("#reviews-list");
 const filterButtons = document.querySelectorAll("[data-review-filter]");
+const selectReviewsButton = document.querySelector("#select-reviews");
+const deleteSelectedReviewsButton = document.querySelector("#delete-selected-reviews");
+const selectedReviewsCount = document.querySelector("#selected-reviews-count");
 const addReviewButton = document.querySelector("#add-review-button");
 const reviewDialog = document.querySelector("#review-dialog");
 const reviewForm = document.querySelector("#review-form");
@@ -33,12 +36,15 @@ const previewQuote = document.querySelector("#review-preview-quote");
 const previewName = document.querySelector("#review-preview-name");
 const previewType = document.querySelector("#review-preview-type");
 const previewStars = document.querySelector("#review-preview-stars");
+const agentReviewMode = document.body.dataset.reviewAudience === "agents";
 
 let reviews = [];
 let activeFilter = "all";
 let reviewImage = null;
 let originalReviewImagePath = null;
 let pendingReviewImagePath = null;
+let selectionMode = false;
+const selectedReviewIds = new Set();
 
 function initials(name) {
     return (name || "?").split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
@@ -111,6 +117,8 @@ const reviewImagePositionControl = new window.ManagedImagePositionControl({
 });
 
 function reviewMatchesFilter(review) {
+    const isAgentReview = (review.clientType || "").trim().toLowerCase() === "agent";
+    if (agentReviewMode !== isAgentReview) return false;
     if (activeFilter === "archived") return Boolean(review.archivedAt);
     if (activeFilter === "published") return review.isPublished && !review.archivedAt;
     if (activeFilter === "hidden") return !review.isPublished && !review.archivedAt;
@@ -136,6 +144,20 @@ function createAction(label, handler, className = "") {
 function createReviewRow(review) {
     const row = document.createElement("article");
     row.className = `review-row${review.archivedAt ? " is-archived" : ""}`;
+
+    const selector = document.createElement("label");
+    selector.className = "review-row__selector";
+    selector.hidden = !selectionMode;
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = selectedReviewIds.has(review.id);
+    checkbox.setAttribute("aria-label", `Select review from ${review.clientName}`);
+    checkbox.addEventListener("change", () => {
+        if (checkbox.checked) selectedReviewIds.add(review.id);
+        else selectedReviewIds.delete(review.id);
+        updateSelectionControls();
+    });
+    selector.append(checkbox);
 
     const image = document.createElement("div");
     image.className = "review-row__image";
@@ -181,8 +203,19 @@ function createReviewRow(review) {
         createAction(review.archivedAt ? "Restore" : "Archive", () => changeArchiveState(review), "review-row__archive")
     );
 
-    row.append(image, identity, quote, meta, order, actions);
+    row.append(selector, image, identity, quote, meta, order, actions);
     return row;
+}
+
+function updateSelectionControls() {
+    const count = selectedReviewIds.size;
+    reviewsList.classList.toggle("is-selecting", selectionMode);
+    selectReviewsButton.textContent = selectionMode ? "Cancel selection" : "Select reviews";
+    selectReviewsButton.setAttribute("aria-pressed", String(selectionMode));
+    selectedReviewsCount.hidden = !selectionMode;
+    deleteSelectedReviewsButton.hidden = !selectionMode;
+    selectedReviewsCount.textContent = `${count} selected`;
+    deleteSelectedReviewsButton.disabled = count === 0;
 }
 
 function renderReviews() {
@@ -191,6 +224,45 @@ function renderReviews() {
     reviewsList.hidden = visibleReviews.length === 0;
     reviewsStatus.hidden = visibleReviews.length > 0;
     if (!visibleReviews.length) reviewsStatus.textContent = reviews.length ? "No reviews match this filter." : "No reviews have been added yet.";
+    updateSelectionControls();
+}
+
+function toggleReviewSelection() {
+    selectionMode = !selectionMode;
+    if (!selectionMode) selectedReviewIds.clear();
+    renderReviews();
+}
+
+async function deleteSelectedReviews() {
+    const selectedReviews = reviews.filter((review) => selectedReviewIds.has(review.id));
+    if (!selectedReviews.length) return;
+    const label = `${selectedReviews.length} review${selectedReviews.length === 1 ? "" : "s"}`;
+    if (!window.confirm(`Permanently delete ${label}? This cannot be undone.`)) return;
+
+    selectReviewsButton.disabled = true;
+    deleteSelectedReviewsButton.disabled = true;
+    reviewsStatus.hidden = false;
+    reviewsStatus.textContent = `Deleting ${label}…`;
+    let deletedCount = 0;
+    const failures = [];
+    for (const review of selectedReviews) {
+        try {
+            await requestJson(`/api/reviews/${review.id}`, { method: "DELETE" });
+            deletedCount += 1;
+            selectedReviewIds.delete(review.id);
+            if (review.clientImagePath) await deleteManagedImage(review.clientImagePath).catch(() => {});
+        } catch (error) {
+            failures.push(review.clientName);
+        }
+    }
+
+    selectionMode = failures.length > 0;
+    selectReviewsButton.disabled = false;
+    await loadReviews("Refreshing reviews…");
+    if (failures.length) {
+        reviewsStatus.hidden = false;
+        reviewsStatus.textContent = `${deletedCount} deleted. ${failures.length} could not be deleted; please try again.`;
+    }
 }
 
 async function requestJson(url, options = {}) {
@@ -208,7 +280,8 @@ async function loadReviews(message = "Loading reviews…") {
     reviewsStatus.hidden = false;
     reviewsStatus.textContent = message;
     try {
-        const data = await requestJson("/api/admin/reviews");
+        const audience = agentReviewMode ? "agents" : "clients";
+        const data = await requestJson(`/api/admin/reviews?audience=${audience}`);
         if (!Array.isArray(data)) throw new Error("Reviews response was not an array.");
         reviews = data;
         renderReviews();
@@ -226,7 +299,7 @@ function openReviewDialog(review = null) {
     reviewIdInput.value = review?.id || "";
     clientNameInput.value = review?.clientName || "";
     quoteInput.value = review?.quote || "";
-    clientTypeInput.value = review?.clientType || "";
+    clientTypeInput.value = review?.clientType || (agentReviewMode ? "Agent" : "");
     setRating(review?.rating || null);
     reviewImage = review?.clientImageUrl ? {
         storagePath: review.clientImagePath || null,
@@ -366,6 +439,8 @@ filterButtons.forEach((button) => button.addEventListener("click", () => {
     filterButtons.forEach((item) => item.classList.toggle("is-active", item === button));
     renderReviews();
 }));
+selectReviewsButton.addEventListener("click", toggleReviewSelection);
+deleteSelectedReviewsButton.addEventListener("click", deleteSelectedReviews);
 addReviewButton.addEventListener("click", () => openReviewDialog());
 closeReviewDialogButton.addEventListener("click", closeReviewDialog);
 cancelReviewButton.addEventListener("click", closeReviewDialog);

@@ -10,7 +10,7 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 
 
 MAXIMUM_IMAGE_UPLOAD_BYTES = 8 * 1024 * 1024
-MAXIMUM_VIDEO_UPLOAD_BYTES = 50 * 1024 * 1024
+MAXIMUM_VIDEO_UPLOAD_BYTES = 150 * 1024 * 1024
 MAXIMUM_PDF_UPLOAD_BYTES = 15 * 1024 * 1024
 MAXIMUM_IMAGE_DIMENSION = 2400
 MAXIMUM_IMAGE_PIXELS = 40_000_000
@@ -153,7 +153,7 @@ def process_video_upload(file_storage):
     if not raw_video:
         raise MediaValidationError("The uploaded video is empty.")
     if len(raw_video) > MAXIMUM_VIDEO_UPLOAD_BYTES:
-        raise MediaValidationError("Videos must be 50 MB or smaller.")
+        raise MediaValidationError("Videos must be 150 MB or smaller.")
 
     declared_type = (getattr(file_storage, "content_type", "") or "").lower()
     is_mp4 = len(raw_video) >= 12 and raw_video[4:8] == b"ftyp"

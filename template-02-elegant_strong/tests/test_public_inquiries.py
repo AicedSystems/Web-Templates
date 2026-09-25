@@ -92,6 +92,43 @@ class PublicInquiryTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(post.call_args.kwargs["json"]["type"], "Seller Inquiry")
 
+    def test_agent_application_is_delivered_without_exposing_credentials(self):
+        payload = {
+            "formType": "agent",
+            "name": "Morgan Lee",
+            "email": "morgan@example.com",
+            "phone": "661-555-0123",
+            "licenseStatus": "Currently licensed",
+            "referral": "Friend or colleague",
+            "goals": "I want to grow my business with strong mentorship.",
+            "website": "",
+        }
+        with self.configured_delivery(), patch.object(app_module.httpx, "post", return_value=Mock(status_code=201)) as post:
+            response = self.client.post("/api/inquiries", json=payload)
+
+        self.assertEqual(response.status_code, 200)
+        event = post.call_args.kwargs["json"]
+        self.assertEqual(event["type"], "General Inquiry")
+        self.assertIn("Website agent application", event["message"])
+        self.assertIn("Currently licensed", event["message"])
+        self.assertNotIn("private-user-key", response.get_data(as_text=True))
+
+    def test_invalid_agent_application_never_calls_follow_up_boss(self):
+        payload = {
+            "formType": "agent",
+            "name": "Morgan Lee",
+            "email": "morgan@example.com",
+            "phone": "661-555-0123",
+            "licenseStatus": "Unknown status",
+            "referral": "Other",
+            "goals": "I want mentorship.",
+        }
+        with patch.object(app_module.httpx, "post") as post:
+            response = self.client.post("/api/inquiries", json=payload)
+
+        self.assertEqual(response.status_code, 400)
+        post.assert_not_called()
+
     def test_invalid_contact_form_never_calls_follow_up_boss(self):
         payload = {
             "formType": "contact",

@@ -30,7 +30,8 @@
 <details class="admin-nav-group{% if endpoint in review_endpoints %} admin-nav-group--active{% endif %}"{% if endpoint in review_endpoints %} open{% endif %}>
     <summary><span>Client Stories</span><b aria-hidden="true">⌄</b></summary>
     <div class="admin-nav-group__links">
-        <a class="admin-nav__link{% if endpoint == 'admin_reviews_manager' %} admin-nav__link--active{% endif %}" href="{{ url_for('admin_reviews_manager') }}"{% if endpoint == 'admin_reviews_manager' %} aria-current="page"{% endif %}><span aria-hidden="true">★</span> Manage Reviews</a>
+        <a class="admin-nav__link{% if endpoint == 'admin_reviews_manager' and request.args.get('audience') != 'agents' %} admin-nav__link--active{% endif %}" href="{{ url_for('admin_reviews_manager') }}"{% if endpoint == 'admin_reviews_manager' and request.args.get('audience') != 'agents' %} aria-current="page"{% endif %}><span aria-hidden="true">★</span> Manage Client Reviews</a>
+        <a class="admin-nav__link{% if endpoint == 'admin_reviews_manager' and request.args.get('audience') == 'agents' %} admin-nav__link--active{% endif %}" href="{{ url_for('admin_reviews_manager', audience='agents') }}"{% if endpoint == 'admin_reviews_manager' and request.args.get('audience') == 'agents' %} aria-current="page"{% endif %}><span aria-hidden="true">★</span> Manage Agent Reviews</a>
     </div>
 </details>
 

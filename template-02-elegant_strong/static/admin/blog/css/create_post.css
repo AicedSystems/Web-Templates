@@ -199,7 +199,9 @@
 .full-preview-block--paragraph { font-size: 1rem; line-height: 1.85; }
 .full-preview-block--quote { margin: 34px 0; padding: 8px 0 8px 24px; border-left: 3px solid var(--admin-taupe); font-size: 1.25rem; font-style: italic; line-height: 1.65; }
 .full-preview-block--image { width: 100%; max-height: 560px; border-radius: 9px; object-fit: cover; }
-.full-preview-block--youtube { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 9px; }
+.full-preview-block--youtube-wrap { margin-bottom: 22px; }
+.full-preview-block--youtube { width: 100%; aspect-ratio: 16 / 9; display: block; border: 0; border-radius: 9px; }
+.full-preview-block--youtube-fallback { width: fit-content; margin: 10px 0 0 auto; display: block; color: var(--admin-ink); font-size: .72rem; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 .full-preview-block--cta { width: fit-content; min-height: 44px; padding: 0 18px; display: inline-flex; align-items: center; border-radius: 7px; color: #fff; background: var(--admin-ink); font-size: .76rem; font-weight: 700; }
 .full-preview-article__empty { padding: 28px; color: var(--admin-muted); background: var(--admin-canvas); text-align: center; }
 .publishing-status { min-height: 1.4em; margin: 0 0 12px; color: var(--admin-muted); font-size: .75rem; line-height: 1.5; }

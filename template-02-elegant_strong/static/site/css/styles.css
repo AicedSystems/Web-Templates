@@ -44,6 +44,7 @@ body:has(.hero) .main-nav ul {
     box-shadow: 0 10px 28px rgba(0, 0, 0, .12);
     backdrop-filter: blur(8px);
 }
+body:has(.hero) .main-nav { transform: translate(clamp(12px, 1.5vw, 24px), -8px); }
 body:has(.hero) .main-nav__link { color: var(--color-white); }
 body:has(.hero) .main-nav__link::after { background: var(--color-white); }
 
@@ -755,9 +756,13 @@ main > section:not(.hero) { min-height: 1px; scroll-margin-top: 20px; }
     background: var(--color-paper);
 }
 
+.blog-section #blog-heading {
+    margin-top: 22px;
+}
+
 .blog-post-list {
     min-height: 260px;
-    margin-top: 36px;
+    margin-top: 44px;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 22px;
@@ -1344,7 +1349,7 @@ main > section:not(.hero) { min-height: 1px; scroll-margin-top: 20px; }
 
     .hero--fallback-media .hero__visual > img {
         top: auto;
-        bottom: 190px;
+        bottom: 156px;
         left: 8%;
         width: 76%;
         height: 80%;

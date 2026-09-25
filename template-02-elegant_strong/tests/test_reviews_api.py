@@ -73,6 +73,21 @@ class ReviewsApiTestCase(unittest.TestCase):
         self.assertEqual(self.client.get("/api/reviews").get_json(), [])
         self.assertEqual(self.client.get(f"/api/reviews/{review_id}").status_code, 404)
 
+    def test_agent_reviews_only_returns_published_active_agent_reviews(self):
+        db.session.add_all([
+            Review(client_name="Agent Story", quote="Mentorship helped.", client_type="Agent", is_published=True),
+            Review(client_name="Buyer Story", quote="Bought a home.", client_type="Buyer", is_published=True),
+            Review(client_name="Hidden Agent", quote="Hidden.", client_type="Agent", is_published=False),
+            Review(client_name="Archived Agent", quote="Archived.", client_type="Agent", is_published=True, archived_at=datetime.utcnow()),
+        ])
+        db.session.commit()
+
+        response = self.client.get("/api/agent-reviews")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([review["clientName"] for review in response.get_json()], ["Agent Story"])
+        self.assertEqual([review["clientName"] for review in self.client.get("/api/reviews").get_json()], ["Buyer Story"])
+
     def test_published_reviews_are_ordered_and_detail_is_public(self):
         for name, order in (("Second", 20), ("First", 10)):
             response = self.client.post(

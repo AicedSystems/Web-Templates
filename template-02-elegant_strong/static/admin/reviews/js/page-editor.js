@@ -445,13 +445,13 @@ function uploadHeroMediaRequest(file) {
 async function uploadHeroMedia(file) {
     const supportedTypes = new Set(["image/jpeg", "image/png", "image/webp", "video/mp4", "video/webm"]);
     const isVideo = file.type === "video/mp4" || file.type === "video/webm";
-    const limit = isVideo ? 50 * 1024 * 1024 : 8 * 1024 * 1024;
+    const limit = isVideo ? 150 * 1024 * 1024 : 8 * 1024 * 1024;
     if (!supportedTypes.has(file.type)) {
         heroMediaStatus.textContent = "Choose a JPEG, PNG, WebP, MP4, or WebM file.";
         return;
     }
     if (file.size > limit) {
-        heroMediaStatus.textContent = isVideo ? "Videos must be 50 MB or smaller." : "Images must be 8 MB or smaller.";
+        heroMediaStatus.textContent = isVideo ? "Videos must be 150 MB or smaller." : "Images must be 8 MB or smaller.";
         return;
     }
 

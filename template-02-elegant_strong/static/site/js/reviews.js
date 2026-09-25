@@ -2,9 +2,19 @@ const reviewsFeed = document.querySelector("[data-reviews-feed]");
 const reviewsCarousel = document.querySelector("[data-reviews-carousel]");
 const previousReviewButton = document.querySelector("[data-reviews-previous]");
 const nextReviewButton = document.querySelector("[data-reviews-next]");
+const reviewModal = document.querySelector("[data-review-modal]");
+const reviewModalClose = document.querySelector("[data-review-modal-close]");
+const reviewModalMedia = document.querySelector("[data-review-modal-media]");
+const reviewModalImage = document.querySelector("[data-review-modal-image]");
+const reviewModalStars = document.querySelector("[data-review-modal-stars]");
+const reviewModalQuote = document.querySelector("[data-review-modal-quote]");
+const reviewModalName = document.querySelector("[data-review-modal-name]");
+const reviewModalType = document.querySelector("[data-review-modal-type]");
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let carouselIsMoving = false;
 let carouselTimer = null;
+let loadedReviews = [];
+let reviewModalTrigger = null;
 
 function clampPercentage(value, fallback) {
     const number = Number(value);
@@ -32,9 +42,46 @@ function configureManagedImage(name, settings) {
 configureManagedImage("about", realtorData.reviewsPage?.aboutImage);
 configureManagedImage("featuredStory", realtorData.reviewsPage?.featuredStoryImage);
 
-function makeReviewCard(review) {
+function reviewPreviewText(value, maximum = 180) {
+    const text = String(value || "").trim();
+    if (text.length <= maximum) return text;
+    const shortened = text.slice(0, maximum + 1).replace(/\s+\S*$/, "").trim();
+    return `${shortened || text.slice(0, maximum).trim()}…`;
+}
+
+function openReviewModal(review, trigger) {
+    if (!reviewModal || !review) return;
+    reviewModalTrigger = trigger;
+    reviewModalQuote.textContent = `“${review.quote || ""}”`;
+    reviewModalName.textContent = review.clientName || "Client";
+    reviewModalType.textContent = review.clientType || "Client story";
+    const rating = Math.min(5, Math.max(0, Number(review.rating) || 0));
+    reviewModalStars.replaceChildren();
+    for (let index = 0; index < rating; index += 1) window.siteIcons?.append(reviewModalStars, "star");
+    reviewModalStars.hidden = !rating;
+    if (rating) reviewModalStars.setAttribute("aria-label", `${rating} out of 5 stars`);
+    else reviewModalStars.removeAttribute("aria-label");
+    reviewModalMedia.hidden = !review.clientImageUrl;
+    reviewModal.classList.toggle("review-modal--text-only", !review.clientImageUrl);
+    if (review.clientImageUrl) {
+        reviewModalImage.src = review.clientImageUrl;
+        reviewModalImage.alt = `${review.clientName || "Client"} testimonial`;
+        reviewModalImage.style.objectFit = review.clientImageFit === "contain" ? "contain" : "cover";
+        reviewModalImage.style.objectPosition = `${clampPercentage(review.clientImageFocalX, 50)}% ${clampPercentage(review.clientImageFocalY, 50)}%`;
+    } else reviewModalImage.removeAttribute("src");
+    window.clearInterval(carouselTimer);
+    reviewModal.showModal();
+    reviewModalClose.focus();
+}
+
+function makeReviewCard(review, reviewIndex) {
     const card = document.createElement("article");
     card.className = `review-card${review.clientImageUrl ? "" : " review-card--text-only"}`;
+    card.dataset.reviewIndex = String(reviewIndex);
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-haspopup", "dialog");
+    card.setAttribute("aria-label", `Read the complete review from ${review.clientName || "this client"}`);
 
     const media = document.createElement("div");
     media.className = "review-card__media";
@@ -56,7 +103,16 @@ function makeReviewCard(review) {
     body.className = "review-card__body";
 
     const quote = document.createElement("blockquote");
-    quote.textContent = `“${review.quote || ""}”`;
+    quote.textContent = `“${reviewPreviewText(review.quote)}”`;
+
+    const showMore = document.createElement("span");
+    showMore.className = "review-card__show-more";
+    showMore.setAttribute("aria-hidden", "true");
+    const showMoreLabel = document.createElement("span");
+    showMoreLabel.textContent = "Show full review";
+    const showMoreArrow = document.createElement("span");
+    showMoreArrow.className = "review-card__show-more-arrow";
+    showMore.append(showMoreLabel, showMoreArrow);
 
     const client = document.createElement("div");
     client.className = "review-card__client";
@@ -81,7 +137,7 @@ function makeReviewCard(review) {
         }
         client.append(stars);
     }
-    body.append(quote, client);
+    body.append(quote, showMore, client);
     card.append(media, body);
     return card;
 }
@@ -106,7 +162,7 @@ function updateFeaturedReviewCard() {
 
 function configureCarouselSize() {
     const count = reviewCards().length;
-    reviewsFeed.dataset.visible = String(Math.max(1, Math.min(count, desiredVisibleCards())));
+    reviewsFeed.dataset.visible = String(desiredVisibleCards());
     const disabled = count < 2;
     previousReviewButton.disabled = disabled;
     nextReviewButton.disabled = disabled;
@@ -147,6 +203,7 @@ function showNextReview() {
     const clone = cards[0].cloneNode(true);
     clone.dataset.carouselClone = "true";
     clone.setAttribute("aria-hidden", "true");
+    clone.tabIndex = -1;
     reviewsFeed.append(clone);
     requestAnimationFrame(() => {
         reviewsFeed.classList.add("is-moving");
@@ -172,6 +229,7 @@ function showPreviousReview() {
     const clone = lastCard.cloneNode(true);
     clone.dataset.carouselClone = "true";
     clone.setAttribute("aria-hidden", "true");
+    clone.tabIndex = -1;
     reviewsFeed.prepend(clone);
     reviewsFeed.style.transform = `translateX(-${carouselStep()}px)`;
     reviewsFeed.getBoundingClientRect();
@@ -209,7 +267,8 @@ async function loadReviews() {
             reviewsFeed.append(empty);
             return;
         }
-        reviews.forEach((review) => reviewsFeed.append(makeReviewCard(review)));
+        loadedReviews = reviews;
+        reviews.forEach((review, index) => reviewsFeed.append(makeReviewCard(review, index)));
         configureCarouselSize();
         startCarouselTimer();
     } catch (error) {
@@ -225,4 +284,23 @@ previousReviewButton.addEventListener("click", showPreviousReview);
 nextReviewButton.addEventListener("click", showNextReview);
 window.addEventListener("resize", configureCarouselSize);
 prefersReducedMotion.addEventListener?.("change", startCarouselTimer);
+reviewsFeed?.addEventListener("click", (event) => {
+    const card = event.target.closest(".review-card:not([data-carousel-clone])");
+    if (!card) return;
+    openReviewModal(loadedReviews[Number(card.dataset.reviewIndex)], card);
+});
+reviewsFeed?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const card = event.target.closest(".review-card:not([data-carousel-clone])");
+    if (!card) return;
+    event.preventDefault();
+    openReviewModal(loadedReviews[Number(card.dataset.reviewIndex)], card);
+});
+reviewModalClose?.addEventListener("click", () => reviewModal.close());
+reviewModal?.addEventListener("click", (event) => { if (event.target === reviewModal) reviewModal.close(); });
+reviewModal?.addEventListener("close", () => {
+    reviewModalTrigger?.focus();
+    reviewModalTrigger = null;
+    startCarouselTimer();
+});
 loadReviews();

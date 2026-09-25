@@ -10,11 +10,11 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/dashboard.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='admin/shared/css/image-position-control.css', v='1') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='admin/reviews/css/reviews.css', v='6') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/reviews/css/reviews.css', v='7') }}">
     <script src="{{ url_for('static', filename='admin/shared/js/image-position-control.js', v='1') }}" defer></script>
-    <script src="{{ url_for('static', filename='admin/reviews/js/reviews.js', v='5') }}" defer></script>
+    <script src="{{ url_for('static', filename='admin/reviews/js/reviews.js', v='8') }}" defer></script>
 </head>
-<body>
+<body data-review-audience="{{ 'agents' if agent_mode else 'all' }}">
     <div class="admin-shell">
         <aside class="admin-sidebar">
             <a class="admin-brand" href="{{ url_for('admin_blog_dashboard') }}">
@@ -46,19 +46,24 @@
 
             <main class="admin-main reviews-page" id="main-content">
                 <section class="reviews-heading" aria-labelledby="reviews-heading-title">
-                    <div><p class="admin-kicker">Website content</p><h1 id="reviews-heading-title">Reviews Manager</h1><p>Create, publish, order, hide, and archive client reviews.</p></div>
-                    <button class="reviews-add-button" id="add-review-button" type="button">+ Add Review</button>
+                    <div><p class="admin-kicker">Website content</p><h1 id="reviews-heading-title">{{ 'Agent Reviews Manager' if agent_mode else 'Reviews Manager' }}</h1><p>{{ 'Create and manage testimonials shown in the Agents carousel.' if agent_mode else 'Create, publish, order, hide, and archive client reviews.' }}</p></div>
+                    <button class="reviews-add-button" id="add-review-button" type="button">+ Add {{ 'Agent ' if agent_mode else '' }}Review</button>
                 </section>
 
                 <section class="reviews-manager" aria-labelledby="reviews-list-title">
                     <div class="reviews-toolbar">
-                        <div><p class="admin-kicker">Client feedback</p><h2 id="reviews-list-title">All reviews</h2></div>
+                        <div><p class="admin-kicker">{{ 'Agent feedback' if agent_mode else 'Client feedback' }}</p><h2 id="reviews-list-title">{{ 'Agent reviews' if agent_mode else 'All reviews' }}</h2></div>
                         <div class="reviews-filters" aria-label="Filter reviews">
                             <button class="is-active" type="button" data-review-filter="all">All</button>
                             <button type="button" data-review-filter="published">Published</button>
                             <button type="button" data-review-filter="hidden">Hidden</button>
                             <button type="button" data-review-filter="archived">Archived</button>
                         </div>
+                    </div>
+                    <div class="reviews-selection" aria-label="Review selection actions">
+                        <button id="select-reviews" type="button" aria-pressed="false">Select reviews</button>
+                        <span id="selected-reviews-count" aria-live="polite" hidden>0 selected</span>
+                        <button class="reviews-selection__delete" id="delete-selected-reviews" type="button" hidden disabled>Delete selected</button>
                     </div>
                     <p class="reviews-status" id="reviews-status" aria-live="polite">Loading reviews…</p>
                     <div class="reviews-list" id="reviews-list" hidden></div>

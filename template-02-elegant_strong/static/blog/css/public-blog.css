@@ -141,7 +141,7 @@ a {
     font-family: var(--font-display);
     font-size: clamp(3.2rem, 5.7vw, 6.2rem);
     font-weight: 500;
-    line-height: 0.96;
+    line-height: 1.06;
     letter-spacing: -0.04em;
 }
 
@@ -673,11 +673,27 @@ a {
     margin: 48px 0;
 }
 
+.article-block__youtube-wrap {
+    margin: 48px 0;
+}
+
 .article-block__youtube {
     width: 100%;
     aspect-ratio: 16 / 9;
-    margin: 48px 0;
+    display: block;
     border: 0;
+}
+
+.article-block__youtube-fallback {
+    width: fit-content;
+    margin: 12px 0 0 auto;
+    display: block;
+    color: inherit;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
 }
 
 .article-block__cta {

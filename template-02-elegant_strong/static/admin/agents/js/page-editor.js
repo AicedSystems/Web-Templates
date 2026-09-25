@@ -146,9 +146,9 @@ function uploadRequest(control, file) {
 
 async function uploadMedia(control, file) {
     const key = control.dataset.mediaControl; const status = control.querySelector(".image-control__status");
-    const video = ["video/mp4", "video/webm"].includes(file.type); const allowed = video || ["image/jpeg", "image/png", "image/webp"].includes(file.type); const limit = video ? 50 * 1024 * 1024 : 8 * 1024 * 1024;
+    const video = ["video/mp4", "video/webm"].includes(file.type); const allowed = video || ["image/jpeg", "image/png", "image/webp"].includes(file.type); const limit = video ? 150 * 1024 * 1024 : 8 * 1024 * 1024;
     if (!allowed || (video && key !== "hero")) { status.textContent = key === "hero" ? "Choose a JPEG, PNG, WebP, MP4, or WebM file." : "Choose a JPEG, PNG, or WebP image."; return; }
-    if (file.size > limit) { status.textContent = video ? "Videos must be 50 MB or smaller." : "Images must be 8 MB or smaller."; return; }
+    if (file.size > limit) { status.textContent = video ? "Videos must be 150 MB or smaller." : "Images must be 8 MB or smaller."; return; }
     const current = key === "hero" ? draft.hero.media : draft[key].image; status.textContent = "Uploading…";
     try { const uploaded = await uploadRequest(control, file); if (current && uploadedThisSession.has(current.storagePath)) { await deleteMedia(current.storagePath).catch(() => {}); uploadedThisSession.delete(current.storagePath); } uploadedThisSession.add(uploaded.storagePath); const media = { storagePath: uploaded.storagePath, publicUrl: uploaded.publicUrl, mediaType: uploaded.mediaType || "image", mimeType: uploaded.mimeType || "image/webp", ...(uploaded.mediaType === "video" ? {} : key === "hero" ? { focalX: 50, focalY: 50, desktopFit: "cover", desktopZoom: 100 } : { focalX: 50, focalY: 50, fit: "cover", zoom: 100 }) }; if (key === "hero") draft.hero.media = media; else draft[key].image = media; renderMedia(control); status.textContent = "Media ready. Save Changes to publish it."; setDirty(); updatePreview(); } catch (error) { status.textContent = error.message; } finally { const progress = control.querySelector("progress"); if (progress) { progress.hidden = true; progress.value = 0; } control.querySelector('input[type="file"]').value = ""; }
 }

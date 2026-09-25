@@ -114,6 +114,8 @@ function createArticleBlock(block) {
         const embedUrl = getYouTubeEmbedUrl(block.url);
         if (!embedUrl) return null;
 
+        const video = document.createElement("figure");
+        video.className = "article-block__youtube-wrap";
         const frame = document.createElement("iframe");
         frame.className = "article-block__youtube";
         frame.src = embedUrl;
@@ -121,7 +123,14 @@ function createArticleBlock(block) {
         frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
         frame.allowFullscreen = true;
         frame.loading = "lazy";
-        return frame;
+        const fallback = document.createElement("a");
+        fallback.className = "article-block__youtube-fallback";
+        fallback.href = embedUrl.replace("youtube-nocookie.com/embed/", "youtube.com/watch?v=");
+        fallback.target = "_blank";
+        fallback.rel = "noopener noreferrer";
+        fallback.textContent = "Video not playing? Watch on YouTube →";
+        video.append(frame, fallback);
+        return video;
     }
 
     if (block.type === "cta" && typeof block.text === "string" && isSafeWebUrl(block.url)) {
