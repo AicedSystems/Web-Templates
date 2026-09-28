@@ -7,6 +7,8 @@ from datetime import datetime
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 os.environ["EDITOR_USERNAME"] = "review-test-editor"
 os.environ["EDITOR_PASSWORD"] = "review-test-password"
+os.environ["APP_ENV"] = "test"
+os.environ["EDITOR_PASSWORD_HASH"] = "pbkdf2:sha256:1000000$GP639Ean0NEysEtz$fa522afca3dbab3d179c095d8417c5011e86aa9f2e942fc9d82aa0254d09194b"
 os.environ["SUPABASE_URL"] = "https://example.supabase.co"
 os.environ["SUPABASE_STORAGE_BUCKET"] = "site-media"
 
@@ -33,15 +35,18 @@ class ReviewsApiTestCase(unittest.TestCase):
         db.session.query(Review).delete()
         db.session.commit()
         self.client = app.test_client()
-        credentials = f"{app_module.editor_username}:{app_module.editor_password}".encode("utf-8")
-        token = base64.b64encode(credentials).decode("ascii")
-        self.auth_headers = {"Authorization": f"Basic {token}"}
+        token = "reviews-test-csrf"
+        with self.client.session_transaction() as session:
+            session[app_module.ADMIN_SESSION_KEY] = True
+            session[app_module.CSRF_SESSION_KEY] = token
+        self.auth_headers = {"X-CSRF-Token": token}
 
     def test_public_list_is_empty_and_mutations_require_authentication(self):
+        anonymous = app.test_client()
         self.assertEqual(self.client.get("/api/reviews").status_code, 200)
-        self.assertEqual(self.client.get("/api/admin/reviews").status_code, 401)
-        self.assertEqual(self.client.get("/admin/reviews").status_code, 401)
-        response = self.client.post(
+        self.assertEqual(anonymous.get("/api/admin/reviews").status_code, 401)
+        self.assertEqual(anonymous.get("/admin/reviews").status_code, 302)
+        response = anonymous.post(
             "/api/reviews",
             json={"clientName": "Client", "quote": "A thoughtful review."},
         )
@@ -130,8 +135,9 @@ class ReviewsApiTestCase(unittest.TestCase):
             json={"clientName": "Client", "quote": "Original."},
         )
         review_id = response.get_json()["id"]
-        self.assertEqual(self.client.patch(f"/api/reviews/{review_id}", json={"isPublished": True}).status_code, 401)
-        self.assertEqual(self.client.delete(f"/api/reviews/{review_id}").status_code, 401)
+        anonymous = app.test_client()
+        self.assertEqual(anonymous.patch(f"/api/reviews/{review_id}", json={"isPublished": True}).status_code, 401)
+        self.assertEqual(anonymous.delete(f"/api/reviews/{review_id}").status_code, 401)
 
         updated = self.client.patch(
             f"/api/reviews/{review_id}",
@@ -150,7 +156,7 @@ class ReviewsApiTestCase(unittest.TestCase):
         )
         review_id = response.get_json()["id"]
 
-        self.assertEqual(self.client.patch(f"/api/reviews/{review_id}/archive").status_code, 401)
+        self.assertEqual(app.test_client().patch(f"/api/reviews/{review_id}/archive").status_code, 401)
         archived = self.client.patch(f"/api/reviews/{review_id}/archive", headers=self.auth_headers)
         self.assertEqual(archived.status_code, 200)
         self.assertTrue(archived.get_json()["isPublished"])
@@ -158,7 +164,7 @@ class ReviewsApiTestCase(unittest.TestCase):
         self.assertEqual(self.client.get("/api/reviews").get_json(), [])
         self.assertEqual(self.client.patch(f"/api/reviews/{review_id}/archive", headers=self.auth_headers).status_code, 409)
 
-        self.assertEqual(self.client.patch(f"/api/reviews/{review_id}/restore").status_code, 401)
+        self.assertEqual(app.test_client().patch(f"/api/reviews/{review_id}/restore").status_code, 401)
         restored = self.client.patch(f"/api/reviews/{review_id}/restore", headers=self.auth_headers)
         self.assertEqual(restored.status_code, 200)
         self.assertTrue(restored.get_json()["isPublished"])

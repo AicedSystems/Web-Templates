@@ -64,3 +64,15 @@ Check at 375px, 768px, 1024px, and 1440px:
 - Do not share the Supabase secret key, Follow Up Boss keys, database URL, or `SECRET_KEY` with the client.
 - Record the launch commit hash and successful Render deployment ID.
 - If a launch regression appears, roll Render back to the last known-good deployment before editing production data.
+# Content Studio administrator
+
+Content Studio uses one server-side administrator account. Set `EDITOR_USERNAME`,
+`EDITOR_PASSWORD_HASH`, and a long random `SECRET_KEY` in the production environment.
+Generate the password hash locally without storing the plaintext password in a file:
+
+```bash
+.venv/bin/python -c "from getpass import getpass; from werkzeug.security import generate_password_hash; print(generate_password_hash(getpass('Admin password: '), method='pbkdf2:sha256'))"
+```
+
+Copy only the resulting hash into `EDITOR_PASSWORD_HASH`. Do not commit the real
+username, hash, password, or `SECRET_KEY`. Visit `/admin` to sign in.

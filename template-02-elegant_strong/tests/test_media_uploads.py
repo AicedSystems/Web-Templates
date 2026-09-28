@@ -12,6 +12,8 @@ from werkzeug.datastructures import FileStorage
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 os.environ["EDITOR_USERNAME"] = "media-test-editor"
 os.environ["EDITOR_PASSWORD"] = "media-test-password"
+os.environ["APP_ENV"] = "test"
+os.environ["EDITOR_PASSWORD_HASH"] = "pbkdf2:sha256:1000000$GP639Ean0NEysEtz$fa522afca3dbab3d179c095d8417c5011e86aa9f2e942fc9d82aa0254d09194b"
 os.environ["SUPABASE_URL"] = "https://example.supabase.co"
 os.environ["SUPABASE_SECRET_KEY"] = "test-server-secret"
 os.environ["SUPABASE_STORAGE_BUCKET"] = "site-media"
@@ -175,14 +177,17 @@ class MediaProcessingTestCase(unittest.TestCase):
 class MediaEndpointTestCase(unittest.TestCase):
     def setUp(self):
         self.client = app.test_client()
-        credentials = f"{app_module.editor_username}:{app_module.editor_password}".encode("utf-8")
-        token = base64.b64encode(credentials).decode("ascii")
-        self.auth_headers = {"Authorization": f"Basic {token}"}
+        token = "media-test-csrf"
+        with self.client.session_transaction() as session:
+            session[app_module.ADMIN_SESSION_KEY] = True
+            session[app_module.CSRF_SESSION_KEY] = token
+        self.auth_headers = {"X-CSRF-Token": token}
 
     def test_upload_requires_authentication(self):
-        response = self.client.post("/api/admin/media/images")
+        anonymous = app.test_client()
+        response = anonymous.post("/api/admin/media/images")
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(self.client.post("/api/admin/media/documents").status_code, 401)
+        self.assertEqual(anonymous.post("/api/admin/media/documents").status_code, 401)
 
     @patch("app.media_storage.upload_document")
     def test_document_upload_is_authenticated_and_returns_managed_metadata(self, upload_document):
@@ -229,7 +234,7 @@ class MediaEndpointTestCase(unittest.TestCase):
     def test_delete_is_authenticated_and_requires_exact_payload(self, delete_image):
         path = f"review-cards/{'d' * 32}.webp"
         self.assertEqual(
-            self.client.delete("/api/admin/media/images", json={"storagePath": path}).status_code,
+            app.test_client().delete("/api/admin/media/images", json={"storagePath": path}).status_code,
             401,
         )
         invalid = self.client.delete(
@@ -251,7 +256,7 @@ class MediaEndpointTestCase(unittest.TestCase):
     def test_document_delete_is_authenticated_and_pdf_scoped(self, delete_image):
         path = f"audience-page/sellers/guide-pdf/{'f' * 32}.pdf"
         self.assertEqual(
-            self.client.delete("/api/admin/media/documents", json={"storagePath": path}).status_code,
+            app.test_client().delete("/api/admin/media/documents", json={"storagePath": path}).status_code,
             401,
         )
         rejected = self.client.delete(

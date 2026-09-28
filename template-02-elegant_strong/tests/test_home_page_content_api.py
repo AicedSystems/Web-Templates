@@ -12,6 +12,8 @@ from sqlalchemy.exc import SQLAlchemyError
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 os.environ["EDITOR_USERNAME"] = "home-page-test-editor"
 os.environ["EDITOR_PASSWORD"] = "home-page-test-password"
+os.environ["APP_ENV"] = "test"
+os.environ["EDITOR_PASSWORD_HASH"] = "pbkdf2:sha256:1000000$GP639Ean0NEysEtz$fa522afca3dbab3d179c095d8417c5011e86aa9f2e942fc9d82aa0254d09194b"
 os.environ["SUPABASE_URL"] = "https://example.supabase.co"
 os.environ["SUPABASE_STORAGE_BUCKET"] = "site-media"
 
@@ -119,8 +121,11 @@ class HomePageContentApiTestCase(unittest.TestCase):
         ))
         db.session.commit()
         self.client = app.test_client()
-        credentials = f"{app_module.editor_username}:{app_module.editor_password}".encode()
-        self.auth = {"Authorization": f"Basic {base64.b64encode(credentials).decode()}"}
+        token = "home-page-test-csrf"
+        with self.client.session_transaction() as session:
+            session[app_module.ADMIN_SESSION_KEY] = True
+            session[app_module.CSRF_SESSION_KEY] = token
+        self.auth = {"X-CSRF-Token": token}
 
     def tearDown(self):
         db.session.rollback()
@@ -148,8 +153,9 @@ class HomePageContentApiTestCase(unittest.TestCase):
         self.assertNotIn("DROP TABLE", migration.upper())
 
     def test_get_and_put_require_authentication(self):
-        self.assertEqual(self.client.get("/api/admin/home-page").status_code, 401)
-        self.assertEqual(self.client.put("/api/admin/home-page", json=home_page_payload()).status_code, 401)
+        anonymous = app.test_client()
+        self.assertEqual(anonymous.get("/api/admin/home-page").status_code, 401)
+        self.assertEqual(anonymous.put("/api/admin/home-page", json=home_page_payload()).status_code, 401)
 
     def test_get_and_put_complete_document(self):
         get_response = self.client.get("/api/admin/home-page", headers=self.auth)
@@ -221,7 +227,7 @@ class HomePageContentApiTestCase(unittest.TestCase):
         self.assertEqual(self.client.put("/api/admin/home-page", headers=self.auth, json=payload).status_code, 400)
 
     def test_visual_editor_and_actual_preview_are_authenticated(self):
-        self.assertEqual(self.client.get("/admin/home/page").status_code, 401)
+        self.assertEqual(app.test_client().get("/admin/home/page").status_code, 302)
         editor = self.client.get("/admin/home/page", headers=self.auth)
         preview = self.client.get("/admin/home/page/preview", headers=self.auth)
         self.assertEqual(editor.status_code, 200)

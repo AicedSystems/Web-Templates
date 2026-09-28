@@ -80,6 +80,7 @@ body.agents-page .site-header.is-scrolled { position: sticky; top: 0; }
 .agent-application__intro li::before { width: 18px; height: 18px; position: absolute; left: 0; top: -2px; display: grid; border-radius: 50%; background: #aea293; color: #fff; content: "✓"; font-size: .62rem; place-items: center; }
 .agent-application__form { padding: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; background: rgba(255,255,255,.62); }
 .form-field { min-width: 0; display: flex; flex-direction: column; }
+.form-field--honeypot[hidden] { display: none !important; }
 .form-field label { margin-bottom: 7px; font-size: .66rem; font-weight: 700; }
 .form-field input, .form-field select, .form-field textarea { width: 100%; min-height: 45px; padding: 11px 12px; border: 1px solid #d9d1c9; border-radius: 2px; background: rgba(255,255,255,.8); color: var(--color-text); font: .75rem var(--font-body); }
 .form-field textarea { min-height: 102px; resize: vertical; }
@@ -449,9 +450,10 @@ body.agents-page .site-header.is-scrolled { position: sticky; top: 0; }
     display: block;
     background: #d2d2ce;
 }
-.agents-page .agent-application__intro ul { margin-top: 0; padding-block: 6px 12px; display: grid; gap: 16px; }
-.agents-page .agent-application__intro li { padding-left: 28px; font-size: .92rem; letter-spacing: .02em; line-height: 1.45; text-transform: none; }
-.agents-page .agent-application__intro li::before { width: auto; height: auto; top: -1px; border-radius: 0; background: transparent; color: var(--agents-charcoal); font-size: .8rem; }
+.agents-page .agent-application__intro ul { margin-top: 0; padding-block: 6px 12px; display: grid; gap: 18px; }
+.agents-page .agent-application__intro li { padding-left: 0; display: grid; grid-template-columns: 46px minmax(0, 1fr); align-items: center; gap: 14px; color: #454849; font-size: clamp(1rem, 1.2vw, 1.15rem); font-weight: 700; letter-spacing: .01em; line-height: 1.4; text-transform: none; }
+.agents-page .agent-application__intro li::before { display: none; content: none; }
+.agent-application__benefit-icon { width: 44px; height: 44px; display: grid; border: 1px solid rgba(80,83,84,.2); border-radius: 50%; color: #555958; background: rgba(250,250,247,.68); place-items: center; }
 .agents-page .agent-application .eyebrow { font-size: .8rem; }
 .agents-page .agent-application__form .form-field { gap: 5px; }
 .agents-page .agent-application__form .form-field label { color: #505353; font-size: .72rem; letter-spacing: .025em; }

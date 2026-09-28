@@ -4,17 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
+    {% include 'admin/_security.html' %}
     <title>Reviews Page | {{ admin_site.admin_title }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/dashboard.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='admin/shared/css/image-position-control.css', v='1') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='admin/reviews/css/page-editor.css', v='8') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/reviews/css/page-editor.css', v='11') }}">
     <script src="{{ url_for('static', filename='admin/shared/js/image-position-control.js', v='1') }}" defer></script>
-    <script src="{{ url_for('static', filename='admin/reviews/js/page-editor.js', v='11') }}" defer></script>
+    <script src="{{ url_for('static', filename='admin/reviews/js/page-editor.js', v='12') }}" defer></script>
 </head>
-<body>
+<body class="admin-editor-page">
     <div class="admin-shell">
         <aside class="admin-sidebar">
             <a class="admin-brand" href="{{ url_for('admin_blog_dashboard') }}">
@@ -69,7 +70,7 @@
                                     <span class="image-control__label">Hero Media</span>
                                     <div class="hero-media-priority"><strong>What visitors will see</strong><ol><li>Uploaded image or video</li><li>Instagram Reel</li><li>Website fallback image</li></ol><p id="hero-media-active">Checking active media…</p></div>
                                     <div class="hero-media-dropzone" id="hero-media-dropzone" tabindex="0" role="button" aria-label="Upload a Hero image or video">
-                                        <span aria-hidden="true">＋</span><strong>Drag an image or video here</strong><small>or click to browse · Images up to 8 MB · Videos up to 150 MB</small>
+                                        <span aria-hidden="true">＋</span><strong>Drag an image or video here</strong><small>or click to browse · Images or videos up to 150 MB</small>
                                         <input id="hero-media-file" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm">
                                     </div>
                                     <div class="image-control__preview hero-media-preview" id="hero-media-preview">

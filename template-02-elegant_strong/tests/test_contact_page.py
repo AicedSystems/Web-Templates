@@ -5,6 +5,8 @@ import unittest
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 os.environ["EDITOR_USERNAME"] = "contact-test-editor"
 os.environ["EDITOR_PASSWORD"] = "contact-test-password"
+os.environ["APP_ENV"] = "test"
+os.environ["EDITOR_PASSWORD_HASH"] = "pbkdf2:sha256:1000000$GP639Ean0NEysEtz$fa522afca3dbab3d179c095d8417c5011e86aa9f2e942fc9d82aa0254d09194b"
 
 from app import app  # noqa: E402
 

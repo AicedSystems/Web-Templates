@@ -11,8 +11,11 @@ function getDraftTitle(draft) {
 }
 
 function createDraftCard(draft) {
+    const card = document.createElement("article");
+    card.className = "post-start-drafts__item";
+
     const link = document.createElement("a");
-    link.className = "post-start-drafts__item";
+    link.className = "post-start-drafts__continue";
     link.href = "/admin/blog/new/build?draft=continue";
 
     const thumbnail = document.createElement("div");
@@ -40,7 +43,22 @@ function createDraftCard(draft) {
     action.textContent = "Continue editing →";
     content.append(label, title, action);
     link.append(thumbnail, content);
-    return link;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "post-start-drafts__delete";
+    deleteButton.type = "button";
+    deleteButton.textContent = "Delete";
+    deleteButton.setAttribute("aria-label", `Delete draft: ${getDraftTitle(draft)}`);
+    deleteButton.addEventListener("click", () => {
+        if (!window.confirm(`Delete “${getDraftTitle(draft)}”? This draft cannot be recovered.`)) return;
+        postStorage.deleteDraft();
+        draftsEmptyState.textContent = "Draft deleted. Start a new article whenever you're ready.";
+        renderDrafts();
+        draftsEmptyState.focus();
+    });
+
+    card.append(link, deleteButton);
+    return card;
 }
 
 function loadMoreDrafts() {

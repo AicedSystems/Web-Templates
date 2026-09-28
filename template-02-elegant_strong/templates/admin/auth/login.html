@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Sign In | {{ admin_site.admin_title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/auth/login.css', v='1') }}">
+</head>
+<body>
+    <main class="login-shell">
+        <section class="login-card" aria-labelledby="login-title">
+            <a class="login-brand" href="{{ url_for('home') }}" aria-label="Return to {{ admin_site.name }} website">
+                <img src="{{ url_for('static', filename=admin_site.logo_filename) }}" alt="">
+            </a>
+            <p class="login-eyebrow">{{ admin_site.name }}</p>
+            <h1 id="login-title">Content Studio</h1>
+            <p class="login-intro">Sign in to manage website content.</p>
+
+            {% if error %}<p class="login-error" role="alert">{{ error }}</p>{% endif %}
+
+            <form method="post" action="{{ url_for('admin_login') }}" class="login-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                {% if next_path %}<input type="hidden" name="next" value="{{ next_path }}">{% endif %}
+                <label>
+                    <span>Username or email</span>
+                    <input name="username" type="text" autocomplete="username" required autofocus{% if not login_available %} disabled{% endif %}>
+                </label>
+                <label>
+                    <span>Password</span>
+                    <input name="password" type="password" autocomplete="current-password" required{% if not login_available %} disabled{% endif %}>
+                </label>
+                <button type="submit"{% if not login_available %} disabled{% endif %}>Sign In</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

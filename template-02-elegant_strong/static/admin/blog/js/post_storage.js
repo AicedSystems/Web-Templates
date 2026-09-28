@@ -25,6 +25,10 @@ const postStorage = {
         return readStoredJson(postStorageKeys.draft, null);
     },
 
+    deleteDraft() {
+        localStorage.removeItem(postStorageKeys.draft);
+    },
+
     getPublishedPosts() {
         const publishedPosts = readStoredJson(postStorageKeys.publishedPosts, []);
         return Array.isArray(publishedPosts) ? publishedPosts : [];

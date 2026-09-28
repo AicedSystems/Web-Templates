@@ -42,3 +42,8 @@
         <a class="admin-nav__link" href="{{ admin_site.live_site_url }}"><span aria-hidden="true">↗</span> Live Website</a>
     </div>
 </details>
+
+<form method="post" action="{{ url_for('admin_logout') }}" class="admin-logout-form">
+    <input type="hidden" name="csrf_token" value="{{ admin_csrf_token() }}">
+    <button class="admin-nav__link" type="submit"><span aria-hidden="true">↪</span> Sign Out</button>
+</form>

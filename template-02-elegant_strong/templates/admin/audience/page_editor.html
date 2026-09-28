@@ -4,19 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
+    {% include 'admin/_security.html' %}
     <title>{{ page_label }} Page | {{ admin_site.admin_title }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/dashboard.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='admin/shared/css/image-position-control.css', v='1') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='admin/reviews/css/page-editor.css', v='8') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/reviews/css/page-editor.css', v='11') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='admin/agents/css/page-editor.css', v='1') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='admin/audience/css/page-editor.css', v='1') }}">
     <script>window.AUDIENCE_EDITOR = {{ {'pageType': page_type, 'pageLabel': page_label, 'apiUrl': url_for('get_admin_audience_page', page_type=page_type), 'previewUrl': url_for('admin_audience_page_preview', page_type=page_type), 'liveUrl': url_for(page_type)} | tojson }};</script>
     <script src="{{ url_for('static', filename='admin/shared/js/image-position-control.js', v='1') }}" defer></script>
-    <script src="{{ url_for('static', filename='admin/audience/js/page-editor.js', v='1') }}" defer></script>
+    <script src="{{ url_for('static', filename='admin/audience/js/page-editor.js', v='2') }}" defer></script>
 </head>
-<body>
+<body class="admin-editor-page">
 <div class="admin-shell">
     <aside class="admin-sidebar">
         <a class="admin-brand" href="{{ url_for('admin_blog_dashboard') }}"><img src="{{ url_for('static', filename=admin_site.logo_filename) }}" alt="{{ admin_site.name }}"><span>{{ admin_site.admin_title }}</span></a>

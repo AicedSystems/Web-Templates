@@ -5,6 +5,8 @@ import unittest
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 os.environ["EDITOR_USERNAME"] = "launch-test-editor"
 os.environ["EDITOR_PASSWORD"] = "launch-test-password"
+os.environ["APP_ENV"] = "test"
+os.environ["EDITOR_PASSWORD_HASH"] = "pbkdf2:sha256:1000000$GP639Ean0NEysEtz$fa522afca3dbab3d179c095d8417c5011e86aa9f2e942fc9d82aa0254d09194b"
 
 from app import app  # noqa: E402
 
@@ -26,7 +28,7 @@ class LaunchReadinessTestCase(unittest.TestCase):
 
     def test_admin_responses_are_not_cached(self):
         response = self.client.get("/admin/blog")
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 302)
         self.assertEqual(response.headers["Cache-Control"], "no-store")
 
     def test_agent_application_uses_server_delivery_contract(self):
@@ -34,7 +36,7 @@ class LaunchReadinessTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'data-agent-application', response.data)
         self.assertIn(b'name="website"', response.data)
-        self.assertIn(b'agents.js?v=3', response.data)
+        self.assertIn(b'/static/site/js/agents.js', response.data)
 
 
 if __name__ == "__main__":

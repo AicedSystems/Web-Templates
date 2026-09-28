@@ -155,10 +155,15 @@ img {
 
 a.admin-nav__link:hover,
 a.admin-nav__link:focus-visible,
+button.admin-nav__link:hover,
+button.admin-nav__link:focus-visible,
 .admin-nav__link--active {
     color: #fff;
     background: rgba(255, 255, 255, 0.1);
 }
+
+.admin-logout-form { margin: 8px 0 0; }
+.admin-logout-form button { cursor: pointer; font-family: inherit; }
 
 button.admin-nav__link:disabled {
     opacity: 0.43;

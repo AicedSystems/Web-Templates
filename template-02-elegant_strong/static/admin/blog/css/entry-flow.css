@@ -95,11 +95,37 @@
 .post-start-drafts__item {
     padding: 18px;
     display: grid;
-    grid-template-columns: 96px 1fr;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 18px;
     border: 1px solid var(--admin-line);
     border-radius: 10px;
+}
+
+.post-start-drafts__continue {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    align-items: center;
+    gap: 18px;
+}
+
+.post-start-drafts__delete {
+    min-height: 38px;
+    padding: 0 13px;
+    border: 1px solid #c99a91;
+    border-radius: 7px;
+    color: #8b3f35;
+    background: #fff8f6;
+    font: 700 .7rem var(--admin-font);
+    cursor: pointer;
+}
+
+.post-start-drafts__delete:hover,
+.post-start-drafts__delete:focus-visible {
+    border-color: #8b3f35;
+    outline: 2px solid rgba(139, 63, 53, .16);
+    outline-offset: 2px;
 }
 
 .post-start-drafts__thumbnail {
@@ -287,6 +313,14 @@
 
     .post-start-drafts__item {
         grid-template-columns: 1fr;
+    }
+
+    .post-start-drafts__continue {
+        grid-template-columns: 1fr;
+    }
+
+    .post-start-drafts__delete {
+        width: 100%;
     }
 
     .paste-card__actions .entry-button {

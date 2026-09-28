@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
+    {% include 'admin/_security.html' %}
     <title>Create Article | {{ admin_site.name }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/dashboard.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/entry-flow.css') }}">
-    <script src="{{ url_for('static', filename='admin/blog/js/post_storage.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='admin/blog/js/start_post.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/blog/css/entry-flow.css', v='2') }}">
+    <script src="{{ url_for('static', filename='admin/blog/js/post_storage.js', v='2') }}" defer></script>
+    <script src="{{ url_for('static', filename='admin/blog/js/start_post.js', v='2') }}" defer></script>
 </head>
 <body>
     <div class="admin-shell">
@@ -64,7 +65,7 @@
                 <section class="draft-panel" aria-labelledby="drafts-title">
                     <div class="section-heading"><div><p class="admin-kicker">Browser storage</p><h2 id="drafts-title">Continue from a draft</h2></div></div>
                     <div id="drafts-list"></div>
-                    <p class="entry-empty" id="drafts-empty-state">Your saved browser draft will appear here.</p>
+                    <p class="entry-empty" id="drafts-empty-state" tabindex="-1" aria-live="polite">Your saved browser draft will appear here.</p>
                     <button class="entry-text-button" id="load-more-drafts" type="button" hidden>View all drafts</button>
                 </section>
             </main>

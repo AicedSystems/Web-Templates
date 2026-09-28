@@ -10,8 +10,9 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 
 
 MAXIMUM_IMAGE_UPLOAD_BYTES = 8 * 1024 * 1024
+MAXIMUM_HERO_IMAGE_UPLOAD_BYTES = 150 * 1024 * 1024
 MAXIMUM_VIDEO_UPLOAD_BYTES = 150 * 1024 * 1024
-MAXIMUM_PDF_UPLOAD_BYTES = 15 * 1024 * 1024
+MAXIMUM_PDF_UPLOAD_BYTES = 100 * 1024 * 1024
 MAXIMUM_IMAGE_DIMENSION = 2400
 MAXIMUM_IMAGE_PIXELS = 40_000_000
 OUTPUT_IMAGE_QUALITY = 85
@@ -47,6 +48,13 @@ MANAGED_STORAGE_PATH_PATTERN = re.compile(
     r"audience-page/(?:buyers|sellers)/guide-pdf/[0-9a-f]{32}\.pdf)$"
 )
 VIDEO_UPLOAD_SCOPES = {"reviews-page/hero", "agents-page/hero", "home-page/hero/video"}
+HERO_IMAGE_UPLOAD_SCOPES = {
+    "home-page/hero",
+    "reviews-page/hero",
+    "agents-page/hero",
+    "audience-page/buyers/hero",
+    "audience-page/sellers/hero",
+}
 
 
 class MediaStorageError(Exception):
@@ -104,15 +112,17 @@ def derive_public_url(storage_path, project_url=None, bucket=None):
     return f"{project_url}/storage/v1/object/public/{encoded_bucket}/{encoded_path}"
 
 
-def process_image_upload(file_storage):
+def process_image_upload(file_storage, maximum_bytes=None):
     if file_storage is None or not getattr(file_storage, "filename", ""):
         raise MediaValidationError("Choose an image to upload.")
 
-    raw_image = file_storage.stream.read(MAXIMUM_IMAGE_UPLOAD_BYTES + 1)
+    maximum_bytes = maximum_bytes or MAXIMUM_IMAGE_UPLOAD_BYTES
+    raw_image = file_storage.stream.read(maximum_bytes + 1)
     if not raw_image:
         raise MediaValidationError("The uploaded image is empty.")
-    if len(raw_image) > MAXIMUM_IMAGE_UPLOAD_BYTES:
-        raise MediaValidationError("Images must be 8 MB or smaller.")
+    if len(raw_image) > maximum_bytes:
+        maximum_megabytes = maximum_bytes // (1024 * 1024)
+        raise MediaValidationError(f"Images must be {maximum_megabytes} MB or smaller.")
 
     try:
         with Image.open(io.BytesIO(raw_image)) as source_image:
@@ -190,7 +200,7 @@ def process_pdf_upload(file_storage):
     if not raw_pdf:
         raise MediaValidationError("The uploaded PDF is empty.")
     if len(raw_pdf) > MAXIMUM_PDF_UPLOAD_BYTES:
-        raise MediaValidationError("PDF guides must be 15 MB or smaller.")
+        raise MediaValidationError("PDF guides must be 100 MB or smaller.")
     if not raw_pdf.startswith(b"%PDF-") or b"%%EOF" not in raw_pdf[-2048:]:
         raise MediaValidationError("The uploaded file is not a valid PDF guide.")
     return raw_pdf
@@ -213,7 +223,12 @@ def upload_image(file_storage, scope):
         width = height = None
         media_type = "video"
     else:
-        media_bytes, width, height = process_image_upload(file_storage)
+        maximum_image_bytes = (
+            MAXIMUM_HERO_IMAGE_UPLOAD_BYTES
+            if scope in HERO_IMAGE_UPLOAD_SCOPES
+            else MAXIMUM_IMAGE_UPLOAD_BYTES
+        )
+        media_bytes, width, height = process_image_upload(file_storage, maximum_image_bytes)
         content_type = "image/webp"
         extension = "webp"
         media_type = "image"
@@ -234,7 +249,7 @@ def upload_image(file_storage, scope):
     }
 
     try:
-        response = httpx.post(upload_url, headers=headers, content=media_bytes, timeout=90.0)
+        response = httpx.post(upload_url, headers=headers, content=media_bytes, timeout=300.0)
         response.raise_for_status()
     except httpx.HTTPError as error:
         raise MediaUpstreamError("The media could not be uploaded to Storage.") from error
@@ -273,7 +288,7 @@ def upload_document(file_storage, scope):
     }
 
     try:
-        response = httpx.post(upload_url, headers=headers, content=document_bytes, timeout=90.0)
+        response = httpx.post(upload_url, headers=headers, content=document_bytes, timeout=300.0)
         response.raise_for_status()
     except httpx.HTTPError as error:
         raise MediaUpstreamError("The PDF guide could not be uploaded to Storage.") from error

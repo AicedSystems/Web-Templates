@@ -3,6 +3,10 @@ const titleInput = document.querySelector("#post-title");
 const excerptInput = document.querySelector("#post-excerpt");
 const categoryInput = document.querySelector("#post-category");
 const tagsInput = document.querySelector("#post-tags");
+const categoryChips = [...document.querySelectorAll("[data-category-value]")];
+const tagEntryInput = document.querySelector("#post-tag-entry");
+const tagChipList = document.querySelector("#tag-chip-list");
+const tagPickerControl = document.querySelector("#tag-picker-control");
 const titleCount = document.querySelector("#title-character-count");
 const excerptCount = document.querySelector("#excerpt-character-count");
 const blockList = document.querySelector("#content-block-list");
@@ -42,6 +46,10 @@ const aicedCloseButton = document.querySelector("#aiced-close");
 const aicedIdle = document.querySelector("#aiced-idle");
 const aicedWorkflow = document.querySelector("#aiced-workflow");
 const improveSeoButton = document.querySelector("#aiced-improve-seo");
+const aicedPanelActionButtons = [...document.querySelectorAll("[data-aiced-panel-action]")];
+const aicedPanelComposer = document.querySelector("#aiced-panel-composer");
+const aicedPanelRequest = document.querySelector("#aiced-panel-request");
+const aicedPanelSend = document.querySelector("#aiced-panel-send");
 const aiAssistantCardToggle = document.querySelector("#ai-assistant-card-toggle");
 const aiAssistantCardContent = document.querySelector("#ai-assistant-card-content");
 const aiAssistantTips = document.querySelector("#ai-assistant-tips");
@@ -71,7 +79,14 @@ let featuredImageSettings = { focalX: 50, focalY: 50, fit: "cover", zoom: 100 };
 let isPublishing = false;
 let isAiProcessing = false;
 let aiUndoState = null;
-let aiWorkflowState = { mode: "idle", before: null, after: null, summary: null };
+let aiWorkflowState = { mode: "idle", before: null, after: null, summary: null, request: null };
+const aiIntentPresentation = {
+    seo: { progress: "Improving SEO…", description: "Aiced Bot is reviewing your article for search clarity.", complete: "SEO proposal ready" },
+    shorter: { progress: "Making it shorter…", description: "Aiced Bot is removing repetition while preserving useful details.", complete: "Shorter version ready" },
+    readability: { progress: "Improving readability…", description: "Aiced Bot is improving clarity, sentence structure, and flow.", complete: "Readability proposal ready" },
+    warmer_tone: { progress: "Warming the tone…", description: "Aiced Bot is making the article more approachable while keeping it professional.", complete: "Warmer version ready" },
+    custom: { progress: "Working on your request…", description: "Aiced Bot is applying your requested editorial change safely.", complete: "Custom edit ready" }
+};
 let draggedBlockIndex = null;
 let draggedSectionIndexes = null;
 let editingBlocks = new WeakSet();
@@ -85,7 +100,49 @@ function showStatus(message, type = "") {
 }
 
 function parseTags() {
-    return tagsInput.value.split(",").map((tag) => tag.trim()).filter(Boolean);
+    const uniqueTags = [];
+    tagsInput.value.split(",").map((tag) => tag.trim()).filter(Boolean).forEach((tag) => {
+        if (!uniqueTags.some((existing) => existing.toLowerCase() === tag.toLowerCase())) uniqueTags.push(tag);
+    });
+    return uniqueTags.slice(0, 5);
+}
+
+function setTags(tags) {
+    const cleanTags = [];
+    tags.filter((tag) => typeof tag === "string").forEach((tag) => {
+        const cleanTag = tag.trim().replace(/^#+/, "").slice(0, 40);
+        if (cleanTag && !cleanTags.some((existing) => existing.toLowerCase() === cleanTag.toLowerCase()) && cleanTags.length < 5) cleanTags.push(cleanTag);
+    });
+    tagsInput.value = cleanTags.join(", ");
+    renderTagChips();
+}
+
+function renderTagChips() {
+    const tags = parseTags();
+    tagChipList.replaceChildren(...tags.map((tag) => {
+        const chip = document.createElement("span");
+        chip.className = "tag-chip";
+        chip.append(document.createTextNode(tag));
+        const removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.setAttribute("aria-label", `Remove ${tag} tag`);
+        removeButton.textContent = "×";
+        removeButton.addEventListener("click", () => {
+            setTags(parseTags().filter((existing) => existing.toLowerCase() !== tag.toLowerCase()));
+            tagEntryInput.focus();
+        });
+        chip.append(removeButton);
+        return chip;
+    }));
+    tagEntryInput.placeholder = tags.length >= 5 ? "5 tag maximum" : "Add a tag…";
+    tagEntryInput.disabled = tags.length >= 5;
+}
+
+function commitTagEntry() {
+    const entries = tagEntryInput.value.split(",");
+    if (!entries.some((entry) => entry.trim())) return;
+    setTags([...parseTags(), ...entries]);
+    tagEntryInput.value = "";
 }
 
 function getPostData(status = "draft") {
@@ -108,6 +165,11 @@ function renderMetadata() {
     previewTitle.textContent = titleInput.value.trim() || "Your article title";
     previewExcerpt.textContent = excerptInput.value.trim() || "Your article summary will appear here.";
     previewCategory.textContent = categoryInput.selectedOptions[0]?.text || "Select a category";
+    categoryChips.forEach((chip) => {
+        const selected = chip.dataset.categoryValue === categoryInput.value;
+        chip.classList.toggle("is-active", selected);
+        chip.setAttribute("aria-checked", String(selected));
+    });
 }
 
 function makeField(labelText, value, onInput, options = {}) {
@@ -523,7 +585,7 @@ function populateEditor(post) {
     titleInput.value = typeof post.title === "string" ? post.title.slice(0, 100) : "";
     excerptInput.value = typeof post.excerpt === "string" ? post.excerpt.slice(0, 160) : "";
     categoryInput.value = supportedCategories.has(post.category) ? post.category : "";
-    tagsInput.value = Array.isArray(post.tags) ? post.tags.filter((tag) => typeof tag === "string").join(", ") : "";
+    setTags(Array.isArray(post.tags) ? post.tags : []);
     featuredImageDataUrl = typeof post.featuredImage === "string" ? post.featuredImage : null;
     const savedImageSettings = post.featuredImageSettings || {};
     featuredImageSettings = {
@@ -726,8 +788,24 @@ async function publishPost() {
     }
 }
 
-[titleInput, excerptInput, tagsInput].forEach((input) => input.addEventListener("input", renderMetadata));
+[titleInput, excerptInput].forEach((input) => input.addEventListener("input", renderMetadata));
 categoryInput.addEventListener("change", renderMetadata);
+categoryChips.forEach((chip) => chip.addEventListener("click", () => {
+    categoryInput.value = chip.dataset.categoryValue;
+    categoryInput.dispatchEvent(new Event("change", { bubbles: true }));
+}));
+tagPickerControl.addEventListener("click", (event) => {
+    if (!event.target.closest("button")) tagEntryInput.focus();
+});
+tagEntryInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === ",") {
+        event.preventDefault();
+        commitTagEntry();
+    } else if (event.key === "Backspace" && !tagEntryInput.value && parseTags().length) {
+        setTags(parseTags().slice(0, -1));
+    }
+});
+tagEntryInput.addEventListener("blur", commitTagEntry);
 addBlockButtons.forEach((button) => button.addEventListener("click", () => {
     const newBlock = { ...blockDefaults[button.dataset.addBlock] };
     contentBlocks.push(newBlock);
@@ -787,6 +865,7 @@ fullPreviewDialog.addEventListener("click", (event) => {
 });
 
 renderMetadata();
+renderTagChips();
 renderFeaturedImage();
 renderBlocks();
 
@@ -870,6 +949,7 @@ function setWorkflowScreen(mode, elements = []) {
     const isIdle = mode === "idle";
     aicedIdle.hidden = !isIdle;
     aicedWorkflow.hidden = isIdle;
+    aicedPanelComposer.hidden = !isIdle;
     aicedWorkflow.replaceChildren(...elements);
 }
 
@@ -908,34 +988,47 @@ function getAiChanges(beforeState, afterState) {
     return { fields, blocks, counts };
 }
 
-function showAiProcessing(beforeState) {
+function getAiPresentation(action) {
+    return aiIntentPresentation[action] || aiIntentPresentation.custom;
+}
+
+function setAiControlsDisabled(disabled) {
+    improveSeoButton.disabled = disabled;
+    aiAssistantSend.disabled = disabled;
+    aicedPanelSend.disabled = disabled;
+    aicedPanelActionButtons.forEach((button) => { button.disabled = disabled; });
+    aiAssistantCardActions.forEach((button) => { button.disabled = disabled; });
+}
+
+function showAiProcessing(beforeState, request) {
+    const presentation = getAiPresentation(request.action);
     const image = createWorkflowElement("img", "aiced-workflow__bot");
     image.src = "/static/admin/blog/images/aiced-bot/aicedbotrunning.png";
     image.alt = "Aiced Bot is working";
-    const title = createWorkflowElement("h2", "aiced-workflow__title", "Improving SEO…");
-    const description = createWorkflowElement("p", "aiced-workflow__description", "Aiced Bot is reviewing your article for search clarity.");
+    const title = createWorkflowElement("h2", "aiced-workflow__title", presentation.progress);
+    const description = createWorkflowElement("p", "aiced-workflow__description", presentation.description);
     const label = createWorkflowElement("p", "aiced-workflow__label", "Analyzing:");
     const list = createWorkflowElement("ul", "aiced-workflow__list");
-    ["Title", "SEO summary", "Headings", "Keyword clarity"].forEach((item) => list.append(createWorkflowElement("li", "", item)));
-    aiWorkflowState = { mode: "processing", before: beforeState, after: null, summary: null };
+    ["Article context", "Facts and meaning", "Text structure", "Requested style"].forEach((item) => list.append(createWorkflowElement("li", "", item)));
+    aiWorkflowState = { mode: "processing", before: beforeState, after: null, summary: null, request };
     setWorkflowScreen("processing", [image, title, description, label, list]);
 }
 
-function showAiSuccess(beforeState, afterState) {
-    const summary = getAiChanges(beforeState, afterState);
-    const title = createWorkflowElement("h2", "aiced-workflow__title", "SEO improved");
-    const description = createWorkflowElement("p", "aiced-workflow__description", "Your editor has been updated. Review the changes before publishing.");
+function showAiApplied() {
+    const { summary, request } = aiWorkflowState;
+    const title = createWorkflowElement("h2", "aiced-workflow__title", "Changes applied");
+    const description = createWorkflowElement("p", "aiced-workflow__description", "Your editor now includes the approved changes. You can undo them before applying another AI edit.");
     const label = createWorkflowElement("p", "aiced-workflow__label", "I updated:");
     const list = createWorkflowElement("ul", "aiced-workflow__list");
     const items = [
         ...summary.fields.map((change) => change.label),
         ...Object.entries(summary.counts).filter(([, count]) => count).map(([type, count]) => `${count} ${type} block${count === 1 ? "" : "s"}`)
     ];
-    (items.length ? items : ["Search clarity refinements"]).forEach((item) => list.append(createWorkflowElement("li", "", item)));
+    (items.length ? items : ["Editorial refinements"]).forEach((item) => list.append(createWorkflowElement("li", "", item)));
     const actions = createWorkflowElement("div", "aiced-workflow__actions");
-    actions.append(createWorkflowButton("Review Changes", "review", true), createWorkflowButton("Keep Changes", "keep"), createWorkflowButton("Undo", "undo"));
-    aiWorkflowState = { mode: "success", before: beforeState, after: afterState, summary };
-    setWorkflowScreen("success", [title, description, label, list, actions]);
+    actions.append(createWorkflowButton("Undo", "undo", true), createWorkflowButton("Back to Actions", "idle"));
+    setWorkflowScreen("applied", [title, description, label, list, actions]);
+    aiAssistantCardStatus.textContent = `${getAiPresentation(request.action).complete} and applied.`;
 }
 
 function createReviewItem(change) {
@@ -950,20 +1043,21 @@ function createReviewItem(change) {
 }
 
 function showAiReview() {
-    const { before, after, summary } = aiWorkflowState;
-    if (!before || !after || !summary) return;
-    const title = createWorkflowElement("h2", "aiced-workflow__title", "Review SEO changes");
+    const { before, after, summary, request } = aiWorkflowState;
+    if (!before || !after || !summary || !request) return;
+    const title = createWorkflowElement("h2", "aiced-workflow__title", "Review Changes");
     const description = createWorkflowElement("p", "aiced-workflow__description", "Only fields and content blocks that changed are shown.");
     const review = createWorkflowElement("div", "aiced-review");
     [...summary.fields, ...summary.blocks].forEach((change) => review.append(createReviewItem(change)));
     if (!review.childElementCount) review.append(createWorkflowElement("p", "aiced-workflow__description", "No visible changes were returned."));
     const actions = createWorkflowElement("div", "aiced-workflow__actions");
-    actions.append(createWorkflowButton("Back", "success"), createWorkflowButton("Keep Changes", "keep", true), createWorkflowButton("Undo", "undo"));
+    actions.append(createWorkflowButton("Apply Changes", "apply", true), createWorkflowButton("Cancel", "cancel"));
     setWorkflowScreen("review", [title, description, review, actions]);
+    aiAssistantCardStatus.textContent = getAiPresentation(request.action).complete;
 }
 
 function showAiError(message) {
-    const title = createWorkflowElement("h2", "aiced-workflow__title", "Couldn’t improve SEO");
+    const title = createWorkflowElement("h2", "aiced-workflow__title", "Aiced Bot couldn’t finish");
     const description = createWorkflowElement("p", "aiced-workflow__description", message || "Your original article has not been changed.");
     const reassurance = createWorkflowElement("p", "aiced-workflow__description", "Your article remains available in the editor.");
     const actions = createWorkflowElement("div", "aiced-workflow__actions");
@@ -980,7 +1074,7 @@ function undoAiChanges() {
     const actions = createWorkflowElement("div", "aiced-workflow__actions");
     actions.append(createWorkflowButton("Back to Actions", "idle", true));
     setWorkflowScreen("undone", [title, description, actions]);
-    showStatus("SEO changes undone. Your original article was restored.", "success");
+    showStatus("AI changes undone. Your original article was restored.", "success");
 }
 
 function isUsableAiResult(result) {
@@ -993,8 +1087,29 @@ function isUsableAiResult(result) {
         && result.contentBlocks.every((block) => block && supportedBlockTypes.has(block.type));
 }
 
-async function improveSeo() {
+function applyAiChanges() {
+    if (!aiWorkflowState.before || !aiWorkflowState.after) return;
+    restoreAiState(aiWorkflowState.after);
+    aiUndoState = aiWorkflowState.before;
+    showAiApplied();
+    showStatus("AI changes applied. Review once more, then publish when ready.", "success");
+}
+
+function cancelAiChanges() {
+    aiAssistantCardStatus.textContent = "Suggestion canceled. Your article was not changed.";
+    setWorkflowScreen("idle");
+    showStatus("AI suggestion canceled. Your article was not changed.", "success");
+}
+
+async function runAiEdit(action, instruction = "") {
     if (isAiProcessing) return;
+    const normalizedInstruction = instruction.trim();
+    if (action === "custom" && !normalizedInstruction) {
+        aiAssistantCardStatus.hidden = false;
+        aiAssistantCardStatus.textContent = "Tell Aiced Bot what you would like changed.";
+        (aicedBackdrop.hidden ? aiAssistantRequest : aicedPanelRequest).focus();
+        return;
+    }
     const beforeState = captureAiState();
     const validationError = validatePost(beforeState.post);
     if (validationError) {
@@ -1004,31 +1119,42 @@ async function improveSeo() {
     }
 
     const { title, excerpt, category, tags, contentBlocks: blocks } = beforeState.post;
+    const presentation = getAiPresentation(action);
+    const request = { action, instruction: normalizedInstruction };
     isAiProcessing = true;
-    improveSeoButton.disabled = true;
-    aiAssistantCardActions.forEach((button) => { button.disabled = true; });
+    setAiControlsDisabled(true);
     aiAssistantCardStatus.hidden = false;
-    aiAssistantCardStatus.textContent = "Aiced Bot is improving your article…";
+    aiAssistantCardStatus.textContent = presentation.progress;
     setAicedOpen(true);
-    showAiProcessing(beforeState);
+    showAiProcessing(beforeState, request);
 
     try {
         const response = await fetch("/api/posts/ai-edit", {
             method: "POST",
             credentials: "same-origin",
             headers: { "Content-Type": "application/json", Accept: "application/json" },
-            body: JSON.stringify({ action: "seo", title, excerpt, category, tags, contentBlocks: blocks })
+            body: JSON.stringify({
+                action,
+                title,
+                excerpt,
+                category,
+                tags,
+                contentBlocks: blocks,
+                ...(action === "custom" ? { instruction: normalizedInstruction } : {})
+            })
         });
         const result = await response.json().catch(() => null);
-        if (!response.ok) throw new Error(result?.message || "Aiced Bot could not improve SEO right now.");
+        if (!response.ok) throw new Error(result?.message || "Aiced Bot could not complete that request.");
         if (!isUsableAiResult(result)) throw new Error("Aiced Bot returned an unusable result. Your article was not changed.");
 
-        aiUndoState = beforeState;
-        populateEditor({ ...result, featuredImage: beforeState.post.featuredImage });
-        const afterState = captureAiState();
-        showAiSuccess(beforeState, afterState);
-        showStatus("SEO improved. Review the changes before publishing.", "success");
-        aiAssistantCardStatus.textContent = "SEO improved. Review the changes before publishing.";
+        const afterState = {
+            ...beforeState,
+            post: { ...beforeState.post, ...result, featuredImage: beforeState.post.featuredImage }
+        };
+        const summary = getAiChanges(beforeState, afterState);
+        aiWorkflowState = { mode: "review", before: beforeState, after: afterState, summary, request };
+        showAiReview();
+        showStatus(`${presentation.complete}. Review before applying.`, "success");
     } catch (error) {
         const message = error instanceof TypeError ? "Unable to reach Aiced Bot. Check your connection and try again." : error.message;
         showAiError(message);
@@ -1036,15 +1162,8 @@ async function improveSeo() {
         aiAssistantCardStatus.textContent = message;
     } finally {
         isAiProcessing = false;
-        improveSeoButton.disabled = false;
-        aiAssistantCardActions.forEach((button) => { button.disabled = false; });
+        setAiControlsDisabled(false);
     }
-}
-
-function showUnavailableAicedAction() {
-    aiAssistantCardStatus.hidden = false;
-    aiAssistantCardStatus.textContent = "This action will be connected in the next Aiced Bot phase. Improve SEO is ready now.";
-    setAicedOpen(true);
 }
 
 aiAssistantCardToggle.addEventListener("click", () => {
@@ -1055,31 +1174,46 @@ aiAssistantCardToggle.addEventListener("click", () => {
 });
 aiAssistantTips.addEventListener("click", () => setAicedOpen(true));
 aiAssistantCardActions.forEach((button) => button.addEventListener("click", () => {
-    if (button.dataset.aicedCardAction === "seo") improveSeo();
-    else showUnavailableAicedAction();
+    runAiEdit(button.dataset.aicedCardAction);
 }));
 document.querySelectorAll("[data-aiced-example]").forEach((button) => button.addEventListener("click", () => {
     aiAssistantRequest.value = button.dataset.aicedExample;
     aiAssistantRequest.focus();
 }));
 aiAssistantSend.addEventListener("click", () => {
-    if (!aiAssistantRequest.value.trim()) return aiAssistantRequest.focus();
-    showUnavailableAicedAction();
+    runAiEdit("custom", aiAssistantRequest.value);
+});
+aiAssistantRequest.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        runAiEdit("custom", aiAssistantRequest.value);
+    }
+});
+aicedPanelActionButtons.forEach((button) => button.addEventListener("click", () => {
+    runAiEdit(button.dataset.aicedPanelAction);
+}));
+aicedPanelSend.addEventListener("click", () => {
+    runAiEdit("custom", aicedPanelRequest.value);
+});
+aicedPanelRequest.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        runAiEdit("custom", aicedPanelRequest.value);
+    }
 });
 
 aicedLauncher.addEventListener("click", () => setAicedOpen(aicedBackdrop.hidden));
 aicedCloseButton.addEventListener("click", () => setAicedOpen(false));
 aicedBackdrop.addEventListener("click", (event) => { if (event.target === aicedBackdrop) setAicedOpen(false); });
-improveSeoButton.addEventListener("click", improveSeo);
 aicedWorkflow.addEventListener("click", (event) => {
     const button = event.target.closest("[data-aiced-action]");
     if (!button) return;
     if (button.dataset.aicedAction === "review") showAiReview();
-    if (button.dataset.aicedAction === "success") showAiSuccess(aiWorkflowState.before, aiWorkflowState.after);
+    if (button.dataset.aicedAction === "apply") applyAiChanges();
+    if (button.dataset.aicedAction === "cancel") cancelAiChanges();
     if (button.dataset.aicedAction === "undo") undoAiChanges();
-    if (button.dataset.aicedAction === "retry") improveSeo();
+    if (button.dataset.aicedAction === "retry" && aiWorkflowState.request) runAiEdit(aiWorkflowState.request.action, aiWorkflowState.request.instruction);
     if (button.dataset.aicedAction === "idle") setWorkflowScreen("idle");
-    if (button.dataset.aicedAction === "keep") { aiUndoState = null; setWorkflowScreen("idle"); setAicedOpen(false); showStatus("SEO changes kept. Review once more, then publish when ready.", "success"); }
 });
 document.addEventListener("click", (event) => {
     closeOpenSectionMenus(event.target);
