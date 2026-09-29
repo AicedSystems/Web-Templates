@@ -414,8 +414,10 @@ class HomePageContentApiTestCase(unittest.TestCase):
         statement = str(execute.call_args.args[0])
         self.assertIn("posts.status", statement)
         self.assertNotIn("posts.content", statement)
-        self.assertNotIn("posts.featured_image", statement)
+        self.assertNotIn("posts.featured_image,", statement)
         self.assertEqual([article["id"] for article in articles], [8])
+        self.assertEqual(articles[0]["imageFocalX"], 50)
+        self.assertEqual(articles[0]["imageFit"], "cover")
 
     def test_reviews_keep_existing_source_and_blog_uses_one_bootstrap_dataset(self):
         source = Path("static/site/js/homepage-reviews.js").read_text(encoding="utf-8")

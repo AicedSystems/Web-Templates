@@ -65,7 +65,8 @@ class BlogArticleRedesignTestCase(unittest.TestCase):
         self.assertIn("headings.length < 2", source)
         self.assertIn("IntersectionObserver", source)
         self.assertIn("`/api/posts/${post.id}/featured-image`", source)
-        self.assertIn("articleCoverFallback.hidden = false", source)
+        self.assertIn("window.blogFallbackImages.forPost(post)", source)
+        self.assertIn("articleImage.src = fallback.src", source)
         self.assertIn("Video not playing? Watch on YouTube", source)
         self.assertIn('fallback.rel = "noopener noreferrer"', source)
         self.assertIn("post.featuredImageSettings", source)
@@ -85,8 +86,21 @@ class BlogArticleRedesignTestCase(unittest.TestCase):
     def test_blog_cards_use_the_same_published_featured_image_endpoint(self):
         source = Path(app.static_folder, "blog/js/blog.js").read_text(encoding="utf-8")
         self.assertIn("`/api/posts/${post.id}/featured-image`", source)
-        self.assertIn("image.src = fallback", source)
+        self.assertIn("image.src = fallback.src", source)
         self.assertIn("post.featuredImageSettings", source)
+
+    def test_shared_fallbacks_cover_each_article_audience(self):
+        source = Path(app.static_folder, "site/js/blog-fallback-images.js").read_text(encoding="utf-8")
+        for filename in (
+            "Marketupdateblgfallbackimg.webp",
+            "agentgrowthblogfallbackimg.webp",
+            "buyersblogfallbackimg.webp",
+            "generalguidancefallbackimg.webp",
+            "sellersblogfallbackimg.webp",
+        ):
+            self.assertIn(filename, source)
+        self.assertIn("compactPosition", source)
+        self.assertIn("largePosition", source)
 
     def test_article_editor_exposes_persistent_featured_image_controls(self):
         template = Path(app.template_folder, "admin/blog/create_post.html").read_text(encoding="utf-8")

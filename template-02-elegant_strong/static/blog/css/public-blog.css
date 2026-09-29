@@ -113,6 +113,11 @@ a {
     background: var(--ink);
 }
 
+.blog-header .mobile-menu-button,
+.blog-header .mobile-nav { display: none; }
+
+.blog-header .mobile-nav[hidden] { display: none; }
+
 .blog-hero {
     min-height: 610px;
     padding: clamp(50px, 6vw, 82px) clamp(24px, 6vw, 96px);
@@ -882,8 +887,9 @@ a {
 
 @media (max-width: 960px) {
     .blog-header {
-        align-items: flex-start;
-        flex-direction: column;
+        position: sticky;
+        align-items: center;
+        flex-direction: row;
     }
 
     .blog-wordmark {
@@ -891,9 +897,59 @@ a {
     }
 
     .blog-nav {
+        display: none;
+    }
+
+    .blog-header .mobile-menu-button {
+        width: 44px;
+        height: 44px;
+        margin-left: auto;
+        padding: 10px 8px;
+        display: grid;
+        align-content: center;
+        gap: 5px;
+        border: 1px solid var(--line);
+        color: var(--ink);
+        background: transparent;
+        cursor: pointer;
+    }
+
+    .blog-header .mobile-menu-button span {
         width: 100%;
-        overflow-x: auto;
-        padding-bottom: 4px;
+        height: 2px;
+        display: block;
+        background: currentColor;
+    }
+
+    .blog-header .mobile-nav {
+        position: absolute;
+        top: calc(100% - 1px);
+        right: 20px;
+        z-index: 40;
+        width: min(320px, calc(100% - 40px));
+        padding: 10px 18px 18px;
+        display: block;
+        border: 1px solid var(--line);
+        background: var(--paper);
+        box-shadow: 0 18px 36px rgba(23,23,23,.16);
+    }
+
+    .blog-header .mobile-nav a {
+        padding: 12px 4px;
+        display: block;
+        border-bottom: 1px solid var(--line);
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .13em;
+        text-align: center;
+        text-transform: uppercase;
+    }
+
+    .blog-header .mobile-nav a:last-child { border-bottom: 0; }
+    .blog-header .mobile-nav a[aria-current="page"] { color: #786b60; }
+
+    .blog-header .mobile-nav.is-open {
+        display: block;
     }
 
     .blog-hero {
@@ -927,14 +983,8 @@ a {
         width: 260px;
     }
 
-    .blog-nav {
-        gap: 20px;
-        font-size: 0.65rem;
-    }
-
-    .blog-nav__contact {
-        padding: 10px 14px;
-    }
+    .blog-wordmark { min-width: 0; }
+    .blog-wordmark img { width: min(230px, 66vw); }
 
     .blog-hero {
         min-height: auto;

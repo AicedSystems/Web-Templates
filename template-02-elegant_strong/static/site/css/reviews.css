@@ -916,6 +916,27 @@ body.reviews-page .site-header.is-scrolled {
 
 }
 
+@media (max-width: 420px) {
+    .reviews-carousel { padding-inline: 28px; }
+
+    .review-card:not(.review-card--text-only) .review-card__body {
+        width: calc(100% - 16px);
+        min-height: 310px;
+        padding: 22px 16px 18px;
+    }
+
+    .review-card__client {
+        min-width: 0;
+        flex-wrap: wrap;
+        gap: 10px 12px;
+    }
+
+    .review-card__client > div { min-width: 0; flex: 1 1 140px; }
+    .review-card__name,
+    .review-card__type { overflow-wrap: anywhere; }
+    .review-card__stars { margin-left: 0; flex: 0 0 auto; }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .reviews-page * {
         scroll-behavior: auto;

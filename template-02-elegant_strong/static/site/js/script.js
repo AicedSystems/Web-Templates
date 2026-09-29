@@ -132,7 +132,7 @@ if (menuButton && mobileNav) {
     });
 
     window.addEventListener("resize", () => {
-        if (window.innerWidth > 1180) closeMobileMenu();
+        if (window.getComputedStyle(menuButton).display === "none") closeMobileMenu();
     });
 }
 

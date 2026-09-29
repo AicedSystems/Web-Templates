@@ -219,8 +219,11 @@ function renderArticleCover(post) {
     articleImage.style.objectPosition = `${focalX}% ${focalY}%`;
     articleImage.style.transform = `scale(${zoom / 100})`;
     articleImage.addEventListener("error", () => {
-        articleImage.hidden = true;
-        articleCoverFallback.hidden = false;
+        const fallback = window.blogFallbackImages.forPost(post);
+        articleImage.src = fallback.src;
+        articleImage.style.objectFit = "cover";
+        articleImage.style.objectPosition = fallback.largePosition;
+        articleImage.style.transform = "none";
     }, { once: true });
 }
 

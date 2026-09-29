@@ -780,10 +780,12 @@ def serialize_post(post):
 
 
 def serialize_post_summary(post):
+    tags = getattr(post, "tags", "") or ""
     return {
         "id": post.id,
         "title": post.title,
         "category": post.category,
+        "tags": [tag.strip() for tag in tags.split(",") if tag.strip()],
         "excerpt": post.excerpt,
         "featuredImageSettings": {
             "focalX": post.featured_image_focal_x,
@@ -2052,7 +2054,18 @@ def validate_review_payload(data, partial=False):
 def get_home_blog_posts(blog_config):
     article_count = min(blog_config["articleCount"], MAXIMUM_HOME_ARTICLES)
     statement = (
-        db.select(Post.id, Post.title, Post.category, Post.tags, Post.excerpt, Post.published_at)
+        db.select(
+            Post.id,
+            Post.title,
+            Post.category,
+            Post.tags,
+            Post.excerpt,
+            Post.published_at,
+            Post.featured_image_focal_x,
+            Post.featured_image_focal_y,
+            Post.featured_image_fit,
+            Post.featured_image_zoom,
+        )
         .where(Post.status == "published")
         .order_by(Post.published_at.desc(), Post.id.desc())
     )
@@ -2083,8 +2096,13 @@ def get_home_blog_posts(blog_config):
             "id": row.id,
             "title": row.title,
             "category": row.category,
+            "tags": row.tags or "",
             "excerpt": row.excerpt,
             "publishedDate": f"{row.published_at.isoformat()}Z" if row.published_at else None,
+            "imageFocalX": getattr(row, "featured_image_focal_x", 50),
+            "imageFocalY": getattr(row, "featured_image_focal_y", 50),
+            "imageFit": getattr(row, "featured_image_fit", "cover"),
+            "imageZoom": getattr(row, "featured_image_zoom", 100),
         })
     return articles
 
@@ -3383,6 +3401,7 @@ def list_posts():
             Post.id,
             Post.title,
             Post.category,
+            Post.tags,
             Post.excerpt,
             Post.published_at,
             Post.featured_image_focal_x,
@@ -3444,6 +3463,7 @@ def list_admin_posts():
             Post.id,
             Post.title,
             Post.category,
+            Post.tags,
             Post.excerpt,
             Post.published_at,
             Post.status,

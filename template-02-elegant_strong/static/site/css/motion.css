@@ -68,7 +68,7 @@
 }
 
 @media (max-width: 1180px) {
-    .site-header .mobile-nav {
+    :is(.site-header, .blog-header) .mobile-nav {
         opacity: 0;
         pointer-events: none;
         transform: translateY(-10px) scale(.985);
@@ -77,7 +77,7 @@
         transition: opacity var(--motion-fast) var(--ease-standard), transform var(--motion-base) var(--ease-standard), visibility 0s linear var(--motion-base);
     }
 
-    .site-header .mobile-nav.is-open {
+    :is(.site-header, .blog-header) .mobile-nav.is-open {
         opacity: 1;
         pointer-events: auto;
         transform: translateY(0) scale(1);
@@ -85,21 +85,21 @@
         transition-delay: 0s;
     }
 
-    .site-header .mobile-menu-button span {
+    :is(.site-header, .blog-header) .mobile-menu-button span {
         transform-origin: center;
         transition: opacity var(--motion-fast) var(--ease-standard), transform var(--motion-base) var(--ease-standard);
     }
 
-    .site-header .mobile-menu-button[aria-expanded="true"] span:first-child {
+    :is(.site-header, .blog-header) .mobile-menu-button[aria-expanded="true"] span:first-child {
         transform: translateY(7px) rotate(45deg);
     }
 
-    .site-header .mobile-menu-button[aria-expanded="true"] span:nth-child(2) {
+    :is(.site-header, .blog-header) .mobile-menu-button[aria-expanded="true"] span:nth-child(2) {
         opacity: 0;
         transform: scaleX(0);
     }
 
-    .site-header .mobile-menu-button[aria-expanded="true"] span:last-child {
+    :is(.site-header, .blog-header) .mobile-menu-button[aria-expanded="true"] span:last-child {
         transform: translateY(-7px) rotate(-45deg);
     }
 }

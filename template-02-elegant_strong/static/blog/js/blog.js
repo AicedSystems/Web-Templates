@@ -23,22 +23,18 @@ const categoryLabels = {
     training: "Training"
 };
 
-const categoryImages = {
-    "market-updates": "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=82",
-    recruiting: "static/site/images/agents-feature.jpg",
-    "success-stories": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=82",
-    training: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=82"
-};
-
 function getListingImage(post) {
-    return categoryImages[post.category] || categoryImages["market-updates"];
+    return window.blogFallbackImages.forPost(post);
 }
 
 function renderPublishedImage(image, post) {
     const fallback = getListingImage(post);
     image.onerror = () => {
         image.onerror = null;
-        image.src = fallback;
+        image.src = fallback.src;
+        image.style.objectFit = "cover";
+        image.style.objectPosition = fallback.largePosition;
+        image.style.setProperty("--article-image-zoom", "1");
     };
     image.src = `/api/posts/${post.id}/featured-image`;
     image.alt = "";

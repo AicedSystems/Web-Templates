@@ -10,13 +10,6 @@ if (homepageBlogList || heroBlogList) {
         training: "Guidance"
     };
 
-    const fallbackImages = {
-        "market-updates": "/static/site/images/contactpagehero.webp",
-        recruiting: "/static/site/images/agents-feature.jpg",
-        "success-stories": "/static/site/images/steph-testimonial-reviews.webp",
-        training: "/static/site/images/about-portrait.webp"
-    };
-
     function formatDate(value) {
         const date = new Date(value);
         if (Number.isNaN(date.getTime())) return "";
@@ -25,6 +18,37 @@ if (homepageBlogList || heroBlogList) {
             day: "numeric",
             year: "numeric"
         }).format(date);
+    }
+
+    function clamp(value, minimum, maximum, fallback) {
+        const number = Number(value);
+        return Number.isFinite(number) ? Math.min(maximum, Math.max(minimum, number)) : fallback;
+    }
+
+    function configureArticleImage(image, post) {
+        const focalX = clamp(post.imageFocalX, 0, 100, 50);
+        const focalY = clamp(post.imageFocalY, 0, 100, 50);
+        const zoom = clamp(post.imageZoom, 100, 200, 100) / 100;
+        image.style.objectFit = post.imageFit === "contain" ? "contain" : "cover";
+        image.style.objectPosition = `${focalX}% ${focalY}%`;
+        image.style.transformOrigin = `${focalX}% ${focalY}%`;
+        image.style.setProperty("--article-image-zoom", String(zoom));
+        image.style.setProperty("--article-image-hover-zoom", String(zoom * 1.025));
+    }
+
+    function fallbackForPost(post) {
+        return window.blogFallbackImages.forPost(post);
+    }
+
+    function useFallbackImage(image, post, presentation) {
+        const fallback = fallbackForPost(post);
+        image.classList.add("is-fallback");
+        image.src = fallback.src;
+        image.style.objectFit = "cover";
+        image.style.objectPosition = presentation === "compact" ? fallback.compactPosition : fallback.largePosition;
+        image.style.transformOrigin = image.style.objectPosition;
+        image.style.setProperty("--article-image-zoom", "1");
+        image.style.setProperty("--article-image-hover-zoom", "1.025");
     }
 
     function createArticleCard(post) {
@@ -40,8 +64,9 @@ if (homepageBlogList || heroBlogList) {
         image.src = `/api/posts/${post.id}/featured-image`;
         image.alt = `Cover image for ${post.title || "article"}`;
         image.loading = "lazy";
+        configureArticleImage(image, post);
         image.addEventListener("error", () => {
-            image.src = fallbackImages[post.category] || fallbackImages["market-updates"];
+            useFallbackImage(image, post, "large");
         }, { once: true });
         media.append(image);
 
@@ -77,8 +102,9 @@ if (homepageBlogList || heroBlogList) {
         image.src = `/api/posts/${post.id}/featured-image`;
         image.alt = `Cover image for ${post.title || "article"}`;
         image.loading = "lazy";
+        configureArticleImage(image, post);
         image.addEventListener("error", () => {
-            image.src = fallbackImages[post.category] || fallbackImages["market-updates"];
+            useFallbackImage(image, post, "compact");
         }, { once: true });
 
         const content = document.createElement("div");
